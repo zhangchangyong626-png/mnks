@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>森林防灭火 · 模拟考试（50题·每题2分）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, system-ui, -apple-system, sans-serif;
+            background: #f0f4f8;
+            color: #1e293b;
+            padding: 12px 8px 120px;
+            /* 底部留白给固定操作栏 */
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* ----- 头部（粘性） ----- */
+        .header {
+            background: linear-gradient(135deg, #1e3a5f, #2a5f7a);
+            color: #fff;
+            border-radius: 16px;
+            padding: 18px 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(30, 58, 95, 0.25);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header h1::before {
+            content: "🔥";
+            font-size: 22px;
+        }
+        .header .sub {
+            font-size: 12px;
+            opacity: 0.9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+            margin-top: 6px;
+        }
+        .header .sub span {
+            background: rgba(255, 255, 255, 0.13);
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        .header .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            margin-top: 10px;
+            font-size: 13px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 10px;
+            align-items: center;
+        }
+        .header .stats strong {
+            font-weight: 600;
+        }
+        .header .stats .num {
+            background: rgba(255, 255, 255, 0.18);
+            padding: 0 10px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .header .stats .score-item {
+            margin-left: auto;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 2px 14px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            width: 0%;
+            background: #7dd3fc;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        /* ----- 题型区块 ----- */
+        .section {
+            background: #fff;
+            border-radius: 14px;
+            padding: 14px 14px 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e9edf2;
+        }
+        .section-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1e3a5f;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eef2f6;
+            margin-bottom: 14px;
+        }
+        .section-title .badge {
+            background: #1e3a5f;
+            color: #fff;
+            font-size: 11px;
+            padding: 0 12px;
+            border-radius: 30px;
+            font-weight: 500;
+            line-height: 22px;
+        }
+        .section-title .count {
+            font-size: 12px;
+            font-weight: 400;
+            color: #64748b;
+            margin-left: auto;
+        }
+
+        /* ----- 题目卡片 ----- */
+        .question {
+            background: #fafcff;
+            border-radius: 12px;
+            padding: 14px 14px;
+            margin-bottom: 12px;
+            border: 1px solid #eef2f6;
+            transition: border-color 0.2s;
+        }
+        .question.correct {
+            border-left: 5px solid #22c55e;
+            background: #f0fdf4;
+        }
+        .question.wrong {
+            border-left: 5px solid #ef4444;
+            background: #fef2f2;
+        }
+        .question .qhead {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        .question .qhead .qid {
+            font-weight: 700;
+            color: #1e3a5f;
+            font-size: 14px;
+            min-width: 32px;
+        }
+        .question .qhead .qtype {
+            font-size: 10px;
+            background: #e2e8f0;
+            color: #475569;
+            padding: 0 10px;
+            border-radius: 30px;
+            font-weight: 600;
+            line-height: 20px;
+        }
+        .question .qhead .answered-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            margin-left: 4px;
+            flex-shrink: 0;
+        }
+        .question .qhead .answered-dot.done {
+            background: #22c55e;
+        }
+        .question .qtext {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            padding-left: 2px;
+            color: #0f172a;
+            word-break: break-word;
+        }
+        .multi-hint {
+            font-size: 11px;
+            color: #64748b;
+            margin: 2px 0 6px 6px;
+        }
+
+        /* ----- 选项 ----- */
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            padding-left: 2px;
+        }
+        .options .opt {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            padding: 4px 12px 4px 8px;
+            border-radius: 30px;
+            border: 1.5px solid #e2e8f0;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+            flex: 0 1 auto;
+            min-height: 34px;
+        }
+        .options .opt:active {
+            transform: scale(0.96);
+        }
+        .options .opt input[type="radio"],
+        .options .opt input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            accent-color: #1e3a5f;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .options .opt .label {
+            cursor: pointer;
+            font-size: 13px;
+            line-height: 1.3;
+        }
+        .options .opt.correct-answer {
+            border-color: #22c55e;
+            background: #dcfce7;
+        }
+        .options .opt.wrong-answer {
+            border-color: #ef4444;
+            background: #fee2e2;
+        }
+        .options .opt.selected {
+            border-color: #1e3a5f;
+            background: #eef2ff;
+        }
+
+        /* ----- 底部操作栏（固定） ----- */
+        .submit-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px 16px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 10px 16px;
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+        }
+        .submit-area .info {
+            font-size: 13px;
+            color: #475569;
+            white-space: nowrap;
+        }
+        .submit-area .info strong {
+            color: #1e3a5f;
+        }
+        .btn {
+            border: none;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #1e3a5f;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.25);
+            white-space: nowrap;
+            touch-action: manipulation;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        .btn.secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+            box-shadow: none;
+        }
+        .btn.secondary:active {
+            background: #cbd5e1;
+        }
+
+        /* ----- 结果弹窗（移动优先） ----- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: #fff;
+            border-radius: 20px;
+            max-width: 520px;
+            width: 100%;
+            padding: 28px 20px 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            animation: modalIn 0.25s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes modalIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.94) translateY(12px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .modal .result-icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .modal .result-title {
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+        .modal .result-sub {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 14px;
+        }
+        .modal .score-box {
+            background: #f1f5f9;
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            margin: 8px 0 16px;
+        }
+        .modal .score-box .big {
+            font-size: 40px;
+            font-weight: 800;
+            color: #1e3a5f;
+        }
+        .modal .score-box .big.pass {
+            color: #16a34a;
+        }
+        .modal .score-box .big.fail {
+            color: #dc2626;
+        }
+        .modal .score-box .label {
+            font-size: 13px;
+            color: #64748b;
+        }
+        .modal .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin: 12px 0 18px;
+        }
+        .modal .detail-grid .item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 10px 4px;
+            text-align: center;
+        }
+        .modal .detail-grid .item .num {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .modal .detail-grid .item .lbl {
+            font-size: 11px;
+            color: #64748b;
+        }
+        .modal .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .modal .actions .btn {
+            padding: 10px 24px;
+            font-size: 14px;
+            flex: 1 1 auto;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        /* ----- 移动端精细化调整 ----- */
+        @media (max-width: 640px) {
+            .header {
+                padding: 14px 12px;
+                border-radius: 14px;
+            }
+            .header h1 {
+                font-size: 18px;
+            }
+            .header .stats {
+                font-size: 12px;
+                gap: 6px 12px;
+            }
+            .header .stats .score-item {
+                font-size: 13px;
+                padding: 0 10px;
+            }
+            .section {
+                padding: 12px 10px 14px;
+                border-radius: 12px;
+            }
+            .section-title {
+                font-size: 15px;
+                gap: 6px;
+            }
+            .question {
+                padding: 12px 10px;
+                border-radius: 10px;
+            }
+            .question .qtext {
+                font-size: 13px;
+            }
+            .options .opt {
+                font-size: 12px;
+                padding: 3px 10px 3px 6px;
+                min-height: 30px;
+            }
+            .options .opt .label {
+                font-size: 12px;
+            }
+            .options .opt input[type="radio"],
+            .options .opt input[type="checkbox"] {
+                width: 14px;
+                height: 14px;
+            }
+            .submit-area {
+                padding: 8px 12px;
+                gap: 8px 12px;
+            }
+            .submit-area .info {
+                font-size: 12px;
+            }
+            .btn {
+                padding: 8px 18px;
+                font-size: 14px;
+            }
+            .modal {
+                padding: 20px 14px;
+            }
+            .modal .score-box .big {
+                font-size: 34px;
+            }
+            .modal .detail-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 6px;
+            }
+            .modal .detail-grid .item .num {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .header h1 {
+                font-size: 16px;
+            }
+            .header .sub span {
+                font-size: 10px;
+                padding: 0 8px;
+            }
+            .header .stats {
+                font-size: 11px;
+                gap: 4px 8px;
+            }
+            .question .qtext {
+                font-size: 12px;
+            }
+            .options {
+                gap: 4px 6px;
+            }
+            .options .opt {
+                font-size: 11px;
+                padding: 2px 8px 2px 4px;
+                min-height: 26px;
+            }
+            .options .opt .label {
+                font-size: 11px;
+            }
+            .btn {
+                font-size: 13px;
+                padding: 6px 14px;
+            }
+            .modal .score-box .big {
+                font-size: 28px;
+            }
+        }
+
+        /* 滚动条美观 */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e9edf2;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>森林防灭火 · 模拟考</h1>
+            <div class="sub">
+                <span>📋 50题（随机）</span>
+                <span>✅ 每题2分</span>
+                <span>🎯 80分及格</span>
+                <span>⏱️ 不限时</span>
+            </div>
+            <div class="stats">
+                <span>已答 <strong id="answeredCount">0</strong> / 50</span>
+                <span>正确 <strong id="correctCount">0</strong></span>
+                <span>错误 <strong id="wrongCount">0</strong></span>
+                <span class="score-item">得分 <strong id="liveScore">0</strong></span>
+            </div>
+            <div class="progress-bar">
+                <div class="fill" id="progressFill"></div>
+            </div>
+        </header>
+
+        <!-- 题目容器 -->
+        <div id="questionContainer"></div>
+
+        <!-- 底部操作栏 -->
+        <div class="submit-area">
+            <span class="info">已答 <strong id="footerAnswered">0</strong> / 50</span>
+            <button class="btn" id="submitBtn">📝 提交</button>
+            <button class="btn secondary" id="resetBtn">🔄 重新抽题</button>
+        </div>
+    </div>
+
+    <!-- 结果弹窗 -->
+    <div class="modal-overlay" id="resultModal">
+        <div class="modal">
+            <div class="result-icon" id="resultIcon">🎉</div>
+            <div class="result-title" id="resultTitle">考试完成</div>
+            <div class="result-sub" id="resultSub">你的答卷已提交</div>
+            <div class="score-box">
+                <div class="label">最终得分（每题2分）</div>
+                <div class="big" id="finalScore">0</div>
+                <div class="label" style="margin-top:4px;" id="passStatus">——</div>
+            </div>
+            <div class="detail-grid">
+                <div class="item"><div class="num" id="rTotal">0</div><div class="lbl">总题数</div></div>
+                <div class="item"><div class="num" id="rCorrect">0</div><div class="lbl">正确</div></div>
+                <div class="item"><div class="num" id="rWrong">0</div><div class="lbl">错误</div></div>
+            </div>
+            <div class="actions">
+                <button class="btn secondary" id="closeResultBtn">关闭</button>
+                <button class="btn" id="retryBtn">🔄 重新抽题</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 1. 完整题库（120题）
+        // ============================================================
+
+        // 判断题（40）
+        const tfPool = [
+            { id: 1, text: '森林资源属于国家所有。', answer: false },
+            { id: 2, text: '乡镇人民政府应设置专职人员承担林业相关工作。', answer: false },
+            { id: 3, text: '教育行政部门、学校应当对学生进行森林资源保护教育。', answer: true },
+            { id: 4, text: '未实行承包经营的集体林地以及林地上的林木，由村民委员会统一经营。', answer: false },
+            { id: 5, text: '采伐自然保护区以外的竹林，不需要申请采伐许可证，但应当符合林木采伐技术规程。', answer: true },
+            { id: 6, text: '更新造林的面积可以少于采伐的面积。', answer: false },
+            { id: 7, text: '各级人民政府应当加强森林资源保护的宣传教育和知识普及工作，鼓励和支持基层群众性自治组织、新闻媒体、林业企业事业单位、志愿者等开展森林资源保护宣传活动。',
+                answer: true },
+            { id: 8, text: '滥伐林木的，由县级以上人民政府林业主管部门责令限期在原地或者异地补种滥伐株数一倍以上五倍以下的树木。', answer: true },
+            { id: 9, text: '农村居民采伐自留地和房前屋后个人所有的零星林木，需要申请采伐许可证。', answer: false },
+            { id: 10, text: '县级以上人民政府林业主管部门对森林资源的保护、修复、利用、更新等进行监督检查，依法查处破坏森林资源等违法行为。', answer: true },
+            { id: 11, text: '防火期内，县级以上地方人民政府及其有关部门和森林、林木、林地、草原经营单位和个人，应当根据森林草原火险气象等级预报和预警信息，在防火区内采取相应的火灾扑救和事后重建措施。',
+                answer: false },
+            { id: 12, text: '森林草原防灭火工作应当坚持预防为主、积极消灭、生命至上、安全第一的工作方针。', answer: true },
+            { id: 13, text: '县级以上地方人民政府森林草原防灭火指挥机构（机制）的日常工作由本级人民政府林业草原主管部门承担。', answer: false },
+            { id: 14, text: '森林草原防灭火工作涉及两个以上行政区域的，有关地方人民政府应当确定联防区域，制定联防制度，建立联防机制。', answer: true },
+            { id: 15, text: '防火期内，禁止在防火区内野外用火。因防治病虫鼠害、冻害等特殊情况确需野外用火的，应当经乡镇街道人民政府批准。', answer: false },
+            { id: 16, text: '森林草原火险预警级别分为一级、二级、三级和四级，分别用红色、橙色、黄色和蓝色标示，一级为最高级别。', answer: true },
+            { id: 17, text: '高火险期内进入高火险区的，应当经乡级人民政府批准，严格按照批准的时间、地点、范围活动。', answer: false },
+            { id: 18, text: '森林草原火灾信息由县级以上人民政府林业草原主管部门向社会统一发布。', answer: false },
+            { id: 19, text: '扑救森林草原火灾，必要时可以安排未经相关专业培训的人员直接参与灭火。', answer: false },
+            { id: 20, text: '受害森林面积不足0.067公顷，且未造成人员死亡、重伤的，不统计为森林火灾。', answer: true },
+            { id: 21, text: '《关于全面加强新形势下森林草原防灭火工作的意见》提出的工作方针是"预防为主、积极消灭、生命至上、安全第一"。', answer: true },
+            { id: 22, text: '根据《关于全面加强新形势下森林草原防灭火工作的意见》，地方各级森林草原防灭火工作实行林业草原主管部门负责制。', answer: false },
+            { id: 23, text: '根据《关于全面加强新形势下森林草原防灭火工作的意见》，加强指挥员队伍建设，研究建立持证上岗制度，完善考核评估制度，实行国家负责省市两级、省级负责县级和基层的指挥员培训机制。',
+                answer: true },
+            { id: 24, text: '森林草原防火地面监控系统中探测器的防护等级应不低于GB/T 4208规定的IP65。', answer: false },
+            { id: 25, text: '探测器应能利用中波红外和日盲紫外至少两个响应频点进行光谱探测。', answer: true },
+            { id: 26, text: '避火罩的供氧系统应连接在避火罩内部的后端。', answer: false },
+            { id: 27, text: '避火罩的生氧罐应由耐腐蚀的非金属材料制成。', answer: false },
+            { id: 28, text: '作业人员应持有相应的无人机操控员执照，且身体健康、精神状态良好。', answer: true },
+            { id: 29, text: '自主巡查过程中，若无人机实时动态定位（RTK）信号丢失，应立即返航。', answer: false },
+            { id: 30, text: '森林草原防火视频监控系统由前端子系统、传输子系统和后端子系统三部分组成。', answer: true },
+            { id: 31, text: '前端监控设备的整体防护等级不小于IP67，镜头和摄像机的保护仓防护等级不小于IP66。', answer: false },
+            { id: 32, text: '若不能立即赶赴火场，火因调查应在火灾发生后24h内启动；若受客观条件限制，应在火灾发生后48h内启动。', answer: true },
+            { id: 33, text: '火场范围大于或等于100hm²的，应采用全林每木调查法进行受害林木调查。', answer: false },
+            { id: 34, text: '标准地应离开火烧迹地周界10m～20m，不应跨越小河、道路和阻火线。', answer: true },
+            { id: 35, text: '参加森林草原火灾扑救的人员宜接受不少于30学时的扑救安全训练。', answer: true },
+            { id: 36, text: '接触火线连续扑打不宜超过30分钟。', answer: false },
+            { id: 37, text: '扑救地下火时，判断地下可燃物的燃烧位置，应在火烧迹地内行走，便于寻找火源。', answer: false },
+            { id: 38, text: '地方森林草原消防队伍建设应贯彻"建设标准化、管理规范化、装备机械化、指挥信息化"的要求。', answer: true },
+            { id: 39, text: '指挥管理层人数不应超过队伍总人数的20%。', answer: false },
+            { id: 40, text: '根据《地方森林草原消防队伍建设规范》（YJ/T 36-2025），营区训练场地宜设置户外照明设施，保证队伍全天候作训的要求。',
+                answer: true }
+        ];
+
+        // 单选题（55）
+        const scPool = [
+            { id: 1, text: '国家以培育（　）的森林生态系统为目标，对公益林和商品林实行分类经营管理。', options: ['A.稳定、健康、优质、高效',
+                    'B.稳定、多样、优质、高效', 'C.健康、多样、优质、高效', 'D.稳定、健康、丰富、高效'
+                ], answer: 'A' },
+            { id: 2, text: '采伐许可证由（　）以上人民政府林业主管部门核发。', options: ['A.市级', 'B.县级', 'C.省级', 'D.乡级'],
+                answer: 'B' },
+            { id: 3, text: '盗伐林木的，由县级以上人民政府林业主管部门责令限期在原地或者异地补种盗伐株数（　）的树木。', options: ['A.一倍以上三倍以下',
+                    'B.一倍以上五倍以下', 'C.二倍以上五倍以下', 'D.三倍以上五倍以下'
+                ], answer: 'B' },
+            { id: 4, text: '公益林划定涉及非国有林地的，应当与权利人签订书面协议，并给予合理（　）。', options: ['A.赔偿', 'B.补偿', 'C.奖金',
+                    'D.补助'
+                ], answer: 'B' },
+            { id: 5, text: '未经县级以上人民政府林业主管部门审核同意，擅自改变林地用途的，由县级以上人民政府林业主管部门责令限期恢复植被和林业生产条件，可以处恢复植被和林业生产条件所需费用（　）以下的罚款。',
+                options: ['A.一倍', 'B.二倍', 'C.三倍', 'D.五倍'], answer: 'C' },
+            { id: 6, text: '地方各级人民政府负责本行政区域的森林防火工作，发挥群防作用。国家综合性消防救援队伍承担国家规定的森林火灾扑救任务和（　）相关工作。',
+                options: ['A.预防', 'B.监测', 'C.预警', 'D.调查'], answer: 'A' },
+            { id: 7, text: '国家保护林地，严格控制林地转为非林地，实行占用林地总量控制，确保林地保有量（　）。', options: ['A.不减少', 'B.不增加',
+                    'C.保持稳定', 'D.逐步增加'
+                ], answer: 'A' },
+            { id: 8, text: '根据《森林法》，下列区域中，应当划定为公益林的是（　）。', options: ['A.重要江河源头汇水区域',
+                    'B.以生产木材为主要目的的森林', 'C.以生产果品为主要目的的森林', 'D.以生产燃料为主要目的的森林'
+                ], answer: 'A' },
+            { id: 9, text: '违反《森林法》规定，伪造、变造、买卖、租借采伐许可证的，由县级以上人民政府林业主管部门没收证件和违法所得，没有违法所得的，可以处（　）以下的罚款。',
+                options: ['A.一万元', 'B.二万元', 'C.三万元', 'D.五万元'], answer: 'B' },
+            { id: 10, text: '临时使用林地的期限一般不超过（　），并不得在临时使用的林地上修建永久性建筑物。', options: ['A.一年', 'B.二年',
+                    'C.三年', 'D.六个月'
+                ], answer: 'B' },
+            { id: 11, text: '森林草原防灭火工作实行（　）负责制。', options: ['A.地方人民政府行政首长', 'B.应急管理部门',
+                    'C.林业草原主管部门', 'D.森林草原防灭火指挥机构'
+                ], answer: 'A' },
+            { id: 12, text: '国家森林草原防灭火指挥部的日常工作由（　）承担。', options: ['A.国务院林业草原主管部门',
+                    'B.国务院应急管理部门', 'C.国务院公安部门', 'D.国务院消防救援机构'
+                ], answer: 'B' },
+            { id: 13, text: '防火期内，需要在防火区内进行非军事实弹演习、爆破等活动的，应当经（　）批准。', options: ['A.县级人民政府',
+                    'B.市级人民政府', 'C.县级以上地方人民政府', 'D.省级人民政府'
+                ], answer: 'C' },
+            { id: 14, text: '森林草原火险预警级别中，最高级别为（　）。', options: ['A.红色', 'B.橙色', 'C.黄色', 'D.蓝色'],
+                answer: 'A' },
+            { id: 15, text: '根据《森林草原防灭火条例》，森林草原火灾信息由（　）向社会发布。', options: ['A.县级以上人民政府林业草原主管部门',
+                    'B.县级以上人民政府应急管理部门', 'C.县级以上人民政府公安部门', 'D.县级以上人民政府消防救援机构'
+                ], answer: 'B' },
+            { id: 16, text: '根据《森林草原防灭火条例》，防火期内未经批准擅自在防火区内野外用火的，对个人处（　）罚款。', options: [
+                    'A.100元以上1000元以下', 'B.200元以上2000元以下', 'C.300元以上5000元以下', 'D.1000元以上1万元以下'
+                ], answer: 'C' },
+            { id: 17, text: '特别重大森林火灾的受害森林面积标准为（　）。', options: ['A.100公顷以上', 'B.500公顷以上',
+                    'C.800公顷以上', 'D.1000公顷以上'
+                ], answer: 'D' },
+            { id: 18, text: '防火期内，进入防火区的各种机动车辆和机械设备应当（　）。', options: ['A.办理进山许可证',
+                    'B.安装防火装置、配备灭火器材', 'C.安装定位系统', 'D.配备通信设备'
+                ], answer: 'B' },
+            { id: 19, text: '森林草原火灾明火扑灭后，应当经（　）方可撤出看守人员。', options: ['A.清点人数无误后',
+                    'B.当地人民政府森林草原防灭火指挥机构检查验收合格', 'C.确认无烟后', 'D.火场前线指挥部同意'
+                ], answer: 'B' },
+            { id: 20, text: '根据《森林草原防灭火条例》要求，编制国家森林草原火灾应急预案的部门是（　）。', options: [
+                    'A.国务院林业草原主管部门', 'B.国务院应急管理部门', 'C.国家森林草原防灭火指挥部', 'D.国务院消防救援机构'
+                ], answer: 'B' },
+            { id: 21, text: '根据《关于全面加强新形势下森林草原防灭火工作的意见》要求，林牧区各类工程建设要（　）。', options: [
+                    'A.同步规划、同步采购、同步施工、同步验收防灭火设施',
+                    'B.同步规划、同步设计、同步施工、同步验收防灭火设施',
+                    'C.同步规划、同步采购、同步施工、同步验收防灭火设施',
+                    'D.同步规划、同步设计、同步施工、同步试运行'
+                ], answer: 'B' },
+            { id: 22, text: '根据《关于全面加强新形势下森林草原防灭火工作的意见》，（　）部门负责火场警戒、交通疏导、治安维护、火案侦破等工作。',
+                options: ['A.应急管理', 'B.林业草原', 'C.公安', 'D.消防救援'], answer: 'C' },
+            { id: 23, text: '根据《关于全面加强新形势下森林草原防灭火工作的意见》要求，抓好国家（　）消防救援力量建设，提升国家（　）消防救援队伍森林草原防灭火核心能力，加快形成"固守重点、因险前置、区域联动、全域救援"的布防格局。',
+                options: ['A.区域性；区域性', 'B.综合性；综合性', 'C.区域性；综合性', 'D.综合性；区域性'], answer: 'B' },
+            { id: 24, text: '根据《关于全面加强新形势下森林草原防灭火工作的意见》要求，到（　）年，森林草原防灭火能力显著增强，综合防控水平全面提升。',
+                options: ['A.2025', 'B.2027', 'C.2030', 'D.2035'], answer: 'C' },
+            { id: 25, text: '根据《森林草原防火地面监控系统技术规范》（GB/T 47049-2026），探测器灵敏度分级试验中，试验火中心距离X=32m时判定为（　）。',
+                options: ['A.I级', 'B.II级', 'C.III级', 'D.IV级'], answer: 'B' },
+            { id: 26, text: '根据《森林草原防火地面监控系统技术规范》（GB/T 47049-2026），物联网网关的外壳防护等级应不低于（　）。',
+                options: ['A.IP54', 'B.IP65', 'C.IP66', 'D.IP67'], answer: 'B' },
+            { id: 27, text: '根据《森林草原防火地面监控系统技术规范》（GB/T 47049-2026），探测器的水平视场角应不小于（　）。',
+                options: ['A.45°', 'B.60°', 'C.90°', 'D.120°'], answer: 'C' },
+            { id: 28, text: '根据《森林草原防火地面监控系统技术规范》（GB/T 47049-2026），探测器的正投率应不低于（　）。',
+                options: ['A.80%', 'B.85%', 'C.90%', 'D.95%'], answer: 'C' },
+            { id: 29, text: '根据《森林草原避火罩》（GB/T 47053-2026），避火罩整备质量应不大于（　）。', options: ['A.2500g',
+                    'B.2800g', 'C.3000g', 'D.3200g'
+                ], answer: 'D' },
+            { id: 30, text: '根据《森林草原避火罩》（GB/T 47053-2026），避火罩供氧系统的防护时间应不小于（　）。', options: [
+                    'A.15min', 'B.20min', 'C.25min', 'D.30min'
+                ], answer: 'D' },
+            { id: 31, text: '根据《森林草原避火罩》（GB/T 47053-2026），避火罩各部位缝头应不小于（　）。', options: ['A.40mm',
+                    'B.50mm', 'C.60mm', 'D.80mm'
+                ], answer: 'C' },
+            { id: 32, text: '根据《森林草原火险等级》（GB/T 47053-2026），避火罩贮存和使用期不应超过（　）。', options: ['A.3年',
+                    'B.4年', 'C.5年', 'D.6年'
+                ], answer: 'C' },
+            { id: 33, text: '根据《森林草原防火 无人机巡查技术规范》（GB/T 47054-2026），起降点作业人员应与无人机保持不少于（　）的安全距离。',
+                options: ['A.10m', 'B.15m', 'C.20m', 'D.30m'], answer: 'C' },
+            { id: 34, text: '根据《森林草原防火 无人机巡查技术规范》（GB/T 47054-2026），无人机手动巡查模式下，作业人员应首先确认（　）。',
+                options: ['A.导航定位信号是否正常', 'B.航线是否正确加载', 'C.遥控器与无人机的通信链路、实时图传画面、电池电量及剩余续航时间',
+                    'D.任务载荷是否正常'
+                ], answer: 'C' },
+            { id: 35, text: '根据《森林草原防火 无人机巡查技术规范》（GB/T 47054-2026），无人机巡查时，与树木的垂直安全距离应不少于（　）。',
+                options: ['A.3m', 'B.5m', 'C.8m', 'D.10m'], answer: 'B' },
+            { id: 36, text: '根据《森林草原防火 无人机巡查技术规范》（GB/T 47054-2026），无人机巡查数据至少保存（　）。',
+                options: ['A.3个月', 'B.6个月', 'C.1年', 'D.2年'], answer: 'C' },
+            { id: 37, text: '根据《森林草原防火视频监控系统技术规范》（GB/T 47058-2026），视频监控系统正报率应不低于（　），误报率应不大于（　）。',
+                options: ['A.85%，15%', 'B.90%，10%', 'C.95%，5%', 'D.90%，15%'], answer: 'B' },
+            { id: 38, text: '根据《森林草原防火视频监控系统技术规范》（GB/T 47058-2026），前端监控设备的可见光视频存储分辨率不低于（　）。',
+                options: ['A.1280像素×720像素', 'B.1920像素×1080像素', 'C.2560像素×1440像素', 'D.3840像素×2160像素'],
+                answer: 'B' },
+            { id: 39, text: '根据《森林草原防火视频监控系统技术规范》（GB/T 47058-2026），前端监控设备俯仰旋转范围要求为上下运动夹角之和不小于（　）。',
+                options: ['A.45°', 'B.60°', 'C.90°', 'D.120°'], answer: 'C' },
+            { id: 40, text: '根据《森林草原防火视频监控系统技术规范》（GB/T 47058-2026），前端监控设备备电时间应不小于（　）。',
+                options: ['A.24h', 'B.48h', 'C.72h', 'D.96h'], answer: 'C' },
+            { id: 41, text: '根据《森林草原防火视频监控系统技术规范》（GB/T 47058-2026），前端监控设备可见光视频和其他光谱的采集数据存储时间不小于（　）。',
+                options: ['A.240h', 'B.480h', 'C.720h', 'D.960h'], answer: 'C' },
+            { id: 42, text: '根据《森林草原防火视频监控系统技术规范》（GB/T 47058-2026），受害成林林木的胸径标准为（　）。',
+                options: ['A.大于或等于3cm', 'B.大于或等于5cm', 'C.大于或等于8cm', 'D.大于或等于10cm'], answer: 'B' },
+            { id: 43, text: '根据《森林草原防火视频监控系统技术规范》（GB/T 47058-2026），火场范围小于或等于1hm²的，应采用（　）进行受害林木调查。',
+                options: ['A.标准地调查法', 'B.航测法', 'C.全林每木调查法', 'D.现地实测法'], answer: 'C' },
+            { id: 44, text: '根据《森林草原防火视频监控系统技术规范》（GB/T 47058-2026），重大森林火灾和特别重大森林火灾的标准地累计面积不应少于过火总面积的（　）。',
+                options: ['A.0.1%', 'B.0.3%', 'C.0.5%', 'D.1%'], answer: 'A' },
+            { id: 45, text: '根据《森林草原火灾成因和损失调查评估规程》（GB/T 47059-2026），标准地各条边界方位角的误差应不大于（　）。',
+                options: ['A.0.5°', 'B.1°', 'C.2°', 'D.5°'], answer: 'B' },
+            { id: 46, text: '根据《地方森林草原消防队伍火灾扑救安全指南》（YJ/T 35-2025），扑救人员间距保持在（　）以内。',
+                options: ['A.1m', 'B.2m', 'C.3m', 'D.5m'], answer: 'B' },
+            { id: 47, text: '根据《地方森林草原消防队伍火灾扑救安全指南》（YJ/T 35-2025），油桶距火线应保持（　）以上安全距离。',
+                options: ['A.10m', 'B.15m', 'C.20m', 'D.30m'], answer: 'C' },
+            { id: 48, text: '根据《地方森林草原消防队伍火灾扑救安全指南》（YJ/T 35-2025），当火场风力等级高于（　）时，避免使用便携式灭火机具接触火线直接灭火。',
+                options: ['A.3级', 'B.4级', 'C.5级', 'D.6级'], answer: 'C' },
+            { id: 49, text: '根据《地方森林草原消防队伍火灾扑救安全指南》（YJ/T 35-2025），割灌机作业时，作业半径（　）范围内不宜有人。',
+                options: ['A.3m', 'B.5m', 'C.8m', 'D.10m'], answer: 'B' },
+            { id: 50, text: '根据《地方森林草原消防队伍火灾扑救安全指南》（YJ/T 35-2025），进入火场参与火灾扑救的车辆驾驶员，返程驾车前宜休息不少于（　）。',
+                options: ['A.1h', 'B.1.5h', 'C.2h', 'D.3h'], answer: 'C' },
+            { id: 51, text: '根据《地方森林草原消防队伍建设规范》（YJ/T 36-2025），一类队伍的建队规模为（　）。', options: [
+                    'A.人数≥50', 'B.人数≥80', 'C.人数≥100', 'D.人数≥150'
+                ], answer: 'C' },
+            { id: 52, text: '根据《地方森林草原消防队伍建设规范》（YJ/T 36-2025），营房建筑面积按（　）每人的标准确定。',
+                options: ['A.25㎡', 'B.30㎡', 'C.35㎡', 'D.40㎡'], answer: 'C' },
+            { id: 53, text: '根据《地方森林草原消防队伍建设规范》（YJ/T 36-2025），全年培训时间不少于（　）。', options: [
+                    'A.80天、480h', 'B.80天、640h', 'C.90天、640h', 'D.100天、720h'
+                ], answer: 'B' },
+            { id: 54, text: '根据《地方森林草原消防队伍建设规范》（YJ/T 36-2025），营区绿地率应不低于（　）。', options: [
+                    'A.15%', 'B.20%', 'C.25%', 'D.30%'
+                ], answer: 'B' },
+            { id: 55, text: '根据《地方森林草原消防队伍建设规范》（YJ/T 36-2025），灭火防护服的配备标准为（　）。', options: [
+                    'A.1套/人', 'B.2套/人', 'C.3套/人', 'D.4套/人'
+                ], answer: 'A' }
+        ];
+
+        // 多选题（25）
+        const mcPool = [{
+            id: 1,
+            text: '保护、培育、利用森林资源应当尊重自然、顺应自然，坚持（　）的原则。',
+            options: ['A.生态优先', 'B.保护优先', 'C.整治结合', 'D.可持续发展'],
+            answer: ['A', 'B', 'D']
+        }, {
+            id: 2,
+            text: '下列选项，（　）属于《森林法》规定的制度范围。',
+            options: ['A.森林资源保护发展目标责任制和考核评价制度', 'B.森林生态效益补偿制度', 'C.环境保护责任制度',
+                'D.森林资源调查监测制度'
+            ],
+            answer: ['A', 'B', 'D']
+        }, {
+            id: 3,
+            text: '国家鼓励公民通过（　）等方式参与造林绿化。',
+            options: ['A.植树造林', 'B.抚育管护', 'C.认建认养', 'D.认缴资金'],
+            answer: ['A', 'B', 'C']
+        }, {
+            id: 4,
+            text: '木材经营加工企业应当建立原料和产品出入库台账。任何单位和个人不得（　）明知是盗伐、滥伐等非法来源的林木。',
+            options: ['A.收购', 'B.加工', 'C.购买', 'D.运输'],
+            answer: ['A', 'B', 'D']
+        }, {
+            id: 5,
+            text: '有下列（　）情形之一的，不得核发采伐许可证。',
+            options: ['A.采伐封山育林期、封山育林区内的林木', 'B.上年度采伐后未按照规定完成更新造林任务',
+                'C.上年度发生重大滥伐案件、森林火灾或者林业有害生物灾害，未采取预防和改进措施', 'D.采伐属于公益林的林木'
+            ],
+            answer: ['A', 'B', 'C']
+        }, {
+            id: 6,
+            text: '根据《森林草原防灭火条例》，森林草原防灭火工作应当坚持的原则包括（　）。',
+            options: ['A.协调联动、分级负责', 'B.属地为主、科学扑救', 'C.快速反应、安全高效', 'D.预防为主、积极消灭'],
+            answer: ['A', 'B', 'C']
+        }, {
+            id: 7,
+            text: '根据《森林草原防灭火条例》，森林草原火灾应急预案应当包括下列（　）内容。',
+            options: ['A.主要任务和组织指挥体系', 'B.处置力量和预警信息报告', 'C.应急响应和综合保障', 'D.后期处置'],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 8,
+            text: '根据《森林草原防灭火条例》，下列（　）属于较大森林火灾。',
+            options: ['A.受害森林面积10公顷以上100公顷以下', 'B.死亡3人以上10人以下', 'C.重伤10人以上50人以下',
+                'D.受害森林面积100公顷以上1000公顷以下'
+            ],
+            answer: ['A', 'B', 'C']
+        }, {
+            id: 9,
+            text: '地方各级人民政府，应急管理部门、林业草原主管部门或者其他有关部门及其工作人员有下列（　）行为，情节严重的，对负有责任的领导人员和直接责任人员依法给予处分。',
+            options: ['A.未按照有关规定编制森林草原火灾应急预案', 'B.发现森林草原火灾隐患未及时下达森林草原火灾隐患整改通知书',
+                'C.瞒报、谎报或者故意拖延报告森林草原火情', 'D.对不符合森林草原防灭火要求的野外用火予以批准'
+            ],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 10,
+            text: '根据《森林草原防灭火条例》，森林草原防灭火工作的主要任务是通过（　），保障人民生命财产安全，保护森林草原资源，维护生态安全。',
+            options: ['A.有效预防森林草原火灾', 'B.扑救森林草原火灾', 'C.灾后处置', 'D.砍伐林区林木开辟防火隔离带'],
+            answer: ['A', 'B', 'C']
+        }, {
+            id: 11,
+            text: '根据《关于全面加强新形势下森林草原防灭火工作的意见》，新形势下森林草原防灭火工作的工作要求包括（　）。',
+            options: ['A.坚持党的领导、属地负责', 'B.坚持预防为主、防救结合', 'C.坚持建强基础、补齐短板',
+                'D.坚持依法治理，从严管控'
+            ],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 12,
+            text: '根据《关于全面加强新形势下森林草原防灭火工作的意见》，地方各级党委和政府落实森林草原防灭火责任，应按照（　）的要求。',
+            options: ['A.党政同责', 'B.一岗双责', 'C.齐抓共管', 'D.失职追责'],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 13,
+            text: '根据《森林草原防火地面监控系统技术规范》（GB/T 47049-2026），森林草原防火地面监控系统的组成部分包括（　）。',
+            options: ['A.前端', 'B.边缘', 'C.云端', 'D.终端'],
+            answer: ['A', 'B', 'C']
+        }, {
+            id: 14,
+            text: '根据《森林草原避火罩》（GB/T 47053-2026），避火罩应由（　）缝制与连接组成。',
+            options: ['A.罩体', 'B.压边带', 'C.固定带', 'D.供氧系统'],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 15,
+            text: '根据《森林草原避火罩》（GB/T 47053-2026），避火罩的标志标签内容应包括（　）。',
+            options: ['A.注明供氧系统位置', 'B.产品型号和名称', 'C.主要材料', 'D.禁止使用场合'],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 16,
+            text: '根据《森林草原防火 无人机巡查技术规范》（GB/T 47054-2026），无人机巡查的类型包括（　）。',
+            options: ['A.日常巡查', 'B.火情巡查', 'C.手动巡查', 'D.自主巡查'],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 17,
+            text: '根据《森林草原防火 无人机巡查技术规范》（GB/T 47054-2026），无人机作业人员应具备的业务技能包括（　）。',
+            options: ['A.日常巡查', 'B.火情巡查', 'C.手动巡查', 'D.自主巡查'],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 18,
+            text: '根据《森林草原防火视频监控系统技术规范》（GB/T 47058-2026），森林草原防火视频监控系统的组成部分包括（　）。',
+            options: ['A.前端子系统', 'B.传输子系统', 'C.后端子系统', 'D.指挥子系统'],
+            answer: ['A', 'B', 'C']
+        }, {
+            id: 19,
+            text: '火灾现场调查方法包括（　）。',
+            options: ['A.离心法', 'B.直观观察法', 'C.向心法', 'D.分片分段法'],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 20,
+            text: '下列（　）属于起火位置调查时可依据的现场痕迹。',
+            options: ['A.树干烟熏面指示的方向', 'B.树冠被烧高度较低的方向', 'C.倒木和树桩被烧一侧指示的方向',
+                'D.岩石等不燃物过火后烟熏黑色面的方向'
+            ],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 21,
+            text: '危险火行为包括（　）。',
+            options: ['A.对流柱', 'B.火旋风', 'C.飞火', 'D.高温热流'],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 22,
+            text: '下列（　）情形下应避免使用便携式灭火机具接触火线直接灭火。',
+            options: ['A.火焰高度大于1.5m', 'B.火场风力等级高于5级', 'C.火蔓延速度大于2m/min', 'D.遇急进树冠火'],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 23,
+            text: '根据《地方森林草原消防队伍建设规范》（YJ/T 36-2025），地方森林草原消防队伍的建设原则包括（　）。',
+            options: ['A.统筹规划、合理布局', 'B.动态评估、持续优化', 'C.注重质量、高效精干', 'D.统一标准、全面覆盖'],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 24,
+            text: '根据《地方森林草原消防队伍建设规范》（YJ/T 36-2025），地方森林草原消防队伍的训练应包含（　）。',
+            options: ['A.队列训练和体能训练', 'B.火场心理行为训练', 'C.防灭火机具使用训练', 'D.森林草原火灾扑救实战演练'],
+            answer: ['A', 'B', 'C', 'D']
+        }, {
+            id: 25,
+            text: '根据《地方森林草原消防队伍建设规范》（YJ/T 36-2025），营房中的业务用房包括（　）。',
+            options: ['A.办公室', 'B.会议及培训室', 'C.宿舍', 'D.物资装备仓库'],
+            answer: ['A', 'B', 'C', 'D']
+        }];
+
+        // ============================================================
+        // 2. 随机抽题函数
+        // ============================================================
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function pickRandom(arr, n) {
+            const copy = [...arr];
+            shuffle(copy);
+            return copy.slice(0, n);
+        }
+
+        // 生成试卷：15道判断，10道单选，25道多选
+        function generateExam() {
+            const tf = pickRandom(tfPool, 15);
+            const sc = pickRandom(scPool, 10);
+            const mc = pickRandom(mcPool, 25);
+            return { tf, sc, mc };
+        }
+
+        // ============================================================
+        // 3. 应用状态
+        // ============================================================
+        let currentExam = generateExam();
+        const userAnswers = new Map();
+        let isSubmitted = false;
+        const TOTAL = 50;
+        const PASS_SCORE = 80;
+
+        // ============================================================
+        // 4. 渲染
+        // ============================================================
+        const container = document.getElementById('questionContainer');
+
+        function renderExam() {
+            let html = '';
+
+            // 判断
+            html += `<div class="section"><div class="section-title"><span>📌 判断题</span><span class="badge">15题</span><span class="count">每题2分</span></div>`;
+            currentExam.tf.forEach((q, idx) => {
+                const key = `tf_${idx}`;
+                const selected = userAnswers.get(key);
+                html += renderTFQuestion(q, idx, key, selected);
+            });
+            html += `</div>`;
+
+            // 单选
+            html += `<div class="section"><div class="section-title"><span>🔘 单选题</span><span class="badge">10题</span><span class="count">每题2分</span></div>`;
+            currentExam.sc.forEach((q, idx) => {
+                const key = `sc_${idx}`;
+                const selected = userAnswers.get(key);
+                html += renderSCQuestion(q, idx, key, selected);
+            });
+            html += `</div>`;
+
+            // 多选
+            html += `<div class="section"><div class="section-title"><span>☑️ 多选题</span><span class="badge">25题</span><span class="count">每题2分（全对才得分）</span></div>`;
+            currentExam.mc.forEach((q, idx) => {
+                const key = `mc_${idx}`;
+                const selected = userAnswers.get(key) || [];
+                html += renderMCQuestion(q, idx, key, selected);
+            });
+            html += `</div>`;
+
+            container.innerHTML = html;
+            updateStats();
+            bindEvents();
+        }
+
+        function renderTFQuestion(q, idx, key, selected) {
+            const checkedTrue = selected === true ? 'checked' : '';
+            const checkedFalse = selected === false ? 'checked' : '';
+            const done = selected !== undefined;
+            return `<div class="question" data-key="${key}" data-type="tf">
+                <div class="qhead"><span class="qid">${idx+1}.</span><span class="qtype">判断</span><span class="answered-dot ${done?'done':''}"></span></div>
+                <div class="qtext">${q.text}</div>
+                <div class="options">
+                    <label class="opt" data-value="true"><input type="radio" name="${key}" value="true" ${checkedTrue} /><span class="label">✅ 正确</span></label>
+                    <label class="opt" data-value="false"><input type="radio" name="${key}" value="false" ${checkedFalse} /><span class="label">❌ 错误</span></label>
+                </div>
+            </div>`;
+        }
+
+        function renderSCQuestion(q, idx, key, selected) {
+            let optHtml = q.options.map(opt => {
+                const letter = opt.charAt(0);
+                const checked = selected === letter ? 'checked' : '';
+                return `<label class="opt" data-value="${letter}"><input type="radio" name="${key}" value="${letter}" ${checked} /><span class="label">${opt}</span></label>`;
+            }).join('');
+            const done = selected !== undefined;
+            return `<div class="question" data-key="${key}" data-type="sc">
+                <div class="qhead"><span class="qid">${idx+1}.</span><span class="qtype">单选</span><span class="answered-dot ${done?'done':''}"></span></div>
+                <div class="qtext">${q.text}</div>
+                <div class="options">${optHtml}</div>
+            </div>`;
+        }
+
+        function renderMCQuestion(q, idx, key, selected) {
+            const selectedSet = new Set(selected);
+            let optHtml = q.options.map(opt => {
+                const letter = opt.charAt(0);
+                const checked = selectedSet.has(letter) ? 'checked' : '';
+                return `<label class="opt" data-value="${letter}"><input type="checkbox" name="${key}" value="${letter}" ${checked} /><span class="label">${opt}</span></label>`;
+            }).join('');
+            const done = selected.length > 0;
+            return `<div class="question" data-key="${key}" data-type="mc">
+                <div class="qhead"><span class="qid">${idx+1}.</span><span class="qtype">多选</span><span class="answered-dot ${done?'done':''}"></span></div>
+                <div class="qtext">${q.text}</div>
+                <div class="multi-hint">📌 全部选对才得2分</div>
+                <div class="options">${optHtml}</div>
+            </div>`;
+        }
+
+        // ----- 事件绑定 -----
+        function bindEvents() {
+            container.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+                input.addEventListener('change', function(e) {
+                    if (isSubmitted) return;
+                    const qDiv = this.closest('.question');
+                    if (!qDiv) return;
+                    const key = qDiv.dataset.key;
+                    const type = qDiv.dataset.type;
+
+                    if (type === 'tf' || type === 'sc') {
+                        const checked = qDiv.querySelector('input:checked');
+                        if (checked) {
+                            const val = checked.value;
+                            userAnswers.set(key, type === 'tf' ? val === 'true' : val);
+                        } else {
+                            userAnswers.delete(key);
+                        }
+                    } else if (type === 'mc') {
+                        const checks = qDiv.querySelectorAll('input[type="checkbox"]:checked');
+                        const vals = Array.from(checks).map(el => el.value);
+                        if (vals.length > 0) {
+                            userAnswers.set(key, vals);
+                        } else {
+                            userAnswers.delete(key);
+                        }
+                    }
+                    updateStats();
+                    updateDot(key);
+                });
+            });
+            // 点击label辅助
+            container.querySelectorAll('.opt').forEach(label => {
+                label.addEventListener('click', function(e) {
+                    const input = this.querySelector('input');
+                    if (!input) return;
+                    setTimeout(() => {
+                        const event = new Event('change', { bubbles: true });
+                        input.dispatchEvent(event);
+                    }, 10);
+                });
+            });
+        }
+
+        function updateDot(key) {
+            const qDiv = document.querySelector(`.question[data-key="${key}"]`);
+            if (!qDiv) return;
+            const dot = qDiv.querySelector('.answered-dot');
+            if (dot) {
+                dot.classList.toggle('done', userAnswers.has(key));
+            }
+        }
+
+        // ============================================================
+        // 5. 统计与评分
+        // ============================================================
+        function updateStats() {
+            let answered = userAnswers.size;
+            let correct = 0,
+                wrong = 0;
+            if (isSubmitted) {
+                const r = calculateScore();
+                answered = r.answered;
+                correct = r.correct;
+                wrong = r.wrong;
+            }
+            document.getElementById('answeredCount').textContent = answered;
+            document.getElementById('footerAnswered').textContent = answered;
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('wrongCount').textContent = wrong;
+            const liveScore = isSubmitted ? calculateScore().score : 0;
+            document.getElementById('liveScore').textContent = liveScore;
+            const pct = Math.round((answered / TOTAL) * 100);
+            document.getElementById('progressFill').style.width = pct + '%';
+        }
+
+        function calculateScore() {
+            let correct = 0,
+                wrong = 0,
+                answered = 0;
+            currentExam.tf.forEach((q, idx) => {
+                const key = `tf_${idx}`;
+                const ans = userAnswers.get(key);
+                if (ans === undefined) return;
+                answered++;
+                if (ans === q.answer) correct++;
+                else wrong++;
+            });
+            currentExam.sc.forEach((q, idx) => {
+                const key = `sc_${idx}`;
+                const ans = userAnswers.get(key);
+                if (ans === undefined) return;
+                answered++;
+                if (ans === q.answer) correct++;
+                else wrong++;
+            });
+            currentExam.mc.forEach((q, idx) => {
+                const key = `mc_${idx}`;
+                const ans = userAnswers.get(key) || [];
+                if (ans.length === 0) return;
+                answered++;
+                const correctAnswer = q.answer;
+                const sortedAns = [...ans].sort();
+                const sortedCorrect = [...correctAnswer].sort();
+                if (sortedAns.length === sortedCorrect.length && sortedAns.every((v, i) => v === sortedCorrect[i])) {
+                    correct++;
+                } else {
+                    wrong++;
+                }
+            });
+            return { score: correct * 2, correct, wrong, answered, total: TOTAL };
+        }
+
+        // ============================================================
+        // 6. 提交与结果
+        // ============================================================
+        function submitExam() {
+            if (isSubmitted) { showResult(); return; }
+            const answered = userAnswers.size;
+            if (answered < TOTAL) {
+                if (!confirm(`还有 ${TOTAL - answered} 道题未作答，确定提交吗？`)) return;
+            }
+            isSubmitted = true;
+            const result = calculateScore();
+            markAnswers();
+            updateStats();
+            showResult(result, result.score >= PASS_SCORE);
+        }
+
+        function markAnswers() {
+            // 判断
+            currentExam.tf.forEach((q, idx) => {
+                const key = `tf_${idx}`;
+                const qDiv = document.querySelector(`.question[data-key="${key}"]`);
+                if (!qDiv) return;
+                const ans = userAnswers.get(key);
+                const isCorrect = ans === q.answer;
+                qDiv.classList.remove('correct', 'wrong');
+                if (ans !== undefined) qDiv.classList.add(isCorrect ? 'correct' : 'wrong');
+                qDiv.querySelectorAll('.opt').forEach(label => {
+                    const val = label.dataset.value === 'true';
+                    label.classList.remove('correct-answer', 'wrong-answer');
+                    if (ans !== undefined) {
+                        if (val === q.answer) label.classList.add('correct-answer');
+                        else if (val === ans && ans !== q.answer) label.classList.add('wrong-answer');
+                    }
+                });
+            });
+            // 单选
+            currentExam.sc.forEach((q, idx) => {
+                const key = `sc_${idx}`;
+                const qDiv = document.querySelector(`.question[data-key="${key}"]`);
+                if (!qDiv) return;
+                const ans = userAnswers.get(key);
+                const isCorrect = ans === q.answer;
+                qDiv.classList.remove('correct', 'wrong');
+                if (ans !== undefined) qDiv.classList.add(isCorrect ? 'correct' : 'wrong');
+                qDiv.querySelectorAll('.opt').forEach(label => {
+                    const val = label.dataset.value;
+                    label.classList.remove('correct-answer', 'wrong-answer');
+                    if (ans !== undefined) {
+                        if (val === q.answer) label.classList.add('correct-answer');
+                        else if (val === ans && ans !== q.answer) label.classList.add('wrong-answer');
+                    }
+                });
+            });
+            // 多选
+            currentExam.mc.forEach((q, idx) => {
+                const key = `mc_${idx}`;
+                const qDiv = document.querySelector(`.question[data-key="${key}"]`);
+                if (!qDiv) return;
+                const ans = userAnswers.get(key) || [];
+                const correctAnswer = q.answer;
+                const sortedAns = [...ans].sort();
+                const sortedCorrect = [...correctAnswer].sort();
+                const isCorrect = sortedAns.length === sortedCorrect.length &&
+                    sortedAns.every((v, i) => v === sortedCorrect[i]);
+                qDiv.classList.remove('correct', 'wrong');
+                if (ans.length > 0) qDiv.classList.add(isCorrect ? 'correct' : 'wrong');
+                qDiv.querySelectorAll('.opt').forEach(label => {
+                    const val = label.dataset.value;
+                    label.classList.remove('correct-answer', 'wrong-answer');
+                    if (ans.length > 0) {
+                        if (correctAnswer.includes(val)) label.classList.add('correct-answer');
+                        else if (ans.includes(val) && !correctAnswer.includes(val)) label.classList.add(
+                            'wrong-answer');
+                    }
+                });
+            });
+        }
+
+        function showResult(result, passed) {
+            const modal = document.getElementById('resultModal');
+            document.getElementById('resultIcon').textContent = passed ? '🎉' : '😅';
+            document.getElementById('resultTitle').textContent = passed ? '恭喜通过！' : '未通过';
+            document.getElementById('resultSub').textContent = passed ? '已达到80分及格线' : '再接再厉，继续加油！';
+            const scoreEl = document.getElementById('finalScore');
+            scoreEl.textContent = result.score;
+            scoreEl.className = 'big ' + (passed ? 'pass' : 'fail');
+            const status = document.getElementById('passStatus');
+            status.textContent = passed ? '✅ 及格' : '❌ 不及格';
+            status.style.color = passed ? '#16a34a' : '#dc2626';
+            document.getElementById('rTotal').textContent = result.total;
+            document.getElementById('rCorrect').textContent = result.correct;
+            document.getElementById('rWrong').textContent = result.wrong;
+            modal.classList.add('active');
+        }
+
+        // ============================================================
+        // 7. 重置 / 重新抽题
+        // ============================================================
+        function resetExam() {
+            if (isSubmitted && !confirm('重新抽题将丢失当前进度，确定吗？')) return;
+            currentExam = generateExam();
+            userAnswers.clear();
+            isSubmitted = false;
+            document.getElementById('resultModal').classList.remove('active');
+            renderExam();
+            document.getElementById('correctCount').textContent = '0';
+            document.getElementById('wrongCount').textContent = '0';
+            document.getElementById('liveScore').textContent = '0';
+            updateStats();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ============================================================
+        // 8. 初始化
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            renderExam();
+            document.getElementById('submitBtn').addEventListener('click', submitExam);
+            document.getElementById('resetBtn').addEventListener('click', resetExam);
+            document.getElementById('closeResultBtn').addEventListener('click', function() {
+                document.getElementById('resultModal').classList.remove('active');
+            });
+            document.getElementById('retryBtn').addEventListener('click', resetExam);
+            document.getElementById('resultModal').addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

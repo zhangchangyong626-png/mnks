@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>森林防灭火 · 模拟考试（50题·每题2分）</title>
+    <title>森林消防 · 模拟考试（50题·每题2分）</title>
     <style>
         * {
             margin: 0;
@@ -14,8 +14,7 @@
             font-family: 'Segoe UI', 'PingFang SC', Roboto, system-ui, -apple-system, sans-serif;
             background: #f0f4f8;
             color: #1e293b;
-            padding: 12px 8px 120px;
-            /* 底部留白给固定操作栏 */
+            padding: 12px 8px 140px; /* 底部留白增加，容纳 footer 和固定栏 */
             min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
         }
@@ -424,6 +423,18 @@
             text-align: center;
         }
 
+        /* ----- 底部版权信息（新增） ----- */
+        .footer-info {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            padding: 16px 0 20px;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 10px;
+            background: #fff;
+            border-radius: 0 0 14px 14px;
+        }
+
         /* ----- 移动端精细化调整 ----- */
         @media (max-width: 640px) {
             .header {
@@ -493,6 +504,10 @@
             .modal .detail-grid .item .num {
                 font-size: 18px;
             }
+            .footer-info {
+                font-size: 12px;
+                padding: 12px 0 16px;
+            }
         }
 
         @media (max-width: 400px) {
@@ -527,6 +542,10 @@
             }
             .modal .score-box .big {
                 font-size: 28px;
+            }
+            .footer-info {
+                font-size: 11px;
+                padding: 10px 0 14px;
             }
         }
 
@@ -573,12 +592,17 @@
         <!-- 题目容器 -->
         <div id="questionContainer"></div>
 
-        <!-- 底部操作栏 -->
-        <div class="submit-area">
-            <span class="info">已答 <strong id="footerAnswered">0</strong> / 50</span>
-            <button class="btn" id="submitBtn">📝 提交</button>
-            <button class="btn secondary" id="resetBtn">🔄 重新抽题</button>
+        <!-- 底部作者信息 -->
+        <div class="footer-info">
+            作者：云和森林消防员 张昌勇
         </div>
+    </div>
+
+    <!-- 底部操作栏（固定） -->
+    <div class="submit-area">
+        <span class="info">已答 <strong id="footerAnswered">0</strong> / 50</span>
+        <button class="btn" id="submitBtn">📝 提交</button>
+        <button class="btn secondary" id="resetBtn">🔄 重新抽题</button>
     </div>
 
     <!-- 结果弹窗 -->

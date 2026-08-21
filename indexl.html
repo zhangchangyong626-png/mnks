@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN" data-theme="dark">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
@@ -159,7 +159,6 @@
             transform: scale(0.95);
         }
 
-        /* 头部右侧工具（主题切换 + 计时器） */
         .header-tools {
             display: flex;
             align-items: center;
@@ -1046,7 +1045,7 @@
                     <div class="badge-count" id="wrongCountBadge">0 道错题</div>
                 </div>
             </div>
-            <div class="footer-info">作者：云和森林消防员 张昌勇 V2.0</div>
+            <div class="footer-info">作者：云和森林消防员 张昌勇</div>
         </div>
 
         <!-- ========== 考试页 ========== -->
@@ -1077,7 +1076,7 @@
             </header>
 
             <div id="questionContainer"></div>
-            <div class="footer-info">作者：云和森林消防员 张昌勇</div>
+            <div class="footer-info">作者：云和森林消防员 张昌勇 版本V2.0</div>
 
             <!-- 底部操作栏 -->
             <div class="submit-area">
@@ -1487,7 +1486,6 @@
             return copy.slice(0, n);
         }
 
-        // 错题本存储
         const WRONG_KEY = 'forest_wrong_questions';
 
         function getWrongQuestions() {
@@ -1506,12 +1504,10 @@
             saveWrongQuestions([...newSet]);
         }
 
-        // 生成唯一标识：类型_id
         function getQuestionId(type, id) {
             return `${type}_${id}`;
         }
 
-        // 根据ID查找题目
         function findQuestionById(qid) {
             const [type, id] = qid.split('_');
             const numId = parseInt(id);
@@ -1531,11 +1527,11 @@
         }
 
         // 主题切换
-        const themeToggle = document.getElementById('themeToggle');
-        const html = document.documentElement;
-        let currentTheme = localStorage.getItem('forest_theme') || 'light';
-        html.setAttribute('data-theme', currentTheme);
-        themeToggle.textContent = currentTheme === 'dark' ? '☀️ 浅色' : '🌓 深色';
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
+let currentTheme = localStorage.getItem('forest_theme') || 'dark';
+html.setAttribute('data-theme', currentTheme);
+themeToggle.textContent = currentTheme === 'dark' ? '☀️ 浅色' : '🌓 深色';
 
         themeToggle.addEventListener('click', function() {
             const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
@@ -1544,7 +1540,6 @@
             this.textContent = next === 'dark' ? '☀️ 浅色' : '🌓 深色';
         });
 
-        // 主页按钮
         document.getElementById('btnExam').addEventListener('click', function() {
             showPage('page-exam');
             initExam();
@@ -1566,7 +1561,6 @@
             showPage('page-home');
         });
 
-        // 更新错题本数量
         function updateWrongBadge() {
             const count = getWrongQuestions().length;
             document.getElementById('wrongCountBadge').textContent = count + ' 道错题';
@@ -1583,7 +1577,6 @@
         const PASS_SCORE = 80;
         const containerExam = document.getElementById('questionContainer');
 
-        // 计时器
         let timerSeconds = 0;
         let timerInterval = null;
 
@@ -1831,7 +1824,6 @@
             stopTimer();
             const result = calculateScore();
 
-            // 收集错题
             const wrongIds = [];
             currentExam.tf.forEach((q, idx) => {
                 const key = `tf_${idx}`;
@@ -1947,11 +1939,9 @@
             modal.classList.add('active');
         }
 
-        // 答题卡
         function renderAnswerSheet() {
             const grid = document.getElementById('asGrid');
             let html = '';
-            // 获取当前所有题目的全局序号
             const questions = document.querySelectorAll('#page-exam .question');
             const map = new Map();
             questions.forEach(el => {
@@ -1960,7 +1950,6 @@
                 if (key) map.set(key, global);
             });
 
-            // 遍历 1~50
             for (let i = 1; i <= 50; i++) {
                 let found = false;
                 let done = false;
@@ -1976,14 +1965,12 @@
             }
             grid.innerHTML = html;
 
-            // 点击跳转
             grid.querySelectorAll('.as-item').forEach(item => {
                 item.addEventListener('click', function() {
                     const num = parseInt(this.dataset.num);
                     const target = document.querySelector(`#page-exam .question[data-global="${num}"]`);
                     if (target) {
                         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        // 闪烁提示
                         target.style.transition = 'background 0.3s';
                         target.style.background = 'var(--bg-card-hover)';
                         setTimeout(() => {
@@ -1994,7 +1981,6 @@
             });
         }
 
-        // 答题卡开关
         const asToggle = document.getElementById('asToggle');
         const asSheet = document.getElementById('answerSheet');
         const asClose = document.getElementById('asClose');
@@ -2006,7 +1992,6 @@
             asSheet.classList.remove('open');
         });
 
-        // 点击外部关闭
         document.addEventListener('click', function(e) {
             if (asSheet.classList.contains('open')) {
                 if (!asSheet.contains(e.target) && e.target !== asToggle) {
@@ -2015,7 +2000,6 @@
             }
         });
 
-        // 按钮事件
         document.getElementById('submitBtn').addEventListener('click', submitExam);
         document.getElementById('resetBtn').addEventListener('click', function() {
             if (isSubmitted && !confirm('重新抽题将丢失当前进度，确定吗？')) return;
@@ -2053,7 +2037,7 @@
         });
 
         // ============================================================
-        // 5. 阅题 / 错题本模块
+        // 5. 阅题 / 错题本模块（精简版）
         // ============================================================
         function renderReview(isWrongMode) {
             const container = document.getElementById('reviewContainer');
@@ -2071,7 +2055,6 @@
                 }
                 let html = '';
                 let globalIdx = 1;
-                // 按题型分组显示
                 const tfList = [],
                     scList = [],
                     mcList = [];
@@ -2142,9 +2125,14 @@
             }
         }
 
+        // 阅题模式下的题目渲染 —— 精简版，只保留一个正确答案展示
         function renderReviewQuestion(q, idx, type, answerText) {
             let optionsHtml = '';
-            if (q.options) {
+            if (type === '判断') {
+                // 判断题不显示选项，只显示正确答案
+                optionsHtml = ''; // 不输出选项区域
+            } else if (q.options) {
+                // 单选/多选：显示选项并高亮正确选项
                 optionsHtml = `<div class="options">`;
                 q.options.forEach(opt => {
                     const letter = opt.charAt(0);
@@ -2153,10 +2141,8 @@
                     optionsHtml += `<div class="opt${cls}" style="cursor:default;"><span class="label">${opt}</span></div>`;
                 });
                 optionsHtml += `</div>`;
-            } else {
-                optionsHtml =
-                    `<div class="options"><div class="opt correct-answer" style="cursor:default;"><span class="label">${answerText}</span></div></div>`;
             }
+
             return `<div class="question">
                 <div class="qhead"><span class="qid">${idx}.</span><span class="qtype">${type}</span></div>
                 <div class="qtext">${q.text}</div>
@@ -2168,7 +2154,7 @@
         // ============================================================
         // 6. 启动
         // ============================================================
-        // 默认主页已激活，错题本数量已更新
+        // 默认主页已激活
     </script>
 </body>
 </html>

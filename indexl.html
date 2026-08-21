@@ -38,17 +38,24 @@
             -webkit-backdrop-filter: blur(4px);
         }
         .header h1 {
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .header h1::before {
-            content: "🔥";
-            font-size: 22px;
-        }
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.header h1::before {
+    content: "";
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    background-image: url("https://img.alicdn.com/imgextra/i3/706125935/O1CN01CrYVGjp8qJL0CaUK_!!706125935.png"); /* 替换为你的图片 */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+}
         .header .sub {
             font-size: 12px;
             opacity: 0.9;
@@ -571,7 +578,7 @@
     <div class="container" id="app">
         <!-- 头部 -->
         <header class="header">
-            <h1>森林防灭火 · 模拟考</h1>
+            <h1>森林消防 · 模拟考试</h1>
             <div class="sub">
                 <span>📋 50题（随机）</span>
                 <span>✅ 每题2分</span>

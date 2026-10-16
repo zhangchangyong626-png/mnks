@@ -205,6 +205,9 @@
         .home-btn.review { border-left: 4px solid var(--color-success); }
         .home-btn.wrong { border-left: 4px solid var(--color-danger); }
         .home-btn.rules { border-left: 4px solid #d4a14b; }
+        /* 新增：三选专项 */
+        .home-btn.threeopt { border-left: 4px solid #7c6fd4; }
+        .home-btn.threeopt .badge-count { background: #7c6fd4; }
 
         /* ====== 考试统计 ====== */
         .header .stats {
@@ -737,7 +740,8 @@
                 <div class="sub" style="width:100%;">
                     <span>120道精选题库</span>
                     <span>模拟考试 · 阅题复习</span>
-                    <span>错题本 · 竞赛规则</span>
+                    <span>错题本 · 三选专项</span>
+                    <span>竞赛规则</span>
                 </div>
             </header>
             <div class="home-grid">
@@ -750,6 +754,13 @@
                     <div class="icon">📖</div>
                     <div class="label">阅题模式</div>
                     <div class="desc">浏览全部120道题及正确答案</div>
+                </div>
+                <!-- 新增：三选专项 -->
+                <div class="home-btn threeopt" id="btnThreeOpt">
+                    <div class="icon">🎯</div>
+                    <div class="label">三选专项</div>
+                    <div class="desc">多选题中正确答案为3个选项的题目</div>
+                    <div class="badge-count" id="threeCountBadge">0 道题</div>
                 </div>
                 <div class="home-btn wrong" id="btnWrong">
                     <div class="icon">📕</div>
@@ -1165,6 +1176,11 @@
             showPage('page-review');
             renderReview(true);
         });
+        // 新增：三选专项
+        document.getElementById('btnThreeOpt').addEventListener('click', function() {
+            showPage('page-review');
+            renderThreeOptionMC();
+        });
         document.getElementById('btnRules').addEventListener('click', function() {
             showPage('page-rules');
             document.getElementById('rulesContent').innerHTML = RULES_TEXT;
@@ -1186,6 +1202,15 @@
             document.getElementById('wrongCountBadge').textContent = count + ' 道错题';
         }
         updateWrongBadge();
+
+        // 新增：三选专项数量徽标
+        function getThreeOptionList() {
+            return mcPool.filter(q => q.answer.length === 3);
+        }
+        function updateThreeOptionBadge() {
+            document.getElementById('threeCountBadge').textContent = getThreeOptionList().length + ' 道题';
+        }
+        updateThreeOptionBadge();
 
         // ============================================================
         // 5. 考试模块
@@ -1649,7 +1674,7 @@
         });
 
         // ============================================================
-        // 6. 阅题 / 错题本
+        // 6. 阅题 / 错题本 / 三选专项
         // ============================================================
         function renderReview(isWrongMode) {
             const container = document.getElementById('reviewContainer');
@@ -1729,6 +1754,34 @@
                 html += `</div>`;
                 container.innerHTML = html;
             }
+        }
+
+        // 新增：三选专项渲染（正确答案为3个选项的多选题）
+        function renderThreeOptionMC() {
+            const container = document.getElementById('reviewContainer');
+            const title = document.getElementById('reviewTitle');
+            const sub = document.getElementById('reviewSub');
+            const list = getThreeOptionList();
+
+            title.textContent = '🎯 三选专项 · 3个正确答案';
+            sub.textContent = `共 ${list.length} 题 · 正确答案均为3个选项`;
+
+            if (list.length === 0) {
+                container.innerHTML = `<div class="section" style="text-align:center;padding:40px 20px;"><p style="font-size:18px;font-weight:300;">暂无符合条件的题目。</p></div>`;
+                return;
+            }
+
+            let html = `<div class="section"><div class="section-title"><span>多选题 · 3个正确选项</span><span class="badge">${list.length}题</span><span class="count">全选对才得分</span></div>`;
+            let globalIdx = 1;
+            list.forEach(q => {
+                const correctTexts = q.answer
+                    .map(letter => q.options.find(opt => opt.startsWith(letter)))
+                    .filter(Boolean)
+                    .join('；');
+                html += renderReviewQuestion(q, globalIdx++, '多选', correctTexts || q.answer.join('、'));
+            });
+            html += `</div>`;
+            container.innerHTML = html;
         }
 
         // 阅题模式下题目渲染（精简：判断题只显示正确答案，不显示选项）

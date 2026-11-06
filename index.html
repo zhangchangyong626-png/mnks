@@ -120,12 +120,18 @@ if (error) {
 
   // 渲染记录列表
   document.getElementById('taskList').innerHTML = tasks.map(t => {
-    // 拼接参与人员展示
     let membersHtml = '';
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
       membersHtml = t.member_hours.map(m => `${esc(m.name)}(${m.hours}h)`).join('、');
     } else {
       membersHtml = esc(t.members).replace(/\n/g, '、');
+    }
+
+    // 获取真实任务时长（取参与成员最长的时间）
+    let displayDuration = t.duration;
+    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
+      const arr = t.member_hours.map(m => parseFloat(m.hours) || 0);
+      if (arr.length > 0) displayDuration = Math.max(...arr);
     }
 
     return `
@@ -136,7 +142,7 @@ if (error) {
         </h2>
         <div class="meta">
           活动时间：${formatTime(t.task_time)} 
-          ${t.duration ? ` · 总计出勤：${esc(t.duration)} 小时` : ''}
+          ${displayDuration ? ` · 任务时长：${esc(displayDuration)} 小时` : ''}
         </div>
         ${t.content ? `<div class="content">${esc(t.content)}</div>` : ''}
         ${membersHtml ? `<div class="members"><strong>参与成员：</strong>${membersHtml}</div>` : ''}
@@ -154,7 +160,6 @@ function renderStats(tasks) {
   tasks.forEach(t => {
     const type = t.event_type || ''; 
     
-    // 优先使用新的 member_hours 数据
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
       t.member_hours.forEach(m => {
         const hours = parseFloat(m.hours) || 0;
@@ -168,7 +173,6 @@ function renderStats(tasks) {
         }
       });
     } 
-    // 兼容老数据（没有 member_hours 的）
     else if (t.members && t.duration) {
       const hours = parseFloat(String(t.duration).replace(/[^\d.]/g, '')) || 0;
       const membersArray = t.members.split(/[,，\s]+/).filter(Boolean);

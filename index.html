@@ -38,12 +38,26 @@
   details[open] summary { border-bottom: 1px solid #eceff1; }
   .details-content { padding: 18px; }
   
-  /* 表格样式优化，适配多列 */
-  .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
-  .stats-table th, .stats-table td { padding: 10px 6px; border-bottom: 1px solid #eceff1; }
+  /* 关键修复：允许手机端横向滑动，且让滑动更顺畅 */
+  .table-wrapper { 
+    width: 100%; 
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch; 
+    padding-bottom: 5px; /* 留出一点点滚动条空间 */
+  }
+  
+  /* 关键修复：强制表格最小宽度，防止被手机挤压 */
+  .stats-table { 
+    width: 100%; 
+    min-width: 500px; /* 低于500px就出滚动条 */
+    border-collapse: collapse; 
+    font-size: 14px; 
+    text-align: center; 
+  }
+  .stats-table th, .stats-table td { padding: 10px 6px; border-bottom: 1px solid #eceff1; white-space: nowrap; }
   .stats-table th { color: #607d8b; font-weight: 600; background: #f9fbfd; }
   .stats-table tr:hover { background: #f4f7fb; }
-  .stats-table td:nth-child(2) { text-align: left; } /* 姓名左对齐 */
+  .stats-table td:nth-child(2) { text-align: left; } 
   
   .rank { font-weight: bold; color: #1565c0; width: 40px;}
   .rank-1 { color: #f57f17; font-size: 16px; }
@@ -51,13 +65,24 @@
   .rank-3 { color: #8d6e63; font-size: 16px; }
   
   .total-col { font-weight: bold; color: #1565c0; background: #f4f7fb; }
-  
-  /* 手机端让表格可以横向滑动，防止挤压 */
-  .table-wrapper { width: 100%; overflow-x: auto; }
 
   .type-tag {
     display: inline-block; padding: 2px 8px; background: #e3f2fd; color: #1565c0;
     border-radius: 4px; font-size: 12px; font-weight: normal; margin-right: 8px; vertical-align: middle;
+  }
+
+  /* 给手机端加一个滑动提示文字 */
+  .swipe-hint {
+    display: none;
+    font-size: 12px;
+    color: #90a4ae;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  @media (max-width: 600px) {
+    .swipe-hint { display: block; }
+    .details-content { padding: 10px; }
+    .stats-table th, .stats-table td { padding: 8px 6px; font-size: 13px; }
   }
 </style>
 </head>
@@ -140,12 +165,9 @@ if (error) {
 function renderStats(tasks) {
   const statsBox = document.getElementById('statsBox');
   
-  // 记录每个人的详细数据
-  // 结构: { '张三': { rescue: 0, training: 0, fire: 0, total: 0 } }
   const memberStats = {};
 
   tasks.forEach(t => {
-    // 提取纯数字时长
     const hours = parseFloat(String(t.duration).replace(/[^\d.]/g, '')) || 0;
     const type = t.event_type || ''; 
     
@@ -157,10 +179,8 @@ function renderStats(tasks) {
           memberStats[name] = { rescue: 0, training: 0, fire: 0, total: 0 };
         }
         
-        // 累加总时长
         memberStats[name].total += hours;
         
-        // 按类型累加细分时长
         if (type === '公益救援') memberStats[name].rescue += hours;
         else if (type === '技能培训') memberStats[name].training += hours;
         else if (type === '森林消防') memberStats[name].fire += hours;
@@ -168,7 +188,6 @@ function renderStats(tasks) {
     }
   });
 
-  // 转换为数组并按总时长降序排序
   const sortedMembers = Object.entries(memberStats).sort((a, b) => b[1].total - a[1].total);
 
   if (sortedMembers.length === 0) {
@@ -176,11 +195,10 @@ function renderStats(tasks) {
     return;
   }
 
-  // 格式化数字，去掉多余的0 (比如 4.0 -> 4, 4.50 -> 4.5)
   const fmt = (num) => parseFloat(num.toFixed(1));
 
-  // 生成表格
   statsBox.innerHTML = `
+    <div class="swipe-hint">← 左右滑动查看详细分类 →</div>
     <div class="table-wrapper">
       <table class="stats-table">
         <thead>

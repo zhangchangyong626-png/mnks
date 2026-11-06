@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>管理后台 · 蓝天救援队</title>
+<title>管理后台 · 云和蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
 <style>
   .checkbox-group {
@@ -14,7 +14,7 @@
     display: flex; align-items: center; gap: 8px;
     background: #fff; padding: 6px 12px; border: 1px solid #eceff1; border-radius: 6px;
     font-size: 14px; color: #1f2d3d; cursor: pointer; margin: 0;
-    white-space: nowrap; /* 关键修复：强制文字横向不换行 */
+    white-space: nowrap;
   }
   .checkbox-item input[type="checkbox"], .checkbox-item input[type="radio"] { 
     width: auto; margin: 0; cursor: pointer; 
@@ -24,15 +24,27 @@
     font-size: 13px; display: none;
   }
   .member-tag {
-    display: inline-block; padding: 4px 8px; background: #e3f2fd; color: #1565c0;
-    border-radius: 4px; font-size: 13px; margin: 4px;
+    display: inline-block; padding: 6px 10px; background: #e3f2fd; color: #1565c0;
+    border-radius: 6px; font-size: 13px; margin: 4px; line-height: 1.4;
   }
   .member-tag button { border: none; background: none; color: #e53935; cursor: pointer; margin-left: 4px; font-weight: bold; }
+  
+  /* 成员表单改用网格布局 */
+  .member-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 15px;
+  }
+  @media (max-width: 600px) {
+    .member-form-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">蓝天救援队 · 管理后台</div>
+  <div class="brand">云和·蓝天救援队 · 管理后台</div>
   <nav>
     <a href="index.html">查看首页</a>
     <a href="#" id="logoutBtn">退出</a>
@@ -43,14 +55,22 @@
   <!-- 队员名单管理区 -->
   <div class="card">
     <h2>队员名单管理</h2>
-    <form id="memberForm" style="display:flex; gap:10px; align-items:flex-end; margin-bottom:15px;">
-      <div style="flex:1;">
-        <label>新增队员名字</label>
-        <input type="text" id="newMemberName" placeholder="请输入队员名字" required>
+    <form id="memberForm" class="member-form-grid">
+      <div>
+        <label>姓名 *</label>
+        <input type="text" id="newMemberName" placeholder="请输入姓名" required>
       </div>
-      <button class="btn" type="submit" id="addMemberBtn">添加</button>
+      <div>
+        <label>联系电话</label>
+        <input type="text" id="newMemberPhone" placeholder="选填">
+      </div>
+      <div>
+        <label>紧急联系人</label>
+        <input type="text" id="newMemberEmergency" placeholder="选填">
+      </div>
+      <button class="btn" type="submit" id="addMemberBtn" style="height: 38px;">添加</button>
     </form>
-    <div id="memberList" style="margin-top:10px;">加载名单中...</div>
+    <div id="memberList" style="margin-top:15px;">加载名单中...</div>
   </div>
 
   <!-- 活动录入区 -->
@@ -127,7 +147,9 @@ async function loadMembers() {
   } else {
     box.innerHTML = allMembers.map(m => `
       <span class="member-tag">
-        ${esc(m.name)}
+        <strong>${esc(m.name)}</strong> 
+        ${m.phone ? `📞 ${esc(m.phone)}` : ''} 
+        ${m.emergency_contact ? `🆘 ${esc(m.emergency_contact)}` : ''}
         <button type="button" onclick="deleteMember('${m.id}')" title="删除">×</button>
       </span>
     `).join('');
@@ -168,18 +190,28 @@ window.deleteMember = async (id) => {
 document.getElementById('memberForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = document.getElementById('newMemberName').value.trim();
+  const phone = document.getElementById('newMemberPhone').value.trim();
+  const emergency = document.getElementById('newMemberEmergency').value.trim();
+  
   if(!name) return;
   
   const btn = document.getElementById('addMemberBtn');
   btn.disabled = true;
   
-  const { error } = await supabase.from('members').insert({ name });
+  const { error } = await supabase.from('members').insert({ 
+    name: name,
+    phone: phone,
+    emergency_contact: emergency
+  });
+  
   btn.disabled = false;
   
   if(error) {
     alert('添加失败（可能是名字重复）：' + error.message);
   } else {
     document.getElementById('newMemberName').value = '';
+    document.getElementById('newMemberPhone').value = '';
+    document.getElementById('newMemberEmergency').value = '';
     loadMembers();
   }
 });

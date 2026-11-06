@@ -133,7 +133,6 @@ async function loadMembers() {
   if (allMembers.length === 0) {
     checkboxGroup.innerHTML = '<span style="color:#90a4ae;font-size:13px;">请先在上方添加队员名单</span>';
   } else {
-    // 动态生成带时长输入框的勾选项
     checkboxGroup.innerHTML = allMembers.map(m => `
       <label class="checkbox-item">
         <input type="checkbox" name="task_members" value="${esc(m.name)}" onchange="toggleHoursInput(this)">
@@ -144,16 +143,15 @@ async function loadMembers() {
   }
 }
 
-// 勾选时显示输入框，取消勾选时隐藏并清空
 window.toggleHoursInput = (checkbox) => {
   const input = checkbox.parentElement.querySelector('.member-hours-input');
   if (checkbox.checked) {
     input.style.display = 'inline-block';
-    input.required = true; // 勾选了就必填
+    input.required = true;
   } else {
     input.style.display = 'none';
     input.required = false;
-    input.value = ''; // 清空历史值
+    input.value = '';
   }
 };
 
@@ -221,9 +219,8 @@ form.addEventListener('submit', async (e) => {
   const selectedTypeEl = document.querySelector('input[name="event_type"]:checked');
   const eventType = selectedTypeEl ? selectedTypeEl.value : '';
 
-  // 收集成员和各自时长
   const memberHoursArr = [];
-  let totalDuration = 0;
+  let maxDuration = 0; // 记录最长时长
   let membersNames = [];
 
   document.querySelectorAll('input[name="task_members"]').forEach(cb => {
@@ -233,7 +230,11 @@ form.addEventListener('submit', async (e) => {
       
       memberHoursArr.push({ name: cb.value, hours: hours });
       membersNames.push(cb.value);
-      totalDuration += hours;
+      
+      // 比较出最长的时长
+      if (hours > maxDuration) {
+        maxDuration = hours;
+      }
     }
   });
 
@@ -247,9 +248,9 @@ form.addEventListener('submit', async (e) => {
     event_type: eventType,
     task_time: timeInput ? new Date(timeInput).toISOString() : null,
     content: document.getElementById('content').value.trim(),
-    members: membersNames.join(', '), // 兼容保留
-    duration: totalDuration.toString(), // 存总时长，用于以前逻辑的统计
-    member_hours: memberHoursArr, // 存每个人的具体时长 (JSON格式)
+    members: membersNames.join(', '),
+    duration: maxDuration.toString(), // 这里存的不再是总和，而是最长时长
+    member_hours: memberHoursArr,
   };
   
   if (!payload.title) { showError('请填写事件/活动名称'); return; }
@@ -274,7 +275,15 @@ async function loadTasks() {
   allTasks = data || [];
   if (allTasks.length === 0) { box.innerHTML = '<div class="empty">暂无记录</div>'; return; }
 
-  box.innerHTML = allTasks.map(t => `
+  box.innerHTML = allTasks.map(t => {
+    // 动态获取当前任务的最大时长（兼容老数据）
+    let displayDuration = t.duration;
+    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
+      const arr = t.member_hours.map(m => parseFloat(m.hours) || 0);
+      if (arr.length > 0) displayDuration = Math.max(...arr);
+    }
+
+    return `
     <div class="task-row">
       <div>
         <div class="t">
@@ -283,7 +292,7 @@ async function loadTasks() {
         </div>
         <div class="meta">
           ${formatTime(t.task_time)}
-          ${t.duration ? ' · 总计: ' + esc(t.duration) + '小时' : ''}
+          ${displayDuration ? ' · 任务时长: ' + esc(displayDuration) + '小时' : ''}
           ${t.members ? ' · 参与: ' + esc(t.members) : ''}
         </div>
       </div>
@@ -292,7 +301,7 @@ async function loadTasks() {
         <button class="btn sm red" data-del="${t.id}">删除</button>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 
   box.querySelectorAll('[data-edit]').forEach(btn =>
     btn.addEventListener('click', () =>
@@ -317,14 +326,13 @@ function startEdit(t) {
     radio.checked = (radio.value === t.event_type);
   });
 
-  // 回显成员和各自时长
   const taskMembers = t.members ? t.members.split(',').map(s => s.trim()) : [];
   const memberHoursData = t.member_hours || [];
 
   document.querySelectorAll('input[name="task_members"]').forEach(cb => {
     if (taskMembers.includes(cb.value)) {
       cb.checked = true;
-      toggleHoursInput(cb); // 显示输入框
+      toggleHoursInput(cb);
       
       const found = memberHoursData.find(x => x.name === cb.value);
       const input = cb.parentElement.querySelector('.member-hours-input');
@@ -332,7 +340,6 @@ function startEdit(t) {
       if (found) {
         input.value = found.hours;
       } else {
-        // 兼容老数据：如果没有单独存，就把总时长平分或者填总时长
         input.value = t.duration || 0; 
       }
     } else {

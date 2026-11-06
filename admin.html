@@ -7,14 +7,19 @@
 <link rel="stylesheet" href="style.css">
 <style>
   .checkbox-group {
-    display: flex; flex-wrap: wrap; gap: 12px;
+    display: flex; flex-wrap: wrap; gap: 10px;
     background: #f9fbfd; padding: 12px; border-radius: 6px; border: 1px solid #cfd8dc;
   }
   .checkbox-item {
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 8px;
+    background: #fff; padding: 6px 12px; border: 1px solid #eceff1; border-radius: 6px;
     font-size: 14px; color: #1f2d3d; cursor: pointer; margin: 0;
   }
-  .checkbox-item input { width: auto; margin: 0; cursor: pointer; }
+  .checkbox-item input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
+  .member-hours-input {
+    width: 65px; padding: 4px; border: 1px solid #cfd8dc; border-radius: 4px;
+    font-size: 13px; display: none;
+  }
   .member-tag {
     display: inline-block; padding: 4px 8px; background: #e3f2fd; color: #1565c0;
     border-radius: 4px; font-size: 13px; margin: 4px;
@@ -54,7 +59,6 @@
       <label>事件/活动名称 *</label>
       <input type="text" id="title" required>
 
-      <!-- 新增：事件类型勾选 -->
       <label>事件类型 *</label>
       <div class="checkbox-group" style="margin-bottom: 10px;">
         <label class="checkbox-item"><input type="radio" name="event_type" value="公益救援" required> 公益救援</label>
@@ -68,13 +72,10 @@
       <label>事件详情</label>
       <textarea id="content" placeholder="事件详情、地点、注意事项等"></textarea>
 
-      <label>参与成员（勾选）</label>
+      <label>参与成员及个人时长（勾选后填写具体小时数）</label>
       <div id="memberCheckboxes" class="checkbox-group">
         <!-- 动态生成勾选框 -->
       </div>
-
-      <label>本次出勤时长（小时，请填纯数字，如 4 或 1.5）</label>
-      <input type="number" step="0.5" min="0" id="duration" placeholder="例如：4">
 
       <div id="error" class="msg err" style="display:none"></div>
       <p style="margin-top:16px">
@@ -132,14 +133,29 @@ async function loadMembers() {
   if (allMembers.length === 0) {
     checkboxGroup.innerHTML = '<span style="color:#90a4ae;font-size:13px;">请先在上方添加队员名单</span>';
   } else {
+    // 动态生成带时长输入框的勾选项
     checkboxGroup.innerHTML = allMembers.map(m => `
       <label class="checkbox-item">
-        <input type="checkbox" name="task_members" value="${esc(m.name)}">
-        ${esc(m.name)}
+        <input type="checkbox" name="task_members" value="${esc(m.name)}" onchange="toggleHoursInput(this)">
+        <span style="min-width: 40px;">${esc(m.name)}</span>
+        <input type="number" step="0.5" min="0" class="member-hours-input" placeholder="时长">
       </label>
     `).join('');
   }
 }
+
+// 勾选时显示输入框，取消勾选时隐藏并清空
+window.toggleHoursInput = (checkbox) => {
+  const input = checkbox.parentElement.querySelector('.member-hours-input');
+  if (checkbox.checked) {
+    input.style.display = 'inline-block';
+    input.required = true; // 勾选了就必填
+  } else {
+    input.style.display = 'none';
+    input.required = false;
+    input.value = ''; // 清空历史值
+  }
+};
 
 window.deleteMember = async (id) => {
   if(!confirm('确定删除该队员吗？')) return;
@@ -189,7 +205,10 @@ function resetForm() {
   submitBtn.textContent = '保存记录';
   cancelEdit.style.display = 'none';
   errorEl.style.display = 'none';
-  document.querySelectorAll('input[name="task_members"]').forEach(cb => cb.checked = false);
+  document.querySelectorAll('input[name="task_members"]').forEach(cb => {
+    cb.checked = false;
+    toggleHoursInput(cb);
+  });
 }
 cancelEdit.addEventListener('click', (e) => { e.preventDefault(); resetForm(); });
 
@@ -199,23 +218,40 @@ form.addEventListener('submit', async (e) => {
 
   const id = taskIdEl.value;
   const timeInput = document.getElementById('task_time').value;
-  
-  // 获取事件类型
   const selectedTypeEl = document.querySelector('input[name="event_type"]:checked');
   const eventType = selectedTypeEl ? selectedTypeEl.value : '';
 
-  const selectedMembers = Array.from(document.querySelectorAll('input[name="task_members"]:checked'))
-    .map(cb => cb.value)
-    .join(', ');
+  // 收集成员和各自时长
+  const memberHoursArr = [];
+  let totalDuration = 0;
+  let membersNames = [];
+
+  document.querySelectorAll('input[name="task_members"]').forEach(cb => {
+    if (cb.checked) {
+      const input = cb.parentElement.querySelector('.member-hours-input');
+      const hours = parseFloat(input.value) || 0;
+      
+      memberHoursArr.push({ name: cb.value, hours: hours });
+      membersNames.push(cb.value);
+      totalDuration += hours;
+    }
+  });
+
+  if (membersNames.length === 0) {
+    showError('请至少勾选一名参与成员');
+    return;
+  }
 
   const payload = {
     title: document.getElementById('title').value.trim(),
-    event_type: eventType, // 存入数据库
+    event_type: eventType,
     task_time: timeInput ? new Date(timeInput).toISOString() : null,
     content: document.getElementById('content').value.trim(),
-    members: selectedMembers, 
-    duration: document.getElementById('duration').value.trim(),
+    members: membersNames.join(', '), // 兼容保留
+    duration: totalDuration.toString(), // 存总时长，用于以前逻辑的统计
+    member_hours: memberHoursArr, // 存每个人的具体时长 (JSON格式)
   };
+  
   if (!payload.title) { showError('请填写事件/活动名称'); return; }
 
   submitBtn.disabled = true;
@@ -247,7 +283,7 @@ async function loadTasks() {
         </div>
         <div class="meta">
           ${formatTime(t.task_time)}
-          ${t.duration ? ' · 出勤: ' + esc(t.duration) + '小时' : ''}
+          ${t.duration ? ' · 总计: ' + esc(t.duration) + '小时' : ''}
           ${t.members ? ' · 参与: ' + esc(t.members) : ''}
         </div>
       </div>
@@ -275,17 +311,34 @@ function startEdit(t) {
   taskIdEl.value = t.id;
   document.getElementById('title').value = t.title || '';
   document.getElementById('content').value = t.content || '';
-  document.getElementById('duration').value = t.duration || '';
   document.getElementById('task_time').value = toLocalInput(t.task_time);
   
-  // 回显事件类型
   document.querySelectorAll('input[name="event_type"]').forEach(radio => {
     radio.checked = (radio.value === t.event_type);
   });
 
+  // 回显成员和各自时长
   const taskMembers = t.members ? t.members.split(',').map(s => s.trim()) : [];
+  const memberHoursData = t.member_hours || [];
+
   document.querySelectorAll('input[name="task_members"]').forEach(cb => {
-    cb.checked = taskMembers.includes(cb.value);
+    if (taskMembers.includes(cb.value)) {
+      cb.checked = true;
+      toggleHoursInput(cb); // 显示输入框
+      
+      const found = memberHoursData.find(x => x.name === cb.value);
+      const input = cb.parentElement.querySelector('.member-hours-input');
+      
+      if (found) {
+        input.value = found.hours;
+      } else {
+        // 兼容老数据：如果没有单独存，就把总时长平分或者填总时长
+        input.value = t.duration || 0; 
+      }
+    } else {
+      cb.checked = false;
+      toggleHoursInput(cb);
+    }
   });
 
   formTitle.textContent = '编辑活动记录';

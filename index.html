@@ -36,30 +36,81 @@
   }
   details[open] summary::after { transform: rotate(180deg); }
   details[open] summary { border-bottom: 1px solid #eceff1; }
-  .details-content { padding: 18px; }
+  .details-content { padding: 10px; }
   
-  .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 5px; }
-  .stats-table { width: 100%; min-width: 500px; border-collapse: collapse; font-size: 14px; text-align: center; }
-  .stats-table th, .stats-table td { padding: 10px 6px; border-bottom: 1px solid #eceff1; white-space: nowrap; }
+  /* 排行榜表格重新设计，完美适配手机 */
+  .stats-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    font-size: 15px; 
+    text-align: center; 
+  }
+  .stats-table th, .stats-table td { 
+    padding: 14px 8px; 
+    border-bottom: 1px solid #eceff1; 
+  }
   .stats-table th { color: #607d8b; font-weight: 600; background: #f9fbfd; }
-  .stats-table tr:hover { background: #f4f7fb; }
-  .stats-table td:nth-child(2) { text-align: left; } 
   
-  .rank { font-weight: bold; color: #1565c0; width: 40px;}
-  .rank-1 { color: #f57f17; font-size: 16px; }
-  .rank-2 { color: #78909c; font-size: 16px; }
-  .rank-3 { color: #8d6e63; font-size: 16px; }
-  .total-col { font-weight: bold; color: #1565c0; background: #f4f7fb; }
+  /* 姓名列左对齐，并加入点击手势 */
+  .stats-table td:nth-child(2) { text-align: left; }
+  .clickable-name { 
+    cursor: pointer; 
+    color: #1565c0; 
+    font-weight: 600; 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 6px; 
+  }
+  
+  /* 展开箭头动画 */
+  .arrow { 
+    font-size: 10px; 
+    color: #90a4ae; 
+    transition: transform 0.3s ease; 
+  }
+  .arrow.open { transform: rotate(180deg); }
+
+  .rank { font-weight: bold; color: #1565c0; width: 50px;}
+  .rank-1 { color: #f57f17; font-size: 18px; }
+  .rank-2 { color: #78909c; font-size: 18px; }
+  .rank-3 { color: #8d6e63; font-size: 18px; }
+  
+  .total-col { font-weight: bold; color: #1565c0; }
+
+  /* 展开后的详情行样式 */
+  .details-row td {
+    background: #f4f7fb;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eceff1;
+  }
+  .details-flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  .detail-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    background: #fff;
+    border: 1px solid #cfd8dc;
+    color: #546e7a;
+  }
+  .detail-badge.rescue { border-color: #90caf9; color: #1565c0; }
+  .detail-badge.training { border-color: #a5d6a7; color: #2e7d32; }
+  .detail-badge.fire { border-color: #ef9a9a; color: #c62828; }
 
   .type-tag {
     display: inline-block; padding: 2px 8px; background: #e3f2fd; color: #1565c0;
     border-radius: 4px; font-size: 12px; font-weight: normal; margin-right: 8px; vertical-align: middle;
   }
-  .swipe-hint { display: none; font-size: 12px; color: #90a4ae; text-align: center; margin-bottom: 8px; }
+
   @media (max-width: 600px) {
-    .swipe-hint { display: block; }
-    .details-content { padding: 10px; }
-    .stats-table th, .stats-table td { padding: 8px 6px; font-size: 13px; }
+    .details-content { padding: 5px; }
+    .stats-table th, .stats-table td { padding: 12px 4px; font-size: 14px; }
+    .stats-table .rank { width: 40px; }
   }
 </style>
 </head>
@@ -118,7 +169,6 @@ if (error) {
   document.getElementById('statsPanel').style.display = 'block';
   document.getElementById('tasksPanel').style.display = 'block';
 
-  // 渲染记录列表
   document.getElementById('taskList').innerHTML = tasks.map(t => {
     let membersHtml = '';
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
@@ -127,7 +177,6 @@ if (error) {
       membersHtml = esc(t.members).replace(/\n/g, '、');
     }
 
-    // 获取真实任务时长（取参与成员最长的时间）
     let displayDuration = t.duration;
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
       const arr = t.member_hours.map(m => parseFloat(m.hours) || 0);
@@ -196,46 +245,70 @@ function renderStats(tasks) {
 
   const fmt = (num) => parseFloat(num.toFixed(1));
 
+  // 生成极简的表格（只有排名、姓名、总时长），点击姓名展开明细
   statsBox.innerHTML = `
-    <div class="swipe-hint">← 左右滑动查看详细分类 →</div>
-    <div class="table-wrapper">
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th class="rank">排名</th>
-            <th>队员姓名</th>
-            <th>公益救援</th>
-            <th>技能培训</th>
-            <th>森林消防</th>
-            <th class="total-col">总时长</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${sortedMembers.map((item, index) => {
-            const name = item[0];
-            const data = item[1];
-            
-            let rankClass = '';
-            if (index === 0) rankClass = 'rank-1';
-            else if (index === 1) rankClass = 'rank-2';
-            else if (index === 2) rankClass = 'rank-3';
-            
-            return `
-              <tr>
-                <td class="rank ${rankClass}">${index + 1}</td>
-                <td style="${index < 3 ? 'font-weight:bold;' : ''}">${esc(name)}</td>
-                <td>${data.rescue > 0 ? fmt(data.rescue) : '-'}</td>
-                <td>${data.training > 0 ? fmt(data.training) : '-'}</td>
-                <td>${data.fire > 0 ? fmt(data.fire) : '-'}</td>
-                <td class="total-col">${fmt(data.total)} 小时</td>
-              </tr>
-            `;
-          }).join('')}
-        </tbody>
-      </table>
-    </div>
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th class="rank">排名</th>
+          <th>队员姓名</th>
+          <th>总时长</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sortedMembers.map((item, index) => {
+          const name = item[0];
+          const data = item[1];
+          
+          let rankClass = '';
+          if (index === 0) rankClass = 'rank-1';
+          else if (index === 1) rankClass = 'rank-2';
+          else if (index === 2) rankClass = 'rank-3';
+          
+          // 生成详情徽章
+          let detailsHtml = '';
+          if (data.rescue > 0) detailsHtml += `<span class="detail-badge rescue">公益救援：${fmt(data.rescue)}h</span>`;
+          if (data.training > 0) detailsHtml += `<span class="detail-badge training">技能培训：${fmt(data.training)}h</span>`;
+          if (data.fire > 0) detailsHtml += `<span class="detail-badge fire">森林消防：${fmt(data.fire)}h</span>`;
+          if (detailsHtml === '') detailsHtml = '<span class="detail-badge">暂无分类明细</span>';
+
+          return `
+            <tr>
+              <td class="rank ${rankClass}">${index + 1}</td>
+              <td>
+                <span class="clickable-name" onclick="toggleDetail('detail-${index}', this)">
+                  ${esc(name)} <span class="arrow">▼</span>
+                </span>
+              </td>
+              <td class="total-col">${fmt(data.total)} 小时</td>
+            </tr>
+            <tr id="detail-${index}" class="details-row" style="display: none;">
+              <td colspan="3">
+                <div class="details-flex">
+                  ${detailsHtml}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
   `;
 }
+
+// 全局点击展开/收起逻辑
+window.toggleDetail = (detailId, nameElement) => {
+  const detailRow = document.getElementById(detailId);
+  const arrow = nameElement.querySelector('.arrow');
+  
+  if (detailRow.style.display === 'none') {
+    detailRow.style.display = 'table-row';
+    arrow.classList.add('open');
+  } else {
+    detailRow.style.display = 'none';
+    arrow.classList.remove('open');
+  }
+};
 
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c =>

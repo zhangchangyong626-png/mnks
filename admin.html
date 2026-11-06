@@ -14,8 +14,11 @@
     display: flex; align-items: center; gap: 8px;
     background: #fff; padding: 6px 12px; border: 1px solid #eceff1; border-radius: 6px;
     font-size: 14px; color: #1f2d3d; cursor: pointer; margin: 0;
+    white-space: nowrap; /* 关键修复：强制文字横向不换行 */
   }
-  .checkbox-item input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
+  .checkbox-item input[type="checkbox"], .checkbox-item input[type="radio"] { 
+    width: auto; margin: 0; cursor: pointer; 
+  }
   .member-hours-input {
     width: 65px; padding: 4px; border: 1px solid #cfd8dc; border-radius: 4px;
     font-size: 13px; display: none;
@@ -220,7 +223,7 @@ form.addEventListener('submit', async (e) => {
   const eventType = selectedTypeEl ? selectedTypeEl.value : '';
 
   const memberHoursArr = [];
-  let maxDuration = 0; // 记录最长时长
+  let maxDuration = 0;
   let membersNames = [];
 
   document.querySelectorAll('input[name="task_members"]').forEach(cb => {
@@ -231,7 +234,6 @@ form.addEventListener('submit', async (e) => {
       memberHoursArr.push({ name: cb.value, hours: hours });
       membersNames.push(cb.value);
       
-      // 比较出最长的时长
       if (hours > maxDuration) {
         maxDuration = hours;
       }
@@ -249,7 +251,7 @@ form.addEventListener('submit', async (e) => {
     task_time: timeInput ? new Date(timeInput).toISOString() : null,
     content: document.getElementById('content').value.trim(),
     members: membersNames.join(', '),
-    duration: maxDuration.toString(), // 这里存的不再是总和，而是最长时长
+    duration: maxDuration.toString(),
     member_hours: memberHoursArr,
   };
   
@@ -276,7 +278,6 @@ async function loadTasks() {
   if (allTasks.length === 0) { box.innerHTML = '<div class="empty">暂无记录</div>'; return; }
 
   box.innerHTML = allTasks.map(t => {
-    // 动态获取当前任务的最大时长（兼容老数据）
     let displayDuration = t.duration;
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
       const arr = t.member_hours.map(m => parseFloat(m.hours) || 0);

@@ -23,11 +23,35 @@
     width: 65px; padding: 4px; border: 1px solid #cfd8dc; border-radius: 4px;
     font-size: 13px; display: none;
   }
+  
+  /* 优化队员标签的样式 */
   .member-tag {
-    display: inline-block; padding: 6px 10px; background: #e3f2fd; color: #1565c0;
-    border-radius: 6px; font-size: 13px; margin: 4px; line-height: 1.4;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px; 
+    background: #e3f2fd; 
+    color: #1565c0;
+    border-radius: 6px; 
+    font-size: 13px; 
+    margin: 4px; 
+    line-height: 1.4;
   }
-  .member-tag button { border: none; background: none; color: #e53935; cursor: pointer; margin-left: 4px; font-weight: bold; }
+  .tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #546e7a; /* 图标和文字颜色稍微变灰一点，突出姓名 */
+  }
+  .member-icon {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+  .member-tag button { 
+    border: none; background: none; color: #e53935; 
+    cursor: pointer; font-weight: bold; font-size: 16px; padding: 0 4px; 
+  }
   
   /* 成员表单改用网格布局 */
   .member-form-grid {
@@ -145,11 +169,20 @@ async function loadMembers() {
   if (allMembers.length === 0) {
     box.innerHTML = '<span class="empty">暂无队员，请在上方添加</span>';
   } else {
+    // 使用 SVG 图标替换 Emoji
     box.innerHTML = allMembers.map(m => `
       <span class="member-tag">
         <strong>${esc(m.name)}</strong> 
-        ${m.phone ? `📞 ${esc(m.phone)}` : ''} 
-        ${m.emergency_contact ? `🆘 ${esc(m.emergency_contact)}` : ''}
+        ${m.phone ? `
+          <span class="tag-item">
+            <svg class="member-icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg> 
+            ${esc(m.phone)}
+          </span>` : ''} 
+        ${m.emergency_contact ? `
+          <span class="tag-item">
+            <svg class="member-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> 
+            ${esc(m.emergency_contact)}
+          </span>` : ''}
         <button type="button" onclick="deleteMember('${m.id}')" title="删除">×</button>
       </span>
     `).join('');

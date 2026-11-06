@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理后台 · 蓝天救援队</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">蓝天救援队 · 管理后台</div>
+  <nav>
+    <a href="index.html">查看首页</a>
+    <a href="#" id="logoutBtn">退出</a>
+  </nav>
+</header>
+<main>
+  <div class="card">
+    <h2 id="formTitle">发布新任务</h2>
+    <form id="taskForm">
+      <input type="hidden" id="taskId">
+      <label>任务标题 *</label>
+      <input type="text" id="title" required>
+
+      <label>任务时间</label>
+      <input type="datetime-local" id="task_time">
+
+      <label>任务内容</label>
+      <textarea id="content" placeholder="任务详情、地点、注意事项等"></textarea>
+
+      <label>参与成员名字（每行一个，或用逗号分隔）</label>
+      <textarea id="members" placeholder="张三&#10;李四&#10;王五"></textarea>
+
+      <div id="error" class="msg err" style="display:none"></div>
+      <p style="margin-top:16px">
+        <button class="btn" type="submit" id="submitBtn">发布任务</button>
+        <a href="#" class="btn gray" id="cancelEdit" style="display:none">取消编辑</a>
+      </p>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>已发布任务</h2>
+    <div id="taskList"></div>
+  </div>
+</main>
+<script type="module">
+import { supabase } from './supabaseClient.js';
+
+const { data: { session } } = await supabase.auth.getSession();
+if (!session) { location.href = 'login.html'; throw new Error('not logged in'); }
+
+document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+  e.preventDefault();
+  await supabase.auth.signOut();
+  location.href = 'index.html';
+});
+
+const form = document.getElementById('taskForm');
+const taskIdEl = document.getElementById('taskId');
+const formTitle = document.getElementById('formTitle');
+const submitBtn = document.getElementById('submitBtn');
+const cancelEdit = document.getElementById('cancelEdit');
+const errorEl = document.getElementById('error');
+
+let allTasks = [];
+
+function showError(msg) {
+  errorEl.textContent = msg;
+  errorEl.style.display = 'block';
+}
+function resetForm() {
+  form.reset();
+  taskIdEl.value = '';
+  formTitle.textContent = '发布新任务';
+  submitBtn.textContent = '发布任务';
+  cancelEdit.style.display = 'none';
+  errorEl.style.display = 'none';
+}
+cancelEdit.addEventListener('click', (e) => { e.preventDefault(); resetForm(); });
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorEl.style.display = 'none';
+
+  const id = taskIdEl.value;
+  const timeInput = document.getElementById('task_time').value;
+  const payload = {
+    title: document.getElementById('title').value.trim(),
+    task_time: timeInput ? new Date(timeInput).toISOString() : null,
+    content: document.getElementById('content').value.trim(),
+    members: document.getElementById('members').value.trim(),
+  };
+  if (!payload.title) { showError('请填写任务标题'); return; }
+
+  submitBtn.disabled = true;
+  const res = id
+    ? await supabase.from('tasks').update(payload).eq('id', id)
+    : await supabase.from('tasks').insert(payload);
+  submitBtn.disabled = false;
+
+  if (res.error) { showError('保存失败：' + res.error.message); return; }
+  resetForm();
+  loadTasks();
+});
+
+async function loadTasks() {
+  const { data, error } = await supabase
+    .from('tasks').select('*').order('task_time', { ascending: false });
+  const box = document.getElementById('taskList');
+
+  if (error) { box.innerHTML = `<div class="msg err">加载失败：${esc(error.message)}</div>`; return; }
+  allTasks = data || [];
+  if (allTasks.length === 0) { box.innerHTML = '<div class="empty">暂无任务</div>'; return; }
+
+  box.innerHTML = allTasks.map(t => `
+    <div class="task-row">
+      <div>
+        <div class="t">${esc(t.title)}</div>
+        <div class="meta">${formatTime(t.task_time)}${t.members ? ' · ' + esc(t.members).replace(/\n/g,'、') : ''}</div>
+      </div>
+      <div class="actions">
+        <button class="btn sm gray" data-edit="${t.id}">编辑</button>
+        <button class="btn sm red" data-del="${t.id}">删除</button>
+      </div>
+    </div>
+  `).join('');
+
+  box.querySelectorAll('[data-edit]').forEach(btn =>
+    btn.addEventListener('click', () =>
+      startEdit(allTasks.find(x => String(x.id) === btn.dataset.edit))));
+  box.querySelectorAll('[data-del]').forEach(btn =>
+    btn.addEventListener('click', async () => {
+      if (!confirm('确定删除该任务？')) return;
+      const { error } = await supabase.from('tasks').delete().eq('id', btn.dataset.del);
+      if (error) { alert('删除失败：' + error.message); return; }
+      loadTasks();
+    }));
+}
+
+function startEdit(t) {
+  if (!t) return;
+  taskIdEl.value = t.id;
+  document.getElementById('title').value = t.title || '';
+  document.getElementById('content').value = t.content || '';
+  document.getElementById('members').value = t.members || '';
+  document.getElementById('task_time').value = toLocalInput(t.task_time);
+  formTitle.textContent = '编辑任务';
+  submitBtn.textContent = '保存修改';
+  cancelEdit.style.display = 'inline-block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function toLocalInput(t) {
+  if (!t) return '';
+  const d = new Date(t);
+  if (isNaN(d)) return '';
+  const p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function formatTime(t) {
+  if (!t) return '时间待定';
+  const d = new Date(t);
+  if (isNaN(d)) return t;
+  const p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+loadTasks();
+</script>
+</body>
+</html>

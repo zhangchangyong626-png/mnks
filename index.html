@@ -6,12 +6,60 @@
 <title>云和蓝天救援队 · 任务公示</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  /* 针对统计表格加一点样式 */
-  .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px;}
+  /* 折叠面板的样式 */
+  details {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  summary {
+    padding: 18px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #fff;
+    list-style: none; /* 隐藏默认的小三角 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  summary:hover { background: #f9fbfd; }
+  summary::-webkit-details-marker { display: none; } /* 隐藏 Safari 默认的三角 */
+  
+  /* 自定义右侧箭头图标 */
+  summary::after {
+    content: '▼';
+    font-size: 12px;
+    color: #90a4ae;
+    transition: transform 0.3s ease;
+  }
+  details[open] summary::after {
+    transform: rotate(180deg);
+  }
+  details[open] summary {
+    border-bottom: 1px solid #eceff1;
+  }
+  
+  /* 内部内容区样式 */
+  .details-content {
+    padding: 18px;
+  }
+  
+  /* 统计表格样式 */
+  .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; }
   .stats-table th, .stats-table td { padding: 10px; border-bottom: 1px solid #eceff1; text-align: left; }
   .stats-table th { color: #607d8b; font-weight: 600; }
   .stats-table tr:hover { background: #f4f7fb; }
-  .rank { font-weight: bold; color: #1565c0; width: 40px;}
+  .rank { font-weight: bold; color: #1565c0; width: 40px; text-align: center;}
+  
+  /* 前三名特殊颜色 */
+  .rank-1 { color: #f57f17; font-size: 16px; }
+  .rank-2 { color: #78909c; font-size: 16px; }
+  .rank-3 { color: #8d6e63; font-size: 16px; }
 </style>
 </head>
 <body>
@@ -22,17 +70,21 @@
   </nav>
 </header>
 <main>
-  <!-- 出勤统计区 -->
-  <div class="card" style="border-top: 4px solid #1565c0;">
-    <h2>🏆 队员出勤总时长统计</h2>
-    <p style="color:#607d8b; font-size:13px; margin-top:-5px;">根据已发布任务自动累计（单位：小时）</p>
-    <div id="statsBox">统计中...</div>
-  </div>
-
-  <h2 style="font-size:16px; color:#607d8b; margin: 24px 0 12px 4px;">📋 任务公示列表</h2>
   
   <div id="loading" class="empty">加载中…</div>
-  <div id="taskList"></div>
+
+  <!-- 出勤统计折叠面板 -->
+  <details id="statsPanel" style="display:none;">
+    <summary>🏆 队员出勤总时长排行榜</summary>
+    <div class="details-content" id="statsBox"></div>
+  </details>
+
+  <!-- 任务列表折叠面板 -->
+  <details id="tasksPanel" style="display:none;">
+    <summary>📋 任务公示列表</summary>
+    <div class="details-content" id="taskList"></div>
+  </details>
+
   <div id="emptyState" class="empty" style="display:none">暂无任务</div>
 </main>
 <footer>蓝天救援队 · 任务公示</footer>
@@ -61,24 +113,27 @@ const { data: tasks, error } = await supabase
 document.getElementById('loading').style.display = 'none';
 
 if (error) {
-  document.getElementById('taskList').innerHTML = `<div class="msg err">加载失败：${esc(error.message)}</div>`;
+  document.getElementById('emptyState').style.display = 'block';
+  document.getElementById('emptyState').innerHTML = `<div class="msg err">加载失败：${esc(error.message)}</div>`;
+} else if (!tasks || tasks.length === 0) {
+  document.getElementById('emptyState').style.display = 'block';
 } else {
+  // 显示折叠面板
+  document.getElementById('statsPanel').style.display = 'block';
+  document.getElementById('tasksPanel').style.display = 'block';
+
   // 3. 渲染任务列表
-  if (!tasks || tasks.length === 0) {
-    document.getElementById('emptyState').style.display = 'block';
-  } else {
-    document.getElementById('taskList').innerHTML = tasks.map(t => `
-      <article class="card">
-        <h2>${esc(t.title)}</h2>
-        <div class="meta">
-          任务时间：${formatTime(t.task_time)} 
-          ${t.duration ? ` · 任务时长：${esc(t.duration)} 小时` : ''}
-        </div>
-        ${t.content ? `<div class="content">${esc(t.content)}</div>` : ''}
-        ${t.members ? `<div class="members"><strong>参与成员：</strong>${esc(t.members).replace(/\n/g, '、')}</div>` : ''}
-      </article>
-    `).join('');
-  }
+  document.getElementById('taskList').innerHTML = tasks.map(t => `
+    <article class="card" style="box-shadow:none; border:1px solid #eceff1; margin-bottom:12px;">
+      <h2 style="font-size:16px; margin-bottom:8px;">${esc(t.title)}</h2>
+      <div class="meta">
+        任务时间：${formatTime(t.task_time)} 
+        ${t.duration ? ` · 任务时长：${esc(t.duration)} 小时` : ''}
+      </div>
+      ${t.content ? `<div class="content">${esc(t.content)}</div>` : ''}
+      ${t.members ? `<div class="members"><strong>参与成员：</strong>${esc(t.members).replace(/\n/g, '、')}</div>` : ''}
+    </article>
+  `).join('');
 
   // 4. 计算并渲染出勤统计
   renderStats(tasks);
@@ -86,19 +141,13 @@ if (error) {
 
 function renderStats(tasks) {
   const statsBox = document.getElementById('statsBox');
-  if (!tasks || tasks.length === 0) {
-    statsBox.innerHTML = '<div class="empty">暂无数据</div>';
-    return;
-  }
-
   const memberHours = {}; // 用来记录每个人的总时长
 
   tasks.forEach(t => {
-    // 从文本中提取数字：比如把“4小时”提取成 4，如果是纯数字 "4" 就是 4
+    // 从文本中提取数字
     const hours = parseFloat(String(t.duration).replace(/[^\d.]/g, '')) || 0;
     
     if (hours > 0 && t.members) {
-      // 把参与人员按照中英文逗号或空格拆分
       const membersArray = t.members.split(/[,，\s]+/).filter(Boolean);
       
       membersArray.forEach(name => {
@@ -111,11 +160,11 @@ function renderStats(tasks) {
     }
   });
 
-  // 按总时长降序排序
+  // 按总时长降序排序（从高到低）
   const sortedMembers = Object.entries(memberHours).sort((a, b) => b[1] - a[1]);
 
   if (sortedMembers.length === 0) {
-    statsBox.innerHTML = '<div class="empty">暂无时长记录（可能是因为之前的任务时长未填写纯数字）</div>';
+    statsBox.innerHTML = '<div class="empty">暂无时长记录</div>';
     return;
   }
 
@@ -130,13 +179,20 @@ function renderStats(tasks) {
         </tr>
       </thead>
       <tbody>
-        ${sortedMembers.map((item, index) => `
-          <tr>
-            <td class="rank">${index + 1}</td>
-            <td>${esc(item[0])}</td>
-            <td style="text-align:right; font-weight:600; color:#1565c0;">${item[1]} 小时</td>
-          </tr>
-        `).join('')}
+        ${sortedMembers.map((item, index) => {
+          let rankClass = '';
+          if (index === 0) rankClass = 'rank-1';
+          else if (index === 1) rankClass = 'rank-2';
+          else if (index === 2) rankClass = 'rank-3';
+          
+          return `
+            <tr>
+              <td class="rank ${rankClass}">${index + 1}</td>
+              <td style="${index < 3 ? 'font-weight:bold;' : ''}">${esc(item[0])}</td>
+              <td style="text-align:right; font-weight:bold; color:#1565c0;">${item[1]} 小时</td>
+            </tr>
+          `;
+        }).join('')}
       </tbody>
     </table>
   `;

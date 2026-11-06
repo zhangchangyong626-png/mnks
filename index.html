@@ -6,7 +6,6 @@
 <title>云和·蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  /* 全局字体设置为纤细体，增加呼吸感 */
   body {
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
     font-weight: 300; 
@@ -34,22 +33,20 @@
     justify-content: center;
   }
   .logo-container img {
-    height: 65px; /* LOGO 高度 */
-    max-width: 100%; /* 防止手机端溢出 */
+    height: 65px; 
+    max-width: 100%; 
     object-fit: contain;
-    /* 如果你的logo有白底且和背景不融合，可以尝试保留下面这行，或者去掉 */
-    /* mix-blend-mode: multiply; */ 
   }
 
   .main-title {
     font-size: 28px;
-    font-weight: 400; /* 标题稍微加粗一点，对比正文 */
+    font-weight: 400; 
     color: #1565c0;
     letter-spacing: 2px;
     margin: 0;
   }
 
-  /* 右上角导航绝对定位 */
+  /* 电脑端右上角导航 */
   .top-nav {
     position: absolute;
     right: 20px;
@@ -66,13 +63,18 @@
     color: #1565c0;
   }
 
+  /* 手机端底部导航，默认隐藏 */
+  .bottom-nav {
+    display: none;
+  }
+
   main {
     max-width: 800px;
     margin: 30px auto;
     padding: 0 14px;
   }
 
-  /* 折叠面板美化 */
+  /* 折叠面板 */
   details {
     background: #fff;
     border-radius: 12px;
@@ -89,20 +91,14 @@
     background: #fff;
     list-style: none;
     display: flex;
-    align-items: center; /* 垂直居中图标和文字 */
+    align-items: center; 
     user-select: none;
     transition: background 0.2s;
   }
   summary:hover { background: #f9fbfd; }
   summary::-webkit-details-marker { display: none; }
   
-  /* 使用 SVG 图标替代 Emoji */
-  .icon-svg {
-    width: 24px;
-    height: 24px;
-    margin-right: 12px;
-    fill: #1565c0;
-  }
+  .icon-svg { width: 24px; height: 24px; margin-right: 12px; fill: #1565c0; }
   .summary-text { flex: 1; }
   
   summary::after {
@@ -116,28 +112,12 @@
   .details-content { padding: 15px 20px; }
 
   /* 排行榜表格 */
-  .stats-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    font-size: 15px; 
-    text-align: center; 
-  }
-  .stats-table th, .stats-table td { 
-    padding: 16px 8px; 
-    border-bottom: 1px solid #eceff1; 
-    font-weight: 300;
-  }
+  .stats-table { width: 100%; border-collapse: collapse; font-size: 15px; text-align: center; }
+  .stats-table th, .stats-table td { padding: 16px 8px; border-bottom: 1px solid #eceff1; font-weight: 300; }
   .stats-table th { color: #78909c; font-weight: 400; background: #fafbfc; }
   .stats-table td:nth-child(2) { text-align: left; }
   
-  .clickable-name { 
-    cursor: pointer; 
-    color: #1565c0; 
-    font-weight: 400; 
-    display: inline-flex; 
-    align-items: center; 
-    gap: 6px; 
-  }
+  .clickable-name { cursor: pointer; color: #1565c0; font-weight: 400; display: inline-flex; align-items: center; gap: 6px; }
   .arrow { font-size: 10px; color: #b0bec5; transition: transform 0.3s ease; }
   .arrow.open { transform: rotate(180deg); }
 
@@ -145,39 +125,17 @@
   .rank-1 { color: #f57f17; font-size: 18px; font-weight: 500;}
   .rank-2 { color: #78909c; font-size: 18px; font-weight: 500;}
   .rank-3 { color: #8d6e63; font-size: 18px; font-weight: 500;}
-  
   .total-col { font-weight: 500; color: #1565c0; }
 
-  .details-row td {
-    background: #f9fbfd;
-    padding: 12px 15px;
-    border-bottom: 1px solid #eceff1;
-  }
-  .details-flex {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-  }
-  .detail-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 300;
-    background: #fff;
-    border: 1px solid #cfd8dc;
-    color: #546e7a;
-  }
+  .details-row td { background: #f9fbfd; padding: 12px 15px; border-bottom: 1px solid #eceff1; }
+  .details-flex { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .detail-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 300; background: #fff; border: 1px solid #cfd8dc; color: #546e7a; }
   .detail-badge.rescue { border-color: #90caf9; color: #1565c0; background: #e3f2fd; }
   .detail-badge.training { border-color: #a5d6a7; color: #2e7d32; background: #e8f5e9; }
   .detail-badge.fire { border-color: #ef9a9a; color: #c62828; background: #ffebee; }
 
-  .type-tag {
-    display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717;
-    border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 8px; vertical-align: middle;
-  }
+  .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 8px; vertical-align: middle; }
 
-  /* 卡片文字也变细 */
   .card { font-weight: 300; }
   .card h2 { font-weight: 400; }
   .members { color: #546e7a; }
@@ -185,24 +143,46 @@
   /* 手机端适配 */
   @media (max-width: 600px) {
     .main-title { font-size: 22px; }
-    .top-nav { position: static; margin-top: 15px; }
     header { padding: 20px; }
     .details-content { padding: 10px; }
     .stats-table th, .stats-table td { padding: 12px 4px; font-size: 14px; }
+    
+    /* 隐藏顶部导航 */
+    .top-nav { display: none; }
+    
+    /* 显示底部导航并美化 */
+    .bottom-nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 15px;
+    }
+    .bottom-nav a {
+      color: #607d8b;
+      text-decoration: none;
+      font-size: 14px;
+      padding: 6px 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 20px;
+      background: #fff;
+      transition: all 0.2s;
+    }
+    .bottom-nav a:hover {
+      color: #1565c0;
+      border-color: #1565c0;
+    }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <!-- 右上角导航 -->
+  <!-- 电脑端右上角导航 -->
   <nav class="top-nav" id="nav">
     <a href="login.html">管理员登录</a>
   </nav>
 
-  <!-- LOGO 和 大标题 -->
   <div class="logo-container">
-    <!-- 👇 已经替换为你提供的 Logo 外链 👇 -->
     <img src="https://img.alicdn.com/imgextra/i3/706125935/O1CN01KcQnpNaiagF49oPo_!!706125935.png" alt="云和蓝天救援队">
   </div>
   <h1 class="main-title">云和·蓝天救援队</h1>
@@ -212,20 +192,16 @@
   
   <div id="loading" class="empty" style="font-weight: 300;">加载中…</div>
 
-  <!-- 排行榜 -->
   <details id="statsPanel" style="display:none;">
     <summary>
-      <!-- 奖杯 SVG 图标 -->
       <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
       <span class="summary-text">队员出勤总时长排行榜</span>
     </summary>
     <div class="details-content" id="statsBox"></div>
   </details>
 
-  <!-- 任务列表 -->
   <details id="tasksPanel" style="display:none;">
     <summary>
-      <!-- 文件夹/文件 SVG 图标 -->
       <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
       <span class="summary-text">历史活动记录公示</span>
     </summary>
@@ -235,20 +211,41 @@
   <div id="emptyState" class="empty" style="display:none; font-weight: 300;">暂无活动记录</div>
 </main>
 
-<footer style="font-weight: 300;">云和·蓝天救援队 · 活动公示</footer>
+<!-- 底部区域包含版权和手机端导航 -->
+<footer style="font-weight: 300; text-align: center; color: #90a4ae; font-size: 12px; padding: 30px 0 50px;">
+  <div>云和·蓝天救援队 · 活动公示</div>
+  
+  <!-- 手机端底部导航 -->
+  <nav class="bottom-nav" id="bottomNav">
+    <a href="login.html">管理员登录</a>
+  </nav>
+</footer>
 
 <script type="module">
 import { supabase } from './supabaseClient.js';
 
 const { data: { session } } = await supabase.auth.getSession();
 const nav = document.getElementById('nav');
+const bottomNav = document.getElementById('bottomNav');
+
+// 判断登录状态，同时更新电脑端和手机端的导航
 if (session) {
-  nav.innerHTML = `<a href="admin.html">管理后台</a><a href="#" id="logoutBtn">退出</a>`;
-  document.getElementById('logoutBtn').addEventListener('click', async (e) => {
-    e.preventDefault();
-    await supabase.auth.signOut();
-    location.reload();
+  const html = `<a href="admin.html">管理后台</a><a href="#" class="logout-btn">退出</a>`;
+  nav.innerHTML = html;
+  bottomNav.innerHTML = html;
+  
+  // 给所有“退出”按钮绑定事件
+  document.querySelectorAll('.logout-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await supabase.auth.signOut();
+      location.reload();
+    });
   });
+} else {
+  const html = `<a href="login.html">管理员登录</a>`;
+  nav.innerHTML = html;
+  bottomNav.innerHTML = html;
 }
 
 const { data: tasks, error } = await supabase

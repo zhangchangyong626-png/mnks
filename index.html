@@ -50,7 +50,10 @@ if (error) {
   document.getElementById('taskList').innerHTML = tasks.map(t => `
     <article class="card">
       <h2>${esc(t.title)}</h2>
-      <div class="meta">任务时间：${formatTime(t.task_time)}</div>
+      <div class="meta">
+        任务时间：${formatTime(t.task_time)} 
+        ${t.duration ? ` · 任务时长：${esc(t.duration)}` : ''}
+      </div>
       ${t.content ? `<div class="content">${esc(t.content)}</div>` : ''}
       ${t.members ? `<div class="members"><strong>参与成员：</strong>${esc(t.members).replace(/\n/g, '、')}</div>` : ''}
     </article>

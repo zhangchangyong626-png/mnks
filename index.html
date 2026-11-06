@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>蓝天救援队 · 任务公示</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  /* 针对统计表格加一点样式 */
+  .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px;}
+  .stats-table th, .stats-table td { padding: 10px; border-bottom: 1px solid #eceff1; text-align: left; }
+  .stats-table th { color: #607d8b; font-weight: 600; }
+  .stats-table tr:hover { background: #f4f7fb; }
+  .rank { font-weight: bold; color: #1565c0; width: 40px;}
+</style>
 </head>
 <body>
 <header>
@@ -14,6 +22,15 @@
   </nav>
 </header>
 <main>
+  <!-- 出勤统计区 -->
+  <div class="card" style="border-top: 4px solid #1565c0;">
+    <h2>🏆 队员出勤总时长统计</h2>
+    <p style="color:#607d8b; font-size:13px; margin-top:-5px;">根据已发布任务自动累计（单位：小时）</p>
+    <div id="statsBox">统计中...</div>
+  </div>
+
+  <h2 style="font-size:16px; color:#607d8b; margin: 24px 0 12px 4px;">📋 任务公示列表</h2>
+  
   <div id="loading" class="empty">加载中…</div>
   <div id="taskList"></div>
   <div id="emptyState" class="empty" style="display:none">暂无任务</div>
@@ -23,6 +40,7 @@
 <script type="module">
 import { supabase } from './supabaseClient.js';
 
+// 1. 登录状态判断
 const { data: { session } } = await supabase.auth.getSession();
 const nav = document.getElementById('nav');
 if (session) {
@@ -34,6 +52,7 @@ if (session) {
   });
 }
 
+// 2. 获取任务数据
 const { data: tasks, error } = await supabase
   .from('tasks')
   .select('*')
@@ -42,24 +61,88 @@ const { data: tasks, error } = await supabase
 document.getElementById('loading').style.display = 'none';
 
 if (error) {
-  document.getElementById('taskList').innerHTML =
-    `<div class="msg err">加载失败：${esc(error.message)}</div>`;
-} else if (!tasks || tasks.length === 0) {
-  document.getElementById('emptyState').style.display = 'block';
+  document.getElementById('taskList').innerHTML = `<div class="msg err">加载失败：${esc(error.message)}</div>`;
 } else {
-  document.getElementById('taskList').innerHTML = tasks.map(t => `
-    <article class="card">
-      <h2>${esc(t.title)}</h2>
-      <div class="meta">
-        任务时间：${formatTime(t.task_time)} 
-        ${t.duration ? ` · 任务时长：${esc(t.duration)}` : ''}
-      </div>
-      ${t.content ? `<div class="content">${esc(t.content)}</div>` : ''}
-      ${t.members ? `<div class="members"><strong>参与成员：</strong>${esc(t.members).replace(/\n/g, '、')}</div>` : ''}
-    </article>
-  `).join('');
+  // 3. 渲染任务列表
+  if (!tasks || tasks.length === 0) {
+    document.getElementById('emptyState').style.display = 'block';
+  } else {
+    document.getElementById('taskList').innerHTML = tasks.map(t => `
+      <article class="card">
+        <h2>${esc(t.title)}</h2>
+        <div class="meta">
+          任务时间：${formatTime(t.task_time)} 
+          ${t.duration ? ` · 任务时长：${esc(t.duration)} 小时` : ''}
+        </div>
+        ${t.content ? `<div class="content">${esc(t.content)}</div>` : ''}
+        ${t.members ? `<div class="members"><strong>参与成员：</strong>${esc(t.members).replace(/\n/g, '、')}</div>` : ''}
+      </article>
+    `).join('');
+  }
+
+  // 4. 计算并渲染出勤统计
+  renderStats(tasks);
 }
 
+function renderStats(tasks) {
+  const statsBox = document.getElementById('statsBox');
+  if (!tasks || tasks.length === 0) {
+    statsBox.innerHTML = '<div class="empty">暂无数据</div>';
+    return;
+  }
+
+  const memberHours = {}; // 用来记录每个人的总时长
+
+  tasks.forEach(t => {
+    // 从文本中提取数字：比如把“4小时”提取成 4，如果是纯数字 "4" 就是 4
+    const hours = parseFloat(String(t.duration).replace(/[^\d.]/g, '')) || 0;
+    
+    if (hours > 0 && t.members) {
+      // 把参与人员按照中英文逗号或空格拆分
+      const membersArray = t.members.split(/[,，\s]+/).filter(Boolean);
+      
+      membersArray.forEach(name => {
+        if (memberHours[name]) {
+          memberHours[name] += hours;
+        } else {
+          memberHours[name] = hours;
+        }
+      });
+    }
+  });
+
+  // 按总时长降序排序
+  const sortedMembers = Object.entries(memberHours).sort((a, b) => b[1] - a[1]);
+
+  if (sortedMembers.length === 0) {
+    statsBox.innerHTML = '<div class="empty">暂无时长记录（可能是因为之前的任务时长未填写纯数字）</div>';
+    return;
+  }
+
+  // 生成表格
+  statsBox.innerHTML = `
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th class="rank">排名</th>
+          <th>队员姓名</th>
+          <th style="text-align:right;">累计出勤时长</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sortedMembers.map((item, index) => `
+          <tr>
+            <td class="rank">${index + 1}</td>
+            <td>${esc(item[0])}</td>
+            <td style="text-align:right; font-weight:600; color:#1565c0;">${item[1]} 小时</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// 辅助函数
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

@@ -6,29 +6,36 @@
 <title>云和 · 蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
 <style>
+  /* 强制覆盖可能冲突的外部样式 */
   body {
     background-color: #f4f7fb;
+    margin: 0;
   }
   
-  /* 顶部导航栏优化 */
+  /* 顶部导航栏优化：使用绝对定位把按钮强制固定在右上角 */
   header {
     background: #fff;
-    color: #1f2d3d;
     padding: 12px 16px;
-    display: flex;
-    justify-content: space-between; /* 两端对齐 */
-    align-items: center;
     box-shadow: 0 1px 4px rgba(0,0,0,.05);
     position: relative;
+    height: 30px; /* 给头部一个固定高度 */
+    display: flex;
+    align-items: center;
   }
   
-  /* 顶部操作按钮样式 */
+  .brand-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: #546e7a;
+  }
+  
+  /* 右上角操作按钮 */
   header nav {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     position: absolute;
     right: 16px;
-    top: 12px;
+    top: 10px;
   }
   
   header nav a {
@@ -39,6 +46,7 @@
     padding: 4px 10px;
     border-radius: 6px;
     transition: background 0.2s;
+    white-space: nowrap;
   }
   
   header nav a:hover {
@@ -50,13 +58,14 @@
     text-align: center;
     padding: 30px 20px 20px;
     background: #fff;
+    margin-bottom: 16px;
   }
   
   .hero-section img {
     width: 90px;
     height: 90px;
     object-fit: contain;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
   }
   
   .hero-section h1 {
@@ -67,14 +76,15 @@
     letter-spacing: 1px;
   }
 
-  /* 折叠面板样式 */
+  /* 折叠面板及表格样式 */
   details {
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 1px 4px rgba(0,0,0,.06);
     margin-bottom: 16px;
     overflow: hidden;
-    margin-top: 16px;
+    margin-left: 16px;
+    margin-right: 16px;
   }
   summary {
     padding: 18px;
@@ -84,6 +94,7 @@
     background: #fff;
     list-style: none;
     display: flex;
+    justify-content: space-between;
     align-items: center;
     user-select: none;
     transition: background 0.2s;
@@ -94,7 +105,6 @@
     content: '▼';
     font-size: 12px;
     color: #90a4ae;
-    margin-left: auto;
     transition: transform 0.3s ease;
   }
   details[open] summary::after { transform: rotate(180deg); }
@@ -103,27 +113,35 @@
   
   .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
   .stats-table th, .stats-table td { padding: 10px 6px; border-bottom: 1px solid #eceff1; }
-  .stats-table th { color: #607d8b; font-weight: 600; background: #f9fbfd; }
+  .stats-table th { color: #607d8b; font-weight: 600; background: #f9fbfd; white-space: nowrap; }
   .stats-table tr:hover { background: #f4f7fb; }
-  .stats-table td:nth-child(2) { text-align: left; }
+  .stats-table td:nth-child(2) { text-align: left; white-space: nowrap; }
+  
   .rank { font-weight: bold; color: #1565c0; width: 40px;}
   .rank-1 { color: #f57f17; font-size: 16px; }
   .rank-2 { color: #78909c; font-size: 16px; }
   .rank-3 { color: #8d6e63; font-size: 16px; }
+  
   .total-col { font-weight: bold; color: #1565c0; background: #f4f7fb; }
+  
+  /* 手机端让表格可以横向滑动，防止挤压 */
   .table-wrapper { width: 100%; overflow-x: auto; }
+
   .type-tag {
     display: inline-block; padding: 2px 8px; background: #e3f2fd; color: #1565c0;
     border-radius: 4px; font-size: 12px; font-weight: normal; margin-right: 8px; vertical-align: middle;
   }
   
-  main { padding-top: 0; }
-  footer { margin-top: 20px; }
+  main { padding: 0 16px; }
+  footer { text-align: center; color: #90a4ae; font-size: 12px; padding: 24px 0; }
 </style>
 </head>
 <body>
+
+<!-- 顶部栏 -->
 <header>
-  <!-- 固定在右上角的按钮 -->
+  <div class="brand-text">活动公示</div>
+  <!-- 这个 nav 会固定在最右上角 -->
   <nav id="nav">
     <a href="login.html">管理员登录</a>
   </nav>
@@ -131,13 +149,12 @@
 
 <!-- Logo 和队名展示区 -->
 <div class="hero-section">
-  <!-- 请把下面这一行的图片地址，换成你实际的队徽图片地址，或者如果你不知道怎么传，也可以用网上的链接 -->
-  <img src="https://eshdzwflztpekzocnto.supabase.co/storage/v1/object/public/public/logo.png" alt="队徽" onerror="this.style.display='none'">
+  <!-- 请把 src 里的链接换成你们实际的队徽图片地址，或者放在同目录下写 logo.png -->
+  <img src="logo.png" alt="队徽" onerror="this.src='https://eshdzwflztpekzocnto.supabase.co/storage/v1/object/public/public/logo.png'; this.onerror=function(){this.style.display='none'};">
   <h1>云和 · 蓝天救援队</h1>
 </div>
 
 <main>
-  
   <div id="loading" class="empty">加载中…</div>
 
   <!-- 出勤统计折叠面板 -->
@@ -154,6 +171,7 @@
 
   <div id="emptyState" class="empty" style="display:none">暂无活动记录</div>
 </main>
+
 <footer>云和 · 蓝天救援队 · 活动公示</footer>
 
 <script type="module">
@@ -161,7 +179,8 @@ import { supabase } from './supabaseClient.js';
 
 const { data: { session } } = await supabase.auth.getSession();
 const nav = document.getElementById('nav');
-// 如果已登录，右上角显示管理后台和退出
+
+// 如果已登录，右上角显示管理后台和退出，样式自动生效
 if (session) {
   nav.innerHTML = `<a href="admin.html">管理后台</a><a href="#" id="logoutBtn">退出</a>`;
   document.getElementById('logoutBtn').addEventListener('click', async (e) => {
@@ -208,6 +227,7 @@ if (error) {
 
 function renderStats(tasks) {
   const statsBox = document.getElementById('statsBox');
+  
   const memberStats = {};
 
   tasks.forEach(t => {
@@ -221,7 +241,9 @@ function renderStats(tasks) {
         if (!memberStats[name]) {
           memberStats[name] = { rescue: 0, training: 0, fire: 0, total: 0 };
         }
+        
         memberStats[name].total += hours;
+        
         if (type === '公益救援') memberStats[name].rescue += hours;
         else if (type === '技能培训') memberStats[name].training += hours;
         else if (type === '森林消防') memberStats[name].fire += hours;

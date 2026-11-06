@@ -6,36 +6,29 @@
 <title>云和 · 蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  /* 强制覆盖可能冲突的外部样式 */
+  /* 强制覆盖可能冲突的样式，专门适配手机端 */
   body {
     background-color: #f4f7fb;
     margin: 0;
+    padding: 0;
   }
   
-  /* 顶部导航栏优化：使用绝对定位把按钮强制固定在右上角 */
+  /* 顶部固定栏 */
   header {
     background: #fff;
     padding: 12px 16px;
     box-shadow: 0 1px 4px rgba(0,0,0,.05);
     position: relative;
-    height: 30px; /* 给头部一个固定高度 */
+    height: 32px;
     display: flex;
     align-items: center;
+    justify-content: flex-end; /* 靠右对齐 */
   }
   
-  .brand-text {
-    font-size: 15px;
-    font-weight: 600;
-    color: #546e7a;
-  }
-  
-  /* 右上角操作按钮 */
+  /* 右上角按钮组 */
   header nav {
     display: flex;
     gap: 8px;
-    position: absolute;
-    right: 16px;
-    top: 10px;
   }
   
   header nav a {
@@ -43,7 +36,7 @@
     text-decoration: none;
     font-size: 13px;
     background: #e3f2fd;
-    padding: 4px 10px;
+    padding: 5px 12px;
     border-radius: 6px;
     transition: background 0.2s;
     white-space: nowrap;
@@ -53,19 +46,20 @@
     background: #bbdefb;
   }
 
-  /* 中间 Logo 和队名区域 */
+  /* 居中的 Logo 和队名区域 */
   .hero-section {
     text-align: center;
-    padding: 30px 20px 20px;
+    padding: 24px 20px 16px;
     background: #fff;
     margin-bottom: 16px;
   }
   
   .hero-section img {
-    width: 90px;
-    height: 90px;
+    width: 100px;
+    height: 100px;
     object-fit: contain;
     margin-bottom: 12px;
+    border-radius: 50%; /* 如果队徽是圆的，加这行边缘更平滑，方的可删掉 */
   }
   
   .hero-section h1 {
@@ -76,15 +70,20 @@
     letter-spacing: 1px;
   }
 
-  /* 折叠面板及表格样式 */
+  /* 页面主体限制最大宽度，居中显示，两边留白 */
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  /* 折叠面板样式 */
   details {
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 1px 4px rgba(0,0,0,.06);
     margin-bottom: 16px;
     overflow: hidden;
-    margin-left: 16px;
-    margin-right: 16px;
   }
   summary {
     padding: 18px;
@@ -111,6 +110,7 @@
   details[open] summary { border-bottom: 1px solid #eceff1; }
   .details-content { padding: 18px; }
   
+  /* 表格样式优化 */
   .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
   .stats-table th, .stats-table td { padding: 10px 6px; border-bottom: 1px solid #eceff1; }
   .stats-table th { color: #607d8b; font-weight: 600; background: #f9fbfd; white-space: nowrap; }
@@ -132,16 +132,13 @@
     border-radius: 4px; font-size: 12px; font-weight: normal; margin-right: 8px; vertical-align: middle;
   }
   
-  main { padding: 0 16px; }
   footer { text-align: center; color: #90a4ae; font-size: 12px; padding: 24px 0; }
 </style>
 </head>
 <body>
 
-<!-- 顶部栏 -->
+<!-- 顶部栏，只放按钮 -->
 <header>
-  <div class="brand-text">活动公示</div>
-  <!-- 这个 nav 会固定在最右上角 -->
   <nav id="nav">
     <a href="login.html">管理员登录</a>
   </nav>
@@ -149,8 +146,8 @@
 
 <!-- Logo 和队名展示区 -->
 <div class="hero-section">
-  <!-- 请把 src 里的链接换成你们实际的队徽图片地址，或者放在同目录下写 logo.png -->
-  <img src="logo.png" alt="队徽" onerror="this.src='https://eshdzwflztpekzocnto.supabase.co/storage/v1/object/public/public/logo.png'; this.onerror=function(){this.style.display='none'};">
+  <!-- 这里直接引用了你的 logo.png -->
+  <img src="logo.png" alt="队徽" onerror="this.style.display='none'">
   <h1>云和 · 蓝天救援队</h1>
 </div>
 
@@ -179,8 +176,6 @@ import { supabase } from './supabaseClient.js';
 
 const { data: { session } } = await supabase.auth.getSession();
 const nav = document.getElementById('nav');
-
-// 如果已登录，右上角显示管理后台和退出，样式自动生效
 if (session) {
   nav.innerHTML = `<a href="admin.html">管理后台</a><a href="#" id="logoutBtn">退出</a>`;
   document.getElementById('logoutBtn').addEventListener('click', async (e) => {

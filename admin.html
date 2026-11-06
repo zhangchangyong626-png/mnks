@@ -65,8 +65,8 @@
         <!-- 动态生成勾选框 -->
       </div>
 
-      <label>本次任务时长（例如：2小时、4小时等）</label>
-      <input type="text" id="duration" placeholder="例如：4小时">
+      <label>本次任务时长（小时，请填纯数字，如 4 或 1.5）</label>
+      <input type="number" step="0.5" min="0" id="duration" placeholder="例如：4">
 
       <div id="error" class="msg err" style="display:none"></div>
       <p style="margin-top:16px">

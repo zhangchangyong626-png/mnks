@@ -38,22 +38,8 @@
   details[open] summary { border-bottom: 1px solid #eceff1; }
   .details-content { padding: 18px; }
   
-  /* 关键修复：允许手机端横向滑动，且让滑动更顺畅 */
-  .table-wrapper { 
-    width: 100%; 
-    overflow-x: auto; 
-    -webkit-overflow-scrolling: touch; 
-    padding-bottom: 5px; /* 留出一点点滚动条空间 */
-  }
-  
-  /* 关键修复：强制表格最小宽度，防止被手机挤压 */
-  .stats-table { 
-    width: 100%; 
-    min-width: 500px; /* 低于500px就出滚动条 */
-    border-collapse: collapse; 
-    font-size: 14px; 
-    text-align: center; 
-  }
+  .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 5px; }
+  .stats-table { width: 100%; min-width: 500px; border-collapse: collapse; font-size: 14px; text-align: center; }
   .stats-table th, .stats-table td { padding: 10px 6px; border-bottom: 1px solid #eceff1; white-space: nowrap; }
   .stats-table th { color: #607d8b; font-weight: 600; background: #f9fbfd; }
   .stats-table tr:hover { background: #f4f7fb; }
@@ -63,22 +49,13 @@
   .rank-1 { color: #f57f17; font-size: 16px; }
   .rank-2 { color: #78909c; font-size: 16px; }
   .rank-3 { color: #8d6e63; font-size: 16px; }
-  
   .total-col { font-weight: bold; color: #1565c0; background: #f4f7fb; }
 
   .type-tag {
     display: inline-block; padding: 2px 8px; background: #e3f2fd; color: #1565c0;
     border-radius: 4px; font-size: 12px; font-weight: normal; margin-right: 8px; vertical-align: middle;
   }
-
-  /* 给手机端加一个滑动提示文字 */
-  .swipe-hint {
-    display: none;
-    font-size: 12px;
-    color: #90a4ae;
-    text-align: center;
-    margin-bottom: 8px;
-  }
+  .swipe-hint { display: none; font-size: 12px; color: #90a4ae; text-align: center; margin-bottom: 8px; }
   @media (max-width: 600px) {
     .swipe-hint { display: block; }
     .details-content { padding: 10px; }
@@ -97,13 +74,11 @@
   
   <div id="loading" class="empty">加载中…</div>
 
-  <!-- 出勤统计折叠面板 -->
   <details id="statsPanel" style="display:none;">
     <summary>🏆 队员出勤总时长排行榜</summary>
     <div class="details-content" id="statsBox"></div>
   </details>
 
-  <!-- 活动记录折叠面板 -->
   <details id="tasksPanel" style="display:none;">
     <summary>📋 历史活动记录公示</summary>
     <div class="details-content" id="taskList"></div>
@@ -144,43 +119,63 @@ if (error) {
   document.getElementById('tasksPanel').style.display = 'block';
 
   // 渲染记录列表
-  document.getElementById('taskList').innerHTML = tasks.map(t => `
-    <article class="card" style="box-shadow:none; border:1px solid #eceff1; margin-bottom:12px;">
-      <h2 style="font-size:16px; margin-bottom:8px;">
-        ${t.event_type ? `<span class="type-tag">${esc(t.event_type)}</span>` : ''}
-        ${esc(t.title)}
-      </h2>
-      <div class="meta">
-        活动时间：${formatTime(t.task_time)} 
-        ${t.duration ? ` · 出勤时长：${esc(t.duration)} 小时` : ''}
-      </div>
-      ${t.content ? `<div class="content">${esc(t.content)}</div>` : ''}
-      ${t.members ? `<div class="members"><strong>参与成员：</strong>${esc(t.members).replace(/\n/g, '、')}</div>` : ''}
-    </article>
-  `).join('');
+  document.getElementById('taskList').innerHTML = tasks.map(t => {
+    // 拼接参与人员展示
+    let membersHtml = '';
+    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
+      membersHtml = t.member_hours.map(m => `${esc(m.name)}(${m.hours}h)`).join('、');
+    } else {
+      membersHtml = esc(t.members).replace(/\n/g, '、');
+    }
+
+    return `
+      <article class="card" style="box-shadow:none; border:1px solid #eceff1; margin-bottom:12px;">
+        <h2 style="font-size:16px; margin-bottom:8px;">
+          ${t.event_type ? `<span class="type-tag">${esc(t.event_type)}</span>` : ''}
+          ${esc(t.title)}
+        </h2>
+        <div class="meta">
+          活动时间：${formatTime(t.task_time)} 
+          ${t.duration ? ` · 总计出勤：${esc(t.duration)} 小时` : ''}
+        </div>
+        ${t.content ? `<div class="content">${esc(t.content)}</div>` : ''}
+        ${membersHtml ? `<div class="members"><strong>参与成员：</strong>${membersHtml}</div>` : ''}
+      </article>
+    `;
+  }).join('');
 
   renderStats(tasks);
 }
 
 function renderStats(tasks) {
   const statsBox = document.getElementById('statsBox');
-  
   const memberStats = {};
 
   tasks.forEach(t => {
-    const hours = parseFloat(String(t.duration).replace(/[^\d.]/g, '')) || 0;
     const type = t.event_type || ''; 
     
-    if (hours > 0 && t.members) {
+    // 优先使用新的 member_hours 数据
+    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
+      t.member_hours.forEach(m => {
+        const hours = parseFloat(m.hours) || 0;
+        if (hours > 0 && m.name) {
+          if (!memberStats[m.name]) memberStats[m.name] = { rescue: 0, training: 0, fire: 0, total: 0 };
+          
+          memberStats[m.name].total += hours;
+          if (type === '公益救援') memberStats[m.name].rescue += hours;
+          else if (type === '技能培训') memberStats[m.name].training += hours;
+          else if (type === '森林消防') memberStats[m.name].fire += hours;
+        }
+      });
+    } 
+    // 兼容老数据（没有 member_hours 的）
+    else if (t.members && t.duration) {
+      const hours = parseFloat(String(t.duration).replace(/[^\d.]/g, '')) || 0;
       const membersArray = t.members.split(/[,，\s]+/).filter(Boolean);
       
       membersArray.forEach(name => {
-        if (!memberStats[name]) {
-          memberStats[name] = { rescue: 0, training: 0, fire: 0, total: 0 };
-        }
-        
+        if (!memberStats[name]) memberStats[name] = { rescue: 0, training: 0, fire: 0, total: 0 };
         memberStats[name].total += hours;
-        
         if (type === '公益救援') memberStats[name].rescue += hours;
         else if (type === '技能培训') memberStats[name].training += hours;
         else if (type === '森林消防') memberStats[name].fire += hours;

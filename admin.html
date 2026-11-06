@@ -6,7 +6,6 @@
 <title>管理后台 · 蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  /* 补充一点勾选框的样式 */
   .checkbox-group {
     display: flex; flex-wrap: wrap; gap: 12px;
     background: #f9fbfd; padding: 12px; border-radius: 6px; border: 1px solid #cfd8dc;
@@ -46,39 +45,48 @@
     <div id="memberList" style="margin-top:10px;">加载名单中...</div>
   </div>
 
-  <!-- 任务发布区 -->
+  <!-- 活动录入区 -->
   <div class="card">
-    <h2 id="formTitle">云和蓝天任务记录</h2>
+    <h2 id="formTitle">录入新活动记录</h2>
     <form id="taskForm">
       <input type="hidden" id="taskId">
-      <label>任务标题 *</label>
+      
+      <label>事件/活动名称 *</label>
       <input type="text" id="title" required>
 
-      <label>任务时间</label>
+      <!-- 新增：事件类型勾选 -->
+      <label>事件类型 *</label>
+      <div class="checkbox-group" style="margin-bottom: 10px;">
+        <label class="checkbox-item"><input type="radio" name="event_type" value="公益救援" required> 公益救援</label>
+        <label class="checkbox-item"><input type="radio" name="event_type" value="技能培训"> 技能培训</label>
+        <label class="checkbox-item"><input type="radio" name="event_type" value="森林消防"> 森林消防</label>
+      </div>
+
+      <label>发生时间</label>
       <input type="datetime-local" id="task_time">
 
-      <label>任务内容</label>
-      <textarea id="content" placeholder="任务详情、地点、注意事项等"></textarea>
+      <label>事件详情</label>
+      <textarea id="content" placeholder="事件详情、地点、注意事项等"></textarea>
 
       <label>参与成员（勾选）</label>
       <div id="memberCheckboxes" class="checkbox-group">
         <!-- 动态生成勾选框 -->
       </div>
 
-      <label>本次任务时长（小时，请填纯数字，如 4 或 1.5）</label>
+      <label>本次出勤时长（小时，请填纯数字，如 4 或 1.5）</label>
       <input type="number" step="0.5" min="0" id="duration" placeholder="例如：4">
 
       <div id="error" class="msg err" style="display:none"></div>
       <p style="margin-top:16px">
-        <button class="btn" type="submit" id="submitBtn">发布任务</button>
+        <button class="btn" type="submit" id="submitBtn">保存记录</button>
         <a href="#" class="btn gray" id="cancelEdit" style="display:none">取消编辑</a>
       </p>
     </form>
   </div>
 
-  <!-- 任务列表区 -->
+  <!-- 历史记录区 -->
   <div class="card">
-    <h2>已发布任务</h2>
+    <h2>历史记录管理</h2>
     <div id="taskList"></div>
   </div>
 </main>
@@ -110,7 +118,6 @@ async function loadMembers() {
 
   allMembers = data || [];
   
-  // 1. 渲染下方的列表（带删除按钮）
   if (allMembers.length === 0) {
     box.innerHTML = '<span class="empty">暂无队员，请在上方添加</span>';
   } else {
@@ -122,7 +129,6 @@ async function loadMembers() {
     `).join('');
   }
 
-  // 2. 渲染发布任务表单里的勾选框
   if (allMembers.length === 0) {
     checkboxGroup.innerHTML = '<span style="color:#90a4ae;font-size:13px;">请先在上方添加队员名单</span>';
   } else {
@@ -135,7 +141,6 @@ async function loadMembers() {
   }
 }
 
-// 全局暴露删除函数
 window.deleteMember = async (id) => {
   if(!confirm('确定删除该队员吗？')) return;
   const { error } = await supabase.from('members').delete().eq('id', id);
@@ -162,7 +167,7 @@ document.getElementById('memberForm').addEventListener('submit', async (e) => {
   }
 });
 
-// --- 任务发布逻辑 ---
+// --- 活动记录逻辑 ---
 
 const form = document.getElementById('taskForm');
 const taskIdEl = document.getElementById('taskId');
@@ -180,11 +185,10 @@ function showError(msg) {
 function resetForm() {
   form.reset();
   taskIdEl.value = '';
-  formTitle.textContent = '发布新任务';
-  submitBtn.textContent = '发布任务';
+  formTitle.textContent = '录入新活动记录';
+  submitBtn.textContent = '保存记录';
   cancelEdit.style.display = 'none';
   errorEl.style.display = 'none';
-  // 清空所有勾选框
   document.querySelectorAll('input[name="task_members"]').forEach(cb => cb.checked = false);
 }
 cancelEdit.addEventListener('click', (e) => { e.preventDefault(); resetForm(); });
@@ -196,19 +200,23 @@ form.addEventListener('submit', async (e) => {
   const id = taskIdEl.value;
   const timeInput = document.getElementById('task_time').value;
   
-  // 获取所有被勾选的成员名字，用逗号拼接
+  // 获取事件类型
+  const selectedTypeEl = document.querySelector('input[name="event_type"]:checked');
+  const eventType = selectedTypeEl ? selectedTypeEl.value : '';
+
   const selectedMembers = Array.from(document.querySelectorAll('input[name="task_members"]:checked'))
     .map(cb => cb.value)
     .join(', ');
 
   const payload = {
     title: document.getElementById('title').value.trim(),
+    event_type: eventType, // 存入数据库
     task_time: timeInput ? new Date(timeInput).toISOString() : null,
     content: document.getElementById('content').value.trim(),
     members: selectedMembers, 
     duration: document.getElementById('duration').value.trim(),
   };
-  if (!payload.title) { showError('请填写任务标题'); return; }
+  if (!payload.title) { showError('请填写事件/活动名称'); return; }
 
   submitBtn.disabled = true;
   const res = id
@@ -228,15 +236,18 @@ async function loadTasks() {
 
   if (error) { box.innerHTML = `<div class="msg err">加载失败：${esc(error.message)}</div>`; return; }
   allTasks = data || [];
-  if (allTasks.length === 0) { box.innerHTML = '<div class="empty">暂无任务</div>'; return; }
+  if (allTasks.length === 0) { box.innerHTML = '<div class="empty">暂无记录</div>'; return; }
 
   box.innerHTML = allTasks.map(t => `
     <div class="task-row">
       <div>
-        <div class="t">${esc(t.title)}</div>
+        <div class="t">
+          ${t.event_type ? `<span style="background:#e3f2fd;color:#1565c0;padding:2px 6px;border-radius:4px;font-size:12px;margin-right:6px;">${esc(t.event_type)}</span>` : ''}
+          ${esc(t.title)}
+        </div>
         <div class="meta">
           ${formatTime(t.task_time)}
-          ${t.duration ? ' · 时长: ' + esc(t.duration) : ''}
+          ${t.duration ? ' · 出勤: ' + esc(t.duration) + '小时' : ''}
           ${t.members ? ' · 参与: ' + esc(t.members) : ''}
         </div>
       </div>
@@ -252,7 +263,7 @@ async function loadTasks() {
       startEdit(allTasks.find(x => String(x.id) === btn.dataset.edit))));
   box.querySelectorAll('[data-del]').forEach(btn =>
     btn.addEventListener('click', async () => {
-      if (!confirm('确定删除该任务？')) return;
+      if (!confirm('确定删除该记录？')) return;
       const { error } = await supabase.from('tasks').delete().eq('id', btn.dataset.del);
       if (error) { alert('删除失败：' + error.message); return; }
       loadTasks();
@@ -267,13 +278,17 @@ function startEdit(t) {
   document.getElementById('duration').value = t.duration || '';
   document.getElementById('task_time').value = toLocalInput(t.task_time);
   
-  // 回显勾选框
+  // 回显事件类型
+  document.querySelectorAll('input[name="event_type"]').forEach(radio => {
+    radio.checked = (radio.value === t.event_type);
+  });
+
   const taskMembers = t.members ? t.members.split(',').map(s => s.trim()) : [];
   document.querySelectorAll('input[name="task_members"]').forEach(cb => {
     cb.checked = taskMembers.includes(cb.value);
   });
 
-  formTitle.textContent = '编辑任务';
+  formTitle.textContent = '编辑活动记录';
   submitBtn.textContent = '保存修改';
   cancelEdit.style.display = 'inline-block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -297,7 +312,6 @@ function esc(s) {
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-// 初始化加载
 loadMembers();
 loadTasks();
 </script>

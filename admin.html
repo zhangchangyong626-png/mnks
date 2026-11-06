@@ -31,6 +31,10 @@
       <label>参与成员名字（每行一个，或用逗号分隔）</label>
       <textarea id="members" placeholder="张三&#10;李四&#10;王五"></textarea>
 
+      <!-- 新增的时长输入框 -->
+      <label>本次任务时长（例如：4小时、半天等）</label>
+      <input type="text" id="duration" placeholder="例如：4小时">
+
       <div id="error" class="msg err" style="display:none"></div>
       <p style="margin-top:16px">
         <button class="btn" type="submit" id="submitBtn">发布任务</button>
@@ -90,6 +94,7 @@ form.addEventListener('submit', async (e) => {
     task_time: timeInput ? new Date(timeInput).toISOString() : null,
     content: document.getElementById('content').value.trim(),
     members: document.getElementById('members').value.trim(),
+    duration: document.getElementById('duration').value.trim(), // 新增时长
   };
   if (!payload.title) { showError('请填写任务标题'); return; }
 
@@ -117,7 +122,7 @@ async function loadTasks() {
     <div class="task-row">
       <div>
         <div class="t">${esc(t.title)}</div>
-        <div class="meta">${formatTime(t.task_time)}${t.members ? ' · ' + esc(t.members).replace(/\n/g,'、') : ''}</div>
+        <div class="meta">${formatTime(t.task_time)}${t.duration ? ' · 时长: ' + esc(t.duration) : ''}${t.members ? ' · ' + esc(t.members).replace(/\n/g,'、') : ''}</div>
       </div>
       <div class="actions">
         <button class="btn sm gray" data-edit="${t.id}">编辑</button>
@@ -144,6 +149,7 @@ function startEdit(t) {
   document.getElementById('title').value = t.title || '';
   document.getElementById('content').value = t.content || '';
   document.getElementById('members').value = t.members || '';
+  document.getElementById('duration').value = t.duration || ''; // 回显时长
   document.getElementById('task_time').value = toLocalInput(t.task_time);
   formTitle.textContent = '编辑任务';
   submitBtn.textContent = '保存修改';

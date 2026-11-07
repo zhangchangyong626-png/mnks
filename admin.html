@@ -45,6 +45,8 @@
   /* 标题图标 */
   .title-icon { width: 20px; height: 20px; fill: #e53935; }
   .title-icon.blue { fill: #1565c0; }
+  .title-icon.green { fill: #2e7d32; } /* 新增一个绿色用于录入 */
+  .title-icon.orange { fill: #f57f17; } /* 新增一个橙色用于历史 */
 
   /* 内部小折叠面板样式 */
   .details-box { margin-top: 10px; border: 1px solid #cfd8dc; border-radius: 6px; overflow: hidden; background: #fff; }
@@ -143,7 +145,6 @@
           <div><label>活动地点</label><input type="text" id="rLocation" placeholder="如：云和湖码头"></div>
         </div>
         
-        <!-- 使用新的 radio-group 确保在一行 -->
         <label>任务类型 *</label>
         <div class="radio-group">
           <label class="radio-item"><input type="radio" name="r_event_type" value="公益救援" required> 公益救援</label>
@@ -170,7 +171,11 @@
   <!-- 3. 录入出勤记录 -->
   <details class="details-card">
     <summary>
-      <h2 id="formTitle">录入新活动记录</h2>
+      <h2 id="formTitle">
+        <!-- 新增：录入记录图标 -->
+        <svg class="title-icon green" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        录入新活动记录
+      </h2>
     </summary>
     <div class="details-inner">
       <form id="taskForm">
@@ -178,7 +183,6 @@
         <label>事件/活动名称 *</label><input type="text" id="title" required>
         <label>事件类型 *</label>
         
-        <!-- 使用新的 radio-group 确保在一行 -->
         <div class="radio-group">
           <label class="radio-item"><input type="radio" name="event_type" value="公益救援" required> 公益救援</label>
           <label class="radio-item"><input type="radio" name="event_type" value="技能培训"> 技能培训</label>
@@ -211,7 +215,11 @@
   <!-- 4. 历史记录管理 -->
   <details class="details-card">
     <summary>
-      <h2>历史记录管理</h2>
+      <h2>
+        <!-- 新增：历史记录图标 -->
+        <svg class="title-icon orange" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+        历史记录管理
+      </h2>
     </summary>
     <div class="details-inner">
       <div class="export-toolbar">

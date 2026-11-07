@@ -85,6 +85,52 @@
     margin-bottom: 15px;
   }
   .history-header h2 { margin: 0; }
+
+  /* 好看的表格样式 */
+  .admin-table-wrapper {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #eceff1;
+  }
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+    min-width: 800px; /* 防止表格被挤压变形 */
+  }
+  .admin-table th, .admin-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eceff1;
+    vertical-align: middle;
+  }
+  .admin-table th {
+    background-color: #fafbfc;
+    color: #78909c;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  .admin-table tbody tr:hover {
+    background-color: #f9fbfd;
+  }
+  .admin-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  /* 限制参与人员列的宽度，防止太长撑爆 */
+  .col-members {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* 表格里的操作按钮组 */
+  .action-btns {
+    display: flex;
+    gap: 6px;
+    white-space: nowrap;
+  }
 </style>
 </head>
 <body>
@@ -155,15 +201,31 @@
 
   <!-- 历史记录区 -->
   <div class="card">
-    <!-- 标题与导出按钮 -->
     <div class="history-header">
       <h2>历史记录管理</h2>
-      <button class="btn sm gray" id="exportBtn" style="display: flex; align-items: center; gap: 5px;">
+      <button class="btn sm gray" id="exportAllBtn" style="display: flex; align-items: center; gap: 5px;">
         <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-        导出数据
+        全部导出
       </button>
     </div>
-    <div id="taskList"></div>
+    
+    <div class="admin-table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>类型</th>
+            <th>事件名称</th>
+            <th>发生时间</th>
+            <th>时长</th>
+            <th>参与成员</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="taskTableBody">
+          <tr><td colspan="6" style="text-align:center; color:#90a4ae;">加载中...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </main>
 
@@ -363,63 +425,86 @@ form.addEventListener('submit', async (e) => {
 async function loadTasks() {
   const { data, error } = await supabase
     .from('tasks').select('*').order('task_time', { ascending: false });
-  const box = document.getElementById('taskList');
+  const tbody = document.getElementById('taskTableBody');
 
-  if (error) { box.innerHTML = `<div class="msg err">加载失败：${esc(error.message)}</div>`; return; }
+  if (error) { 
+    tbody.innerHTML = `<tr><td colspan="6" class="msg err">加载失败：${esc(error.message)}</td></tr>`; 
+    return; 
+  }
+  
   allTasks = data || [];
-  if (allTasks.length === 0) { box.innerHTML = '<div class="empty">暂无记录</div>'; return; }
+  if (allTasks.length === 0) { 
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#90a4ae;">暂无记录</td></tr>'; 
+    return; 
+  }
 
-  box.innerHTML = allTasks.map(t => {
+  tbody.innerHTML = allTasks.map(t => {
     let displayDuration = t.duration;
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
       const arr = t.member_hours.map(m => parseFloat(m.hours) || 0);
       if (arr.length > 0) displayDuration = Math.max(...arr);
     }
 
+    let membersStr = '';
+    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
+      membersStr = t.member_hours.map(m => `${m.name}(${m.hours}h)`).join('、');
+    } else {
+      membersStr = t.members || '-';
+    }
+
+    let typeTag = t.event_type 
+      ? `<span style="background:#e3f2fd;color:#1565c0;padding:2px 6px;border-radius:4px;font-size:12px;">${esc(t.event_type)}</span>` 
+      : '-';
+
     return `
-    <div class="task-row">
-      <div>
-        <div class="t">
-          ${t.event_type ? `<span style="background:#e3f2fd;color:#1565c0;padding:2px 6px;border-radius:4px;font-size:12px;margin-right:6px;">${esc(t.event_type)}</span>` : ''}
-          ${esc(t.title)}
+    <tr>
+      <td>${typeTag}</td>
+      <td style="font-weight: 400; color: #1f2d3d;">${esc(t.title)}</td>
+      <td style="color: #78909c;">${formatTime(t.task_time)}</td>
+      <td>${displayDuration ? displayDuration + 'h' : '-'}</td>
+      <td class="col-members" title="${esc(membersStr)}">${esc(membersStr)}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn sm gray" data-edit="${t.id}" style="padding: 4px 8px;">编辑</button>
+          <button class="btn sm blue" data-export="${t.id}" style="padding: 4px 8px; background:#0d47a1;">导出</button>
+          <button class="btn sm red" data-del="${t.id}" style="padding: 4px 8px;">删除</button>
         </div>
-        <div class="meta">
-          ${formatTime(t.task_time)}
-          ${displayDuration ? ' · 任务时长: ' + esc(displayDuration) + '小时' : ''}
-          ${t.members ? ' · 参与: ' + esc(t.members) : ''}
-        </div>
-      </div>
-      <div class="actions">
-        <button class="btn sm gray" data-edit="${t.id}">编辑</button>
-        <button class="btn sm red" data-del="${t.id}">删除</button>
-      </div>
-    </div>
+      </td>
+    </tr>
   `}).join('');
 
-  box.querySelectorAll('[data-edit]').forEach(btn =>
+  // 绑定编辑事件
+  tbody.querySelectorAll('[data-edit]').forEach(btn =>
     btn.addEventListener('click', () =>
       startEdit(allTasks.find(x => String(x.id) === btn.dataset.edit))));
-  box.querySelectorAll('[data-del]').forEach(btn =>
+  
+  // 绑定删除事件
+  tbody.querySelectorAll('[data-del]').forEach(btn =>
     btn.addEventListener('click', async () => {
       if (!confirm('确定删除该记录？')) return;
       const { error } = await supabase.from('tasks').delete().eq('id', btn.dataset.del);
       if (error) { alert('删除失败：' + error.message); return; }
       loadTasks();
     }));
+
+  // 绑定单条导出事件
+  tbody.querySelectorAll('[data-export]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const task = allTasks.find(x => String(x.id) === btn.dataset.export);
+      if (task) exportToCSV([task], `出勤记录_${task.title}`);
+    }));
 }
 
-// --- 导出 CSV 功能 ---
-document.getElementById('exportBtn').addEventListener('click', () => {
-  if (!allTasks || allTasks.length === 0) {
+// --- 导出 CSV 通用函数 ---
+function exportToCSV(tasksData, fileNamePrefix) {
+  if (!tasksData || tasksData.length === 0) {
     alert("暂无数据可导出");
     return;
   }
 
-  // 表头
   const headers = ['任务类型', '事件/活动名称', '发生时间', '任务时长(小时)', '参与成员(个人时长)', '事件详情'];
   
-  // 组装数据行
-  const rows = allTasks.map(t => {
+  const rows = tasksData.map(t => {
     let membersStr = '';
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
       membersStr = t.member_hours.map(m => `${m.name}(${m.hours}h)`).join('、');
@@ -439,25 +524,27 @@ document.getElementById('exportBtn').addEventListener('click', () => {
       formatTime(t.task_time),
       displayDuration || '',
       membersStr,
-      (t.content || '').replace(/\n/g, ' ') // 把换行替换成空格，防止破坏 CSV 格式
+      (t.content || '').replace(/\n/g, ' ')
     ];
   });
 
-  // 生成 CSV 内容（处理文本中的逗号和双引号）
   const csvContent = [headers, ...rows].map(row => 
     row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
   ).join('\n');
 
-  // 添加 BOM 头防止 Excel 中文乱码
   const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-  
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   link.setAttribute("href", url);
-  link.setAttribute("download", `云和蓝天救援队_出勤记录_${new Date().toISOString().split('T')[0]}.csv`);
+  link.setAttribute("download", `${fileNamePrefix}_${new Date().toISOString().split('T')[0]}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+// 绑定全部导出
+document.getElementById('exportAllBtn').addEventListener('click', () => {
+  exportToCSV(allTasks, '云和蓝天救援队_全部记录');
 });
 
 

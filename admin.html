@@ -3,598 +3,507 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>管理后台 · 云和蓝天救援队</title>
+<title>云和·蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
+<!-- 引入 ECharts 图表库 -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <style>
-  /* 全局字体设置 */
-  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 300; background: #f4f7fb; color: #333; }
-  h2, h3 { font-weight: 400; color: #1f2d3d; }
-  label { font-weight: 300; color: #607d8b; }
-  input, select, textarea, button { font-weight: 300; font-family: inherit; }
-  
-  /* 按钮统一样式 */
-  .btn { font-weight: 400; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
-  
-  /* 关键修复：单选框/复选框强制在一行显示 */
-  .radio-group {
-    display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 300; background: #e4e7eb; color: #333; }
+
+  header {
+    background: #0d47a1; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    padding: 30px 20px 20px; text-align: center; position: relative;
+    display: flex; flex-direction: column; align-items: center;
   }
-  .radio-item {
-    display: inline-flex; align-items: center; gap: 6px;
-    white-space: nowrap; font-size: 14px; color: #1f2d3d; cursor: pointer;
-    background: transparent; border: none; padding: 0;
+  .logo-container { margin-bottom: 12px; width: 100%; display: flex; justify-content: center; }
+  .logo-container img { height: 65px; max-width: 100%; object-fit: contain; }
+  .main-title { font-size: 28px; font-weight: 400; color: #ffffff; letter-spacing: 3px; margin: 0; line-height: 1.2; }
+  .slogan { color: rgba(255, 255, 255, 0.85); font-size: 13px; font-weight: 300; margin-top: 6px; letter-spacing: 1px; }
+  .slogan span { margin: 0 6px; }
+  .top-nav { position: absolute; right: 20px; top: 20px; font-size: 14px; }
+  .top-nav a { color: #ffffff; text-decoration: none; margin-left: 15px; transition: color 0.2s; }
+  .top-nav a:hover { color: #90caf9; }
+  .bottom-nav { display: none; }
+  main { max-width: 800px; margin: 30px auto; padding: 0 14px; }
+
+  /* 顶部独立卡片 (个人查询) */
+  .standalone-card {
+    background: #fff; border-radius: 8px; padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 16px;
   }
-  .radio-item input[type="radio"] {
-    width: 16px; height: 16px; margin: 0; cursor: pointer;
+  .standalone-title {
+    margin: 0 0 15px; font-size: 16px; font-weight: 400; color: #1565c0;
+    display: flex; align-items: center; gap: 8px;
   }
 
-  /* 外层大折叠面板样式 */
-  .details-card { padding: 0; overflow: hidden; margin-bottom: 16px; background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.06); border: none;}
-  .details-card summary { padding: 18px 20px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; background: #fff; border-bottom: 1px solid transparent; transition: background 0.2s; }
-  .details-card summary:hover { background: #f9fbfd; }
-  .details-card[open] summary { border-bottom: 1px solid #eceff1; background: #fafbfc; }
-  .details-card summary::-webkit-details-marker { display: none; }
-  .details-card summary h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px;}
-  .details-card summary::after { content: '▼'; font-size: 12px; color: #b0bec5; transition: transform 0.3s; }
-  .details-card[open] summary::after { transform: rotate(180deg); }
-  .details-inner { padding: 20px; }
+  /* 折叠面板 */
+  details { background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 16px; overflow: hidden; border: none; }
+  summary { padding: 16px 20px; font-size: 16px; font-weight: 400; letter-spacing: 1px; cursor: pointer; background: #64b5f6; color: #ffffff; list-style: none; display: flex; align-items: center; justify-content: space-between; user-select: none; transition: background 0.2s; }
+  summary:hover { background: #42a5f5; } 
+  summary::-webkit-details-marker { display: none; }
+  .summary-inner { display: flex; align-items: center; gap: 10px; }
+  .icon-svg { width: 20px; height: 20px; fill: #ffffff; }
+  summary::after { content: '▼'; font-size: 12px; color: rgba(255, 255, 255, 0.7); transition: transform 0.3s ease; }
+  details[open] summary::after { transform: rotate(180deg); }
+  details[open] summary { border-bottom: 1px solid #e3f2fd; }
+  .details-content { padding: 16px 20px; background: #ffffff; color: #333; }
 
-  /* 红条特殊样式 */
-  .border-red { border-top: 4px solid #e53935; }
+  /* 图表容器 */
+  .charts-container { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; background: #f9fbfd; padding: 15px; border-radius: 8px; }
+  .chart-box { flex: 1; min-width: 300px; height: 260px; }
 
-  /* 标题图标 */
-  .title-icon { width: 20px; height: 20px; fill: #e53935; }
-  .title-icon.blue { fill: #1565c0; }
+  /* 排行榜表格 */
+  .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
+  .stats-table th, .stats-table td { padding: 14px 8px; border-bottom: 1px solid #eceff1; font-weight: 300; }
+  .stats-table th { color: #78909c; font-weight: 400; background: #fafbfc; }
+  .stats-table td:nth-child(2) { text-align: left; }
+  .clickable-name { cursor: pointer; color: #1565c0; font-weight: 400; display: inline-flex; align-items: center; gap: 6px; }
+  .arrow { font-size: 10px; color: #b0bec5; transition: transform 0.3s ease; }
+  .arrow.open { transform: rotate(180deg); }
+  .rank { font-weight: 400; color: #90a4ae; width: 50px;}
+  .rank-1 { color: #f57f17; font-size: 18px; font-weight: 500;}
+  .rank-2 { color: #78909c; font-size: 18px; font-weight: 500;}
+  .rank-3 { color: #8d6e63; font-size: 18px; font-weight: 500;}
+  .total-col { font-weight: 500; color: #1565c0; }
+  .details-row td { background: #f9fbfd; padding: 12px 15px; border-bottom: 1px solid #eceff1; }
+  .details-flex { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .detail-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 300; background: #fff; border: 1px solid #cfd8dc; color: #546e7a; }
+  .detail-badge.rescue { border-color: #90caf9; color: #1565c0; background: #e3f2fd; }
+  .detail-badge.training { border-color: #a5d6a7; color: #2e7d32; background: #e8f5e9; }
+  .detail-badge.fire { border-color: #ef9a9a; color: #c62828; background: #ffebee; }
 
-  /* 内部小折叠面板样式 */
-  .details-box { margin-top: 10px; border: 1px solid #cfd8dc; border-radius: 6px; overflow: hidden; background: #fff; }
-  .details-box summary { padding: 12px 15px; background: #f9fbfd; color: #1565c0; font-size: 14px; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
-  .details-box summary::-webkit-details-marker { display: none; }
-  .details-box summary::after { content: '▼'; font-size: 10px; color: #b0bec5; transition: transform 0.3s; }
-  .details-box[open] summary::after { transform: rotate(180deg); }
-  .details-box[open] summary { border-bottom: 1px solid #eceff1; }
-  .summary-title { display: flex; align-items: center; gap: 8px; }
-  .summary-icon { width: 18px; height: 18px; fill: #1565c0; }
+  /* 查询区 */
+  .search-box { display: flex; gap: 10px; }
+  .search-box input { flex: 1; padding: 12px 16px; border: 1px solid #cfd8dc; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; }
+  .search-box input:focus { border-color: #1565c0; }
+  .search-box button { padding: 0 24px; background: #1565c0; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: background 0.2s; }
+  .search-box button:hover { background: #0d47a1; }
+  .personal-result { background: #f4f7fb; padding: 20px; border-radius: 8px; margin-top: 15px; display: none; border-left: 4px solid #1565c0; }
+  .personal-result h3 { margin: 0 0 10px; font-size: 16px; font-weight: 500; color: #1f2d3d; display:flex; align-items:center; gap:8px;}
+  .personal-result p { margin: 6px 0; font-size: 14px; color: #546e7a; }
+  .personal-result .svg-big { width: 24px; height: 24px; fill: #1565c0; }
+
+  /* 通讯录密码锁 */
+  .privacy-lock { text-align: center; padding: 30px 20px; background: #f9fbfd; border-radius: 8px; border: 1px dashed #cfd8dc; }
+  .privacy-lock p { color: #78909c; font-size: 14px; margin-bottom: 15px; display:flex; justify-content:center; align-items:center; gap:6px;}
+  .privacy-lock input { padding: 10px 14px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 14px; width: 200px; margin-right: 10px; outline: none; }
+  .privacy-lock button { padding: 10px 20px; background: #1565c0; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+
+  /* 通讯录表格 */
+  .contact-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .contact-table th, .contact-table td { padding: 12px 8px; border-bottom: 1px solid #eceff1; text-align: left; }
+  .contact-table th { color: #78909c; font-weight: 400; background: #fafbfc; }
+  .contact-table td { font-weight: 300; }
+  .contact-table td:first-child { font-weight: 400; color: #1f2d3d; }
+
+  /* 招募接龙面板 */
+  .recruit-panel-red { border: 1px solid #e53935 !important; box-shadow: 0 4px 15px rgba(229,57,53,0.1) !important; }
+  .recruit-panel-red summary { background: #e53935 !important; }
+  .recruit-panel-red summary:hover { background: #d32f2f !important; }
+  .recruit-card { background: #fff; border: 1px solid #ffcdd2; border-radius: 8px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+  .signup-tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 16px; font-size: 13px; margin: 4px; }
   
-  .scroll-area { max-height: 300px; overflow-y: auto; padding: 12px; }
-  .scroll-area::-webkit-scrollbar { width: 6px; }
-  .scroll-area::-webkit-scrollbar-thumb { background: #cfd8dc; border-radius: 3px; }
-
-  /* 搜索框 */
-  .search-input-wrapper { position: relative; background: #fff; border-bottom: 1px solid #eceff1; }
-  .search-icon { position: absolute; left: 12px; top: 10px; width: 16px; height: 16px; fill: #90a4ae; }
-  .search-input { width: 100%; padding: 10px 12px 10px 34px; border: none; font-size: 13px; outline: none; background: transparent; }
-  .search-input:focus { background: #f9fbfd; }
-
-  /* 表单布局 */
-  .member-form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 15px; }
-  @media (max-width: 600px) { .member-form-grid { grid-template-columns: 1fr; } }
-
-  /* 表格通用样式 */
-  .admin-table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eceff1; }
-  .admin-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; min-width: 850px; }
-  .admin-table th, .admin-table td { padding: 12px 14px; border-bottom: 1px solid #eceff1; vertical-align: middle; }
-  .admin-table th { background-color: #fafbfc; color: #78909c; font-weight: 400; white-space: nowrap; }
-  .admin-table tbody tr:hover { background-color: #f9fbfd; }
-  .col-members { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-  
-  /* 招募列表内的报名人员标签 */
-  .signup-tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin: 2px; }
-  
-  /* 招募列表内带图标的信息行 */
   .info-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #546e7a; margin: 4px 0; }
   .info-icon { width: 14px; height: 14px; fill: #78909c; }
 
-  /* 工具栏 */
-  .export-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #f4f7fb; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eceff1;}
-  .date-input { width: 130px; padding: 6px 10px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; color: #546e7a; }
+  /* 历史活动卡片 */
+  .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 8px; vertical-align: middle; }
+  .card { font-weight: 300; }
+  .card h2 { font-weight: 400; font-size: 15px; color: #1f2d3d; }
+  .members { color: #546e7a; }
 
-  /* 事件类型标签 */
-  .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 6px; vertical-align: middle; }
+  @media (max-width: 600px) {
+    .main-title { font-size: 24px; }
+    .top-nav { display: none; }
+    .bottom-nav { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
+    .bottom-nav a { color: #607d8b; text-decoration: none; font-size: 14px; padding: 8px 20px; border: 1px solid #cfd8dc; border-radius: 20px; background: #fff; transition: all 0.2s; }
+    .bottom-nav a:hover { color: #1565c0; border-color: #1565c0; }
+    header { padding: 20px; }
+    .details-content { padding: 12px; }
+    summary { padding: 14px 16px; font-size: 15px; }
+    .icon-svg { width: 18px; height: 18px; }
+    .stats-table th, .stats-table td { padding: 12px 4px; font-size: 13px; }
+    .contact-table th, .contact-table td { padding: 10px 4px; font-size: 13px; }
+    .chart-box { min-width: 100%; height: 200px; }
+    .search-box input { width: 100%; }
+  }
 </style>
 </head>
 <body>
+
 <header>
-  <div class="brand" style="font-weight: 400;">云和·蓝天救援队 · 管理后台</div>
-  <nav><a href="index.html">查看首页</a><a href="#" id="logoutBtn">退出</a></nav>
+  <nav class="top-nav" id="nav">
+    <a href="login.html">管理员登录</a>
+  </nav>
+  <div class="logo-container">
+    <img src="https://img.alicdn.com/imgextra/i3/706125935/O1CN01KcQnpNaiagF49oPo_!!706125935.png" alt="云和蓝天救援队">
+  </div>
+  <h1 class="main-title">云和·蓝天救援队</h1>
+  <div class="slogan">
+    同在蓝天下 <span>携手为公益</span> 400-600-9958
+  </div>
 </header>
+
 <main>
+  <div id="loading" class="empty" style="font-weight: 300; color: #fff; text-align:center; padding:20px;">加载数据中…</div>
 
-  <!-- 1. 队员管理 -->
-  <details class="details-card">
-    <summary>
-      <h2>
-        <svg class="title-icon blue" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-        队员名单管理
-      </h2>
-    </summary>
-    <div class="details-inner">
-      <form id="memberForm" class="member-form-grid">
-        <div><label>姓名 *</label><input type="text" id="newMemberName" required></div>
-        <div><label>联系电话</label><input type="text" id="newMemberPhone"></div>
-        <div><label>紧急联系人</label><input type="text" id="newMemberEmergency"></div>
-        <button class="btn" type="submit" id="addMemberBtn" style="height: 38px;">添加</button>
-      </form>
-      <details class="details-box">
-        <summary>
-          <div class="summary-title">
-            <svg class="summary-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-            展开查看已录入的队员
-          </div>
-        </summary>
-        <div id="memberList" class="scroll-area" style="background: #f9fbfd;"></div>
-      </details>
+  <!-- 1. 独立展示的个人查询 -->
+  <div id="personalPanel" class="standalone-card" style="display:none;">
+    <h2 class="standalone-title">
+      <svg class="svg-big" style="width:20px; height:20px; fill:#1565c0;" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      个人出勤数据查询
+    </h2>
+    <div class="search-box">
+      <input type="text" id="queryNameInput" placeholder="请输入你的姓名，例如：张三">
+      <button id="queryBtn">查询</button>
     </div>
-  </details>
+    <div id="personalResult" class="personal-result"></div>
+  </div>
 
-  <!-- 2. 任务招募管理 -->
-  <details class="details-card border-red">
+  <!-- 2. 任务招募接龙 -->
+  <details id="recruitPanel" class="recruit-panel-red" style="display:none;" open>
     <summary>
-      <h2>
-        <svg class="title-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-        任务招募管理
-      </h2>
-    </summary>
-    <div class="details-inner">
-      <form id="recruitForm" style="background: #f9fbfd; padding: 15px; border-radius: 8px; border: 1px solid #eceff1; margin-bottom: 15px;">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div><label>任务标题 *</label><input type="text" id="rTitle" required placeholder="如：水域救援技能训练"></div>
-          <div><label>活动地点</label><input type="text" id="rLocation" placeholder="如：云和湖码头"></div>
-        </div>
-        
-        <!-- 使用新的 radio-group 确保在一行 -->
-        <label>任务类型 *</label>
-        <div class="radio-group">
-          <label class="radio-item"><input type="radio" name="r_event_type" value="公益救援" required> 公益救援</label>
-          <label class="radio-item"><input type="radio" name="r_event_type" value="技能培训"> 技能培训</label>
-          <label class="radio-item"><input type="radio" name="r_event_type" value="森林消防"> 森林消防</label>
-        </div>
-
-        <label>集合时间</label>
-        <input type="datetime-local" id="rTime">
-        <label>任务详情/要求</label>
-        <textarea id="rContent" placeholder="请填写招募要求、注意事项等..." style="min-height: 60px;"></textarea>
-        <button class="btn" type="submit" style="margin-top: 10px; background:#e53935;">发布招募令</button>
-      </form>
-
-      <div class="admin-table-wrapper">
-        <table class="admin-table">
-          <thead><tr><th>状态</th><th>任务/时间</th><th>已报名人员</th><th>操作</th></tr></thead>
-          <tbody id="recruitTableBody"></tbody>
-        </table>
+      <div class="summary-inner">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <span>任务招募接龙</span>
       </div>
-    </div>
-  </details>
-
-  <!-- 3. 录入出勤记录 -->
-  <details class="details-card">
-    <summary>
-      <h2 id="formTitle">录入新活动记录</h2>
     </summary>
-    <div class="details-inner">
-      <form id="taskForm">
-        <input type="hidden" id="taskId">
-        <label>事件/活动名称 *</label><input type="text" id="title" required>
-        <label>事件类型 *</label>
-        
-        <!-- 使用新的 radio-group 确保在一行 -->
-        <div class="radio-group">
-          <label class="radio-item"><input type="radio" name="event_type" value="公益救援" required> 公益救援</label>
-          <label class="radio-item"><input type="radio" name="event_type" value="技能培训"> 技能培训</label>
-          <label class="radio-item"><input type="radio" name="event_type" value="森林消防"> 森林消防</label>
-        </div>
-        
-        <label>发生时间</label><input type="datetime-local" id="task_time">
-        <label>事件详情</label><textarea id="content"></textarea>
-        
-        <label>参与成员及个人时长</label>
-        <details class="details-box member-select-details">
-          <summary>
-            <div class="summary-title">
-              <svg class="summary-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-              点击展开选择参与成员
-            </div>
-          </summary>
-          <div class="search-input-wrapper">
-            <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-            <input type="text" id="memberSearchInput" class="search-input" placeholder="输入姓名搜索..." oninput="filterMemberCheckboxes(this.value)">
-          </div>
-          <div id="memberCheckboxes" class="scroll-area" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
-        </details>
-        <div id="error" class="msg err" style="display:none"></div>
-        <p style="margin-top:16px"><button class="btn" type="submit" id="submitBtn">保存记录</button><a href="#" class="btn gray" id="cancelEdit" style="display:none">取消编辑</a></p>
-      </form>
-    </div>
+    <div class="details-content" id="recruitList"></div>
   </details>
 
-  <!-- 4. 历史记录管理 -->
-  <details class="details-card">
+  <!-- 3. 排行榜与图表 -->
+  <details id="statsPanel" style="display:none;">
     <summary>
-      <h2>历史记录管理</h2>
+      <div class="summary-inner">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+        <span>出勤时长排行榜 (Top 10)</span>
+      </div>
     </summary>
-    <div class="details-inner">
-      <div class="export-toolbar">
-        <span style="font-size:13px; color:#78909c;">导出时间段：</span>
-        <input type="date" id="exportStart" class="date-input">
-        <span style="color:#90a4ae;">-</span>
-        <input type="date" id="exportEnd" class="date-input">
-        
-        <button class="btn sm" id="exportMembersBtn" style="background: #1565c0; margin-left: auto;">
-          <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:#fff;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-          导出成员时长
-        </button>
-        <button class="btn sm gray" id="exportAllBtn">
-          <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:#fff;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-          导出记录
-        </button>
+    <div class="details-content">
+      <div class="charts-container">
+        <div id="barChart" class="chart-box"></div>
+        <div id="pieChart" class="chart-box"></div>
       </div>
-      
-      <div class="admin-table-wrapper">
-        <table class="admin-table">
-          <thead><tr><th>类型</th><th>事件名称</th><th>发生时间</th><th>时长</th><th>参与成员</th><th>操作</th></tr></thead>
-          <tbody id="taskTableBody"></tbody>
-        </table>
-      </div>
+      <div id="statsBox"></div>
     </div>
   </details>
 
+  <!-- 4. 通讯录 -->
+  <details id="contactPanel" style="display:none;">
+    <summary>
+      <div class="summary-inner">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+        <span>队员通讯录 (需密码)</span>
+      </div>
+    </summary>
+    <div class="details-content" id="contactContainer">
+      <div class="privacy-lock" id="lockView">
+        <p>
+          <svg style="width:16px; height:16px; fill:#e53935;" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+          为保护队员隐私，请输入队内访问口令：
+        </p>
+        <input type="password" id="contactPassword" placeholder="输入口令">
+        <button onclick="unlockContacts()">解锁</button>
+      </div>
+      <div id="contactDataView" style="display:none;"></div>
+    </div>
+  </details>
+
+  <!-- 5. 历史活动 -->
+  <details id="tasksPanel" style="display:none;">
+    <summary>
+      <div class="summary-inner">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+        <span>历史活动记录</span>
+      </div>
+    </summary>
+    <div class="details-content" id="taskList"></div>
+  </details>
+
+  <div id="emptyState" class="empty" style="display:none; font-weight: 300; color: #fff; text-align:center; padding:20px;">暂无活动记录</div>
 </main>
+
+<footer style="font-weight: 300; text-align: center; color: #90a4ae; font-size: 12px; padding: 20px 0 40px;">
+  <div>云和·蓝天救援队 · 活动公示</div>
+  <nav class="bottom-nav" id="bottomNav">
+    <a href="login.html">管理员登录</a>
+  </nav>
+</footer>
 
 <script type="module">
 import { supabase } from './supabaseClient.js';
 
+let globalMemberStats = {}; 
+let globalAllTasks = [];
+let globalAllMembers = [];
+const CONTACT_PASSWORD = "9958";
+
 const { data: { session } } = await supabase.auth.getSession();
-if (!session) { location.href = 'login.html'; throw new Error('not logged in'); }
-document.getElementById('logoutBtn').addEventListener('click', async (e) => { e.preventDefault(); await supabase.auth.signOut(); location.href = 'index.html'; });
+const nav = document.getElementById('nav');
+const bottomNav = document.getElementById('bottomNav');
 
-let allMembers = [];
-let allTasks = [];
-let allRecruits = [];
-let allSignups = [];
-
-// --- 1. 初始化加载 ---
-async function init() {
-  await Promise.all([loadMembers(), loadTasks(), loadRecruits()]);
-  renderRecruits();
-  renderTasks();
-}
-init();
-
-// --- 2. 队员与招募管理 ---
-async function loadMembers() {
-  const { data } = await supabase.from('members').select('*').order('name');
-  allMembers = data || [];
-  
-  document.getElementById('memberList').innerHTML = allMembers.map(m => `
-    <span style="display:inline-flex; align-items:center; gap:8px; padding:6px 10px; background:#e3f2fd; color:#1565c0; border-radius:6px; font-size:13px; margin:4px;">
-      <strong>${esc(m.name)}</strong> 
-      ${m.phone ? `<span style="color:#546e7a; display:flex; align-items:center; gap:4px;"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>${esc(m.phone)}</span>` : ''} 
-      ${m.emergency_contact ? `<span style="color:#546e7a; display:flex; align-items:center; gap:4px;"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>${esc(m.emergency_contact)}</span>` : ''}
-      <button type="button" onclick="deleteMember('${m.id}')" style="border:none;background:none;color:#e53935;cursor:pointer;font-weight:bold;">×</button>
-    </span>
-  `).join('');
-
-  document.getElementById('memberCheckboxes').innerHTML = allMembers.map(m => `
-    <label class="checkbox-item" style="background:#fff; padding:6px 12px; border:1px solid #eceff1; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; white-space:nowrap;">
-      <input type="checkbox" name="task_members" value="${esc(m.name)}" onchange="toggleHoursInput(this)">
-      <span style="min-width: 40px;">${esc(m.name)}</span>
-      <input type="number" step="0.5" min="0" class="member-hours-input" placeholder="时长" style="width:60px; padding:4px; border:1px solid #cfd8dc; border-radius:4px; display:none;">
-    </label>
-  `).join('');
+if (session) {
+  const html = `<a href="admin.html">管理后台</a><a href="#" class="logout-btn">退出</a>`;
+  nav.innerHTML = html; bottomNav.innerHTML = html;
+  document.querySelectorAll('.logout-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => { e.preventDefault(); await supabase.auth.signOut(); location.reload(); });
+  });
+} else {
+  const html = `<a href="login.html">管理员登录</a>`;
+  nav.innerHTML = html; bottomNav.innerHTML = html;
 }
 
-window.deleteMember = async (id) => {
-  if(!confirm('确定删除该队员吗？')) return;
-  await supabase.from('members').delete().eq('id', id);
-  loadMembers();
-};
+const [tasksRes, membersRes, recruitsRes, signupsRes] = await Promise.all([
+  supabase.from('tasks').select('*').order('task_time', { ascending: false }),
+  supabase.from('members').select('*').order('name'),
+  supabase.from('recruitments').select('*').eq('status', '招募中').order('created_at', { ascending: false }),
+  supabase.from('recruitment_signups').select('*')
+]);
 
-document.getElementById('memberForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const name = document.getElementById('newMemberName').value.trim();
-  const phone = document.getElementById('newMemberPhone').value.trim();
-  const emergency = document.getElementById('newMemberEmergency').value.trim();
-  if(!name) return;
-  const { error } = await supabase.from('members').insert({ name, phone, emergency_contact: emergency });
-  if(error) alert(error.message);
-  else { document.getElementById('memberForm').reset(); loadMembers(); }
-});
+document.getElementById('loading').style.display = 'none';
+globalAllTasks = tasksRes.data || [];
+globalAllMembers = membersRes.data || [];
 
-async function loadRecruits() {
-  const [rRes, sRes] = await Promise.all([
-    supabase.from('recruitments').select('*').order('created_at', { ascending: false }),
-    supabase.from('recruitment_signups').select('*')
-  ]);
-  allRecruits = rRes.data || [];
-  allSignups = sRes.data || [];
-}
-
-function renderRecruits() {
-  const tbody = document.getElementById('recruitTableBody');
-  if (allRecruits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#90a4ae;">暂无招募令</td></tr>'; return; }
-
-  tbody.innerHTML = allRecruits.map(r => {
-    const signups = allSignups.filter(s => s.recruitment_id === r.id);
-    const names = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
-    const statusTag = r.status === '招募中' ? '<span style="color:#2e7d32; font-weight:bold;">● 招募中</span>' : '<span style="color:#78909c;">○ 已结束</span>';
-    const typeTag = r.event_type ? `<span class="type-tag">${esc(r.event_type)}</span>` : '';
+// 渲染招募接龙
+if (recruitsRes.data && recruitsRes.data.length > 0) {
+  document.getElementById('recruitPanel').style.display = 'block';
+  document.getElementById('recruitList').innerHTML = recruitsRes.data.map(r => {
+    const signups = (signupsRes.data || []).filter(s => s.recruitment_id === r.id);
+    const signupNames = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
     
     return `
-      <tr>
-        <td>${statusTag}</td>
-        <td>
-          <div style="font-weight:500; color:#1f2d3d;">${typeTag}${esc(r.title)}</div>
-          <div class="info-row" style="margin-top:6px;">
-            <svg class="info-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-            ${formatTime(r.task_time)}
-          </div>
-          <div class="info-row">
-            <svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            ${esc(r.location) || '待定'}
-          </div>
-        </td>
-        <td style="max-width:300px;">${names || '<span style="color:#b0bec5; font-size:12px;">暂无人报名</span>'}</td>
-        <td>
-          <div class="action-btns">
-            <button class="btn sm" style="padding:4px 8px; background:#e53935;" onclick="shareToWeChat(${r.id})">
-              <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:#fff;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
-              分享文案
-            </button>
-            <button class="btn sm" style="padding:4px 8px; background:#1565c0;" onclick="convertToTask(${r.id})">一键转出勤</button>
-            <button class="btn sm gray" style="padding:4px 8px;" onclick="toggleRecruitStatus(${r.id}, '${r.status}')">${r.status === '招募中' ? '结束' : '开启'}</button>
-            <button class="btn sm red" style="padding:4px 8px;" onclick="deleteRecruit(${r.id})">删除</button>
-          </div>
-        </td>
-      </tr>
+      <div class="recruit-card">
+        <h3 style="margin:0 0 8px; font-size:16px; color:#e53935; font-weight:500;">
+          ${r.event_type ? `<span style="background:#ffcdd2; color:#c62828; padding:2px 6px; border-radius:4px; font-size:12px; margin-right:6px;">${esc(r.event_type)}</span>` : ''}
+          ${esc(r.title)}
+        </h3>
+        <div class="info-row">
+          <svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          地点：${esc(r.location) || '待定'}
+        </div>
+        <div class="info-row">
+          <svg class="info-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+          时间：${formatTime(r.task_time)}
+        </div>
+        ${r.content ? `<p style="margin:10px 0; font-size:13px; color:#78909c; background:#f9fbfd; padding:8px; border-radius:4px;">${esc(r.content)}</p>` : ''}
+        
+        <div style="margin: 12px 0;">
+          <div style="font-size:12px; color:#78909c; margin-bottom:6px;">已报名 (${signups.length}人)：</div>
+          <div>${signupNames || '<span style="color:#b0bec5; font-size:12px;">暂无，快来抢沙发！</span>'}</div>
+        </div>
+        
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="text" id="signupName_${r.id}" placeholder="输入真实姓名报名" style="flex:1; padding:10px; border:1px solid #cfd8dc; border-radius:6px; font-size:14px;">
+          <button onclick="handleSignup(${r.id})" style="background:#e53935; color:#fff; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:400;">接龙</button>
+        </div>
+      </div>
     `;
   }).join('');
 }
 
-document.getElementById('recruitForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const typeEl = document.querySelector('input[name="r_event_type"]:checked');
-  const payload = {
-    title: document.getElementById('rTitle').value.trim(),
-    event_type: typeEl ? typeEl.value : null,
-    location: document.getElementById('rLocation').value.trim(),
-    task_time: document.getElementById('rTime').value ? new Date(document.getElementById('rTime').value).toISOString() : null,
-    content: document.getElementById('rContent').value.trim(),
-    status: '招募中'
-  };
-  const { error } = await supabase.from('recruitments').insert(payload);
-  if(error) alert(error.message);
-  else { document.getElementById('recruitForm').reset(); loadRecruits().then(renderRecruits); }
-});
+window.handleSignup = async (id) => {
+  const input = document.getElementById(`signupName_${id}`);
+  const name = input.value.trim();
+  if (!name) { alert('请输入姓名'); return; }
+  
+  const isMember = globalAllMembers.some(m => m.name === name);
+  if (!isMember) { alert('报名失败：你不是本队队员，或姓名输入有误。'); return; }
+  
+  const { data: existing } = await supabase.from('recruitment_signups').select('*').eq('recruitment_id', id).eq('member_name', name);
+  if (existing && existing.length > 0) { alert('你已经报过名啦，无需重复报名！'); return; }
 
-window.toggleRecruitStatus = async (id, currentStatus) => {
-  const newStatus = currentStatus === '招募中' ? '已结束' : '招募中';
-  await supabase.from('recruitments').update({ status: newStatus }).eq('id', id);
-  loadRecruits().then(renderRecruits);
+  const { error } = await supabase.from('recruitment_signups').insert({ recruitment_id: id, member_name: name });
+  if (error) alert('报名失败：' + error.message);
+  else { alert('接龙成功！请准时参加。'); location.reload(); }
 };
 
-window.deleteRecruit = async (id) => {
-  if(!confirm('确定删除该招募令吗？')) return;
-  await supabase.from('recruitments').delete().eq('id', id);
-  loadRecruits().then(renderRecruits);
-};
-
-// 一键转为出勤记录
-window.convertToTask = async (id) => {
-  const r = allRecruits.find(x => x.id === id);
-  const signups = allSignups.filter(s => s.recruitment_id === id);
-  if (signups.length === 0) { alert('该招募令暂无人员报名'); return; }
-  
-  document.getElementById('title').value = r.title;
-  document.getElementById('task_time').value = toLocalInput(r.task_time);
-  document.getElementById('content').value = r.content || '';
-  
-  if (r.event_type) {
-    document.querySelectorAll('input[name="event_type"]').forEach(radio => {
-      radio.checked = (radio.value === r.event_type);
-    });
-  }
-  
-  document.querySelectorAll('input[name="task_members"]').forEach(cb => {
-    cb.checked = false; toggleHoursInput(cb);
-    if (signups.some(s => s.member_name === cb.value)) {
-      cb.checked = true;
-      toggleHoursInput(cb);
-      cb.parentElement.querySelector('.member-hours-input').value = '4';
-    }
-  });
-  
-  document.querySelector('.member-select-details').open = true;
-  document.querySelectorAll('.details-card')[2].open = true; 
-  
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  alert('报名人员及活动类型已自动填好，请核对时长后保存出勤记录。');
-};
-
-// 一键生成微信群分享文案
-window.shareToWeChat = (id) => {
-  const r = allRecruits.find(x => x.id === id);
-  const signups = allSignups.filter(s => s.recruitment_id === r.id);
-  let siteUrl = window.location.href.replace('admin.html', 'index.html');
-  
-  let text = `【云和·蓝天救援队 任务招募】\n\n`;
-  text += `[类型] ${r.event_type || '待定'}\n`;
-  text += `[任务] ${r.title}\n`;
-  text += `[时间] ${formatTime(r.task_time)}\n`;
-  text += `[地点] ${r.location || '待定'}\n`;
-  if (r.content) text += `[详情] ${r.content}\n`;
-  
-  text += `\n[报名] 已有 ${signups.length} 人报名：\n`;
-  if (signups.length > 0) {
-    text += signups.map(s => s.member_name).join('、') + '\n';
-  } else {
-    text += `（暂无，快来抢沙发！）\n`;
-  }
-
-  text += `\n请点击下方链接，打开网页输入真实姓名进行接龙报名：\n${siteUrl}\n\n`;
-  text += `（请大家积极报名，注意安全！）`;
-
-  navigator.clipboard.writeText(text).then(() => {
-    alert('招募文案已复制！\n\n请打开微信群，直接粘贴发送即可。');
-  }).catch(err => {
-    const textarea = document.createElement('textarea');
-    textarea.value = text; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea);
-    alert('招募文案已复制！\n\n请打开微信群，直接粘贴发送即可。');
-  });
-};
-
-// --- 3. 历史记录与导出 ---
-async function loadTasks() {
-  const { data } = await supabase.from('tasks').select('*').order('task_time', { ascending: false });
-  allTasks = data || [];
+if (!tasksRes.error && globalAllTasks.length > 0) {
+  document.getElementById('statsPanel').style.display = 'block';
+  document.getElementById('personalPanel').style.display = 'block';
+  document.getElementById('tasksPanel').style.display = 'block';
+  processTasksData(globalAllTasks); 
+  renderTaskList(globalAllTasks);   
+  renderStatsTable();      
+  renderCharts();          
+} else {
+  document.getElementById('emptyState').style.display = 'block';
 }
 
-function renderTasks() {
-  const tbody = document.getElementById('taskTableBody');
-  if (allTasks.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#90a4ae;">暂无记录</td></tr>'; return; }
+if (globalAllMembers.length > 0) document.getElementById('contactPanel').style.display = 'block';
 
-  tbody.innerHTML = allTasks.map(t => {
+function processTasksData(tasks) {
+  globalMemberStats = {};
+  tasks.forEach(t => {
+    const type = t.event_type || ''; 
+    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
+      t.member_hours.forEach(m => {
+        const hours = parseFloat(m.hours) || 0;
+        if (hours > 0 && m.name) {
+          if (!globalMemberStats[m.name]) globalMemberStats[m.name] = { rescue: 0, training: 0, fire: 0, total: 0 };
+          globalMemberStats[m.name].total += hours;
+          if (type === '公益救援') globalMemberStats[m.name].rescue += hours;
+          else if (type === '技能培训') globalMemberStats[m.name].training += hours;
+          else if (type === '森林消防') globalMemberStats[m.name].fire += hours;
+        }
+      });
+    } 
+  });
+}
+
+function renderCharts() {
+  if (Object.keys(globalMemberStats).length === 0) return;
+  const sortedMembers = Object.entries(globalMemberStats).sort((a, b) => b[1].total - a[1].total);
+  const top10 = sortedMembers.slice(0, 10);
+  
+  const barChart = echarts.init(document.getElementById('barChart'));
+  barChart.setOption({
+    title: { text: '出勤前十名 (小时)', left: 'center', textStyle: { fontSize: 14, fontWeight: 400, color: '#546e7a' } },
+    tooltip: { trigger: 'axis' }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: { type: 'category', data: top10.map(x => x[0]), axisLabel: { color: '#78909c' } },
+    yAxis: { type: 'value', axisLabel: { color: '#78909c' }, splitLine: { lineStyle: { type: 'dashed' } } },
+    series: [{ data: top10.map(x => x[1].total), type: 'bar', itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#64b5f6' }, { offset: 1, color: '#1565c0' }]), borderRadius: [4, 4, 0, 0] }, barMaxWidth: 30 }]
+  });
+
+  let totalRescue = 0, totalTraining = 0, totalFire = 0;
+  Object.values(globalMemberStats).forEach(d => { totalRescue += d.rescue; totalTraining += d.training; totalFire += d.fire; });
+  
+  const pieChart = echarts.init(document.getElementById('pieChart'));
+  pieChart.setOption({
+    title: { text: '任务类型时长占比', left: 'center', textStyle: { fontSize: 14, fontWeight: 400, color: '#546e7a' } },
+    tooltip: { trigger: 'item', formatter: '{b}: {c} 小时 ({d}%)' },
+    legend: { bottom: '0%', icon: 'circle', textStyle: { color: '#78909c' } },
+    color: ['#42a5f5', '#66bb6a', '#ef5350'],
+    series: [{ type: 'pie', radius: ['40%', '70%'], avoidLabelOverlap: false, itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 }, label: { show: false }, data: [{ value: parseFloat(totalRescue.toFixed(1)), name: '公益救援' }, { value: parseFloat(totalTraining.toFixed(1)), name: '技能培训' }, { value: parseFloat(totalFire.toFixed(1)), name: '森林消防' }] }]
+  });
+  window.addEventListener('resize', () => { barChart.resize(); pieChart.resize(); });
+}
+
+function renderStatsTable() {
+  const statsBox = document.getElementById('statsBox');
+  const sortedMembers = Object.entries(globalMemberStats).sort((a, b) => b[1].total - a[1].total);
+  
+  if (sortedMembers.length === 0) { statsBox.innerHTML = '<div class="empty">暂无记录</div>'; return; }
+  
+  // 限制只取前 10 名
+  const top10 = sortedMembers.slice(0, 10);
+  const fmt = (num) => parseFloat(num.toFixed(1));
+
+  statsBox.innerHTML = `
+    <table class="stats-table">
+      <thead><tr><th class="rank">排名</th><th>队员姓名</th><th>总时长</th></tr></thead>
+      <tbody>
+        ${top10.map((item, index) => {
+          const name = item[0], data = item[1];
+          let rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
+          let detailsHtml = '';
+          if (data.rescue > 0) detailsHtml += `<span class="detail-badge rescue">公益救援：${fmt(data.rescue)}h</span>`;
+          if (data.training > 0) detailsHtml += `<span class="detail-badge training">技能培训：${fmt(data.training)}h</span>`;
+          if (data.fire > 0) detailsHtml += `<span class="detail-badge fire">森林消防：${fmt(data.fire)}h</span>`;
+          if (detailsHtml === '') detailsHtml = '<span class="detail-badge">暂无分类明细</span>';
+
+          return `
+            <tr>
+              <td class="rank ${rankClass}">${index + 1}</td>
+              <td><span class="clickable-name" onclick="toggleDetail('detail-${index}', this)">${esc(name)} <span class="arrow">▼</span></span></td>
+              <td class="total-col">${fmt(data.total)} 小时</td>
+            </tr>
+            <tr id="detail-${index}" class="details-row" style="display: none;"><td colspan="3"><div class="details-flex">${detailsHtml}</div></td></tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+document.getElementById('queryBtn').addEventListener('click', () => {
+  const name = document.getElementById('queryNameInput').value.trim();
+  const resultBox = document.getElementById('personalResult');
+  if (!name) { alert('请输入姓名'); return; }
+  
+  const data = globalMemberStats[name];
+  if (!data) {
+    resultBox.innerHTML = `<h3 style="color:#e53935;">未找到“${esc(name)}”的记录</h3><p>请检查输入是否正确，或联系管理员录入。</p>`;
+    resultBox.style.display = 'block'; return;
+  }
+
+  const fmt = (num) => parseFloat(num.toFixed(1));
+  resultBox.innerHTML = `
+    <h3>
+      <svg class="svg-big" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      ${esc(name)}，你的出勤报告：
+    </h3>
+    <p>累计总时长：<strong style="color:#1565c0; font-size:18px;">${fmt(data.total)}</strong> 小时</p>
+    <p style="margin-top:10px;">
+      公益救援：<span class="detail-badge rescue">${fmt(data.rescue)}h</span> &nbsp;
+      技能培训：<span class="detail-badge training">${fmt(data.training)}h</span> &nbsp;
+      森林消防：<span class="detail-badge fire">${fmt(data.fire)}h</span>
+    </p>
+  `;
+  resultBox.style.display = 'block';
+});
+
+window.unlockContacts = async () => {
+  const pwd = document.getElementById('contactPassword').value;
+  if (pwd === CONTACT_PASSWORD) {
+    document.getElementById('lockView').style.display = 'none';
+    document.getElementById('contactDataView').style.display = 'block';
+    document.getElementById('contactDataView').innerHTML = `
+      <table class="contact-table">
+        <thead><tr><th>姓名</th><th>联系电话</th><th>紧急联系人</th></tr></thead>
+        <tbody>
+          ${globalAllMembers.map(m => `
+            <tr>
+              <td>${esc(m.name)}</td>
+              <td>${m.phone ? `<a href="tel:${esc(m.phone)}" style="color:#1565c0;text-decoration:none;">${esc(m.phone)}</a>` : '-'}</td>
+              <td>${esc(m.emergency_contact) || '-'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } else {
+    alert('口令错误，请重试！');
+    document.getElementById('contactPassword').value = '';
+  }
+};
+
+function renderTaskList(tasks) {
+  document.getElementById('taskList').innerHTML = tasks.map(t => {
+    let membersHtml = (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) 
+      ? t.member_hours.map(m => `${esc(m.name)}(${m.hours}h)`).join('、') : esc(t.members).replace(/\n/g, '、');
+
     let displayDuration = t.duration;
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
       const arr = t.member_hours.map(m => parseFloat(m.hours) || 0);
       if (arr.length > 0) displayDuration = Math.max(...arr);
     }
-    let membersStr = (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) 
-      ? t.member_hours.map(m => `${m.name}(${m.hours}h)`).join('、') : (t.members || '-');
-
-    let typeTag = t.event_type ? `<span class="type-tag">${esc(t.event_type)}</span>` : '-';
 
     return `
-    <tr>
-      <td>${typeTag}</td>
-      <td style="font-weight: 400; color: #1f2d3d;">${esc(t.title)}</td>
-      <td style="color: #78909c;">${formatTime(t.task_time)}</td>
-      <td>${displayDuration ? displayDuration + 'h' : '-'}</td>
-      <td class="col-members" title="${esc(membersStr)}">${esc(membersStr)}</td>
-      <td>
-        <div class="action-btns">
-          <button class="btn sm gray" data-edit="${t.id}" style="padding: 4px 8px;">编辑</button>
-          <button class="btn sm blue" data-export="${t.id}" style="padding: 4px 8px; background:#0d47a1;">导出</button>
-          <button class="btn sm red" data-del="${t.id}" style="padding: 4px 8px;">删除</button>
+      <article class="card" style="box-shadow:none; border:1px solid #f0f4f8; margin-bottom:12px; background: #fafbfc; border-radius: 8px;">
+        <div style="margin-bottom:6px;">
+          ${t.event_type ? `<span class="type-tag">${esc(t.event_type)}</span>` : ''}
+          <span style="font-weight: 400; font-size: 15px; color: #1f2d3d;">${esc(t.title)}</span>
         </div>
-      </td>
-    </tr>`}).join('');
-
-  tbody.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => startEdit(allTasks.find(x => String(x.id) === btn.dataset.edit))));
-  tbody.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', async () => {
-      if (!confirm('确定删除该记录？')) return;
-      await supabase.from('tasks').delete().eq('id', btn.dataset.del);
-      loadTasks().then(renderTasks);
-    }));
-  tbody.querySelectorAll('[data-export]').forEach(btn => btn.addEventListener('click', () => {
-      const task = allTasks.find(x => String(x.id) === btn.dataset.export);
-      if (task) exportTasksToCSV([task], `出勤记录_${task.title}`);
-    }));
+        <div class="meta" style="color: #78909c; font-size: 13px;">
+          活动时间：${formatTime(t.task_time)} 
+          ${displayDuration ? ` · 任务时长：${esc(displayDuration)} 小时` : ''}
+        </div>
+        ${t.content ? `<div class="content" style="color: #546e7a; margin-top: 8px;">${esc(t.content)}</div>` : ''}
+        ${membersHtml ? `<div class="members" style="margin-top: 8px; font-size: 13px;"><strong>参与成员：</strong>${membersHtml}</div>` : ''}
+      </article>
+    `;
+  }).join('');
 }
 
-document.getElementById('taskForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const id = document.getElementById('taskId').value;
-  const timeInput = document.getElementById('task_time').value;
-  const eventType = document.querySelector('input[name="event_type"]:checked')?.value;
-  
-  const memberHoursArr = []; let maxDuration = 0; let membersNames = [];
-  document.querySelectorAll('input[name="task_members"]').forEach(cb => {
-    if (cb.checked) {
-      const hours = parseFloat(cb.parentElement.querySelector('.member-hours-input').value) || 0;
-      memberHoursArr.push({ name: cb.value, hours: hours });
-      membersNames.push(cb.value);
-      if (hours > maxDuration) maxDuration = hours;
-    }
-  });
-
-  if (membersNames.length === 0) { alert('请至少勾选一名成员'); return; }
-
-  const payload = {
-    title: document.getElementById('title').value.trim(),
-    event_type: eventType,
-    task_time: timeInput ? new Date(timeInput).toISOString() : null,
-    content: document.getElementById('content').value.trim(),
-    members: membersNames.join(', '),
-    duration: maxDuration.toString(),
-    member_hours: memberHoursArr,
-  };
-
-  const res = id ? await supabase.from('tasks').update(payload).eq('id', id) : await supabase.from('tasks').insert(payload);
-  if (res.error) alert('保存失败：' + res.error.message);
-  else { document.getElementById('taskForm').reset(); document.getElementById('taskId').value = ''; loadTasks().then(renderTasks); alert('保存成功'); }
-});
-
-// 辅助工具
-window.toggleHoursInput = (checkbox) => {
-  const input = checkbox.parentElement.querySelector('.member-hours-input');
-  if (checkbox.checked) { input.style.display = 'inline-block'; input.required = true; }
-  else { input.style.display = 'none'; input.required = false; input.value = ''; }
-};
-window.filterMemberCheckboxes = (keyword) => {
-  const kw = keyword.trim().toLowerCase();
-  document.querySelectorAll('#memberCheckboxes .checkbox-item').forEach(label => {
-    const name = label.querySelector('span').textContent.toLowerCase();
-    label.style.display = name.includes(kw) ? 'inline-flex' : 'none';
-  });
+window.toggleDetail = (detailId, nameElement) => {
+  const detailRow = document.getElementById(detailId);
+  const arrow = nameElement.querySelector('.arrow');
+  if (detailRow.style.display === 'none') { detailRow.style.display = 'table-row'; arrow.classList.add('open'); }
+  else { detailRow.style.display = 'none'; arrow.classList.remove('open'); }
 };
 
-function startEdit(t) {
-  document.getElementById('taskId').value = t.id;
-  document.getElementById('title').value = t.title || '';
-  document.getElementById('content').value = t.content || '';
-  document.getElementById('task_time').value = toLocalInput(t.task_time);
-  document.querySelectorAll('input[name="event_type"]').forEach(r => r.checked = (r.value === t.event_type));
-  
-  const taskMembers = t.members ? t.members.split(',').map(s => s.trim()) : [];
-  const memberHoursData = t.member_hours || [];
-  document.querySelectorAll('input[name="task_members"]').forEach(cb => {
-    if (taskMembers.includes(cb.value)) {
-      cb.checked = true; toggleHoursInput(cb);
-      const found = memberHoursData.find(x => x.name === cb.value);
-      cb.parentElement.querySelector('.member-hours-input').value = found ? found.hours : (t.duration || 0);
-    } else {
-      cb.checked = false; toggleHoursInput(cb);
-    }
-  });
-
-  document.querySelectorAll('.details-card')[2].open = true; 
-  document.querySelector('.member-select-details').open = true;
-
-  document.getElementById('submitBtn').textContent = '保存修改';
-  document.getElementById('cancelEdit').style.display = 'inline-block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-document.getElementById('cancelEdit').addEventListener('click', (e) => {
-  e.preventDefault(); document.getElementById('taskForm').reset(); document.getElementById('taskId').value = '';
-  document.getElementById('submitBtn').textContent = '保存记录'; e.target.style.display = 'none';
-});
-
-function toLocalInput(t) {
-  if (!t) return '';
-  const d = new Date(t); const p = n => String(n).padStart(2,'0');
-  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
-}
-function formatTime(t) {
-  if (!t) return '待定';
-  const d = new Date(t); const p = n => String(n).padStart(2,'0');
-  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
-}
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-// 导出事件的简单占位（复用第一阶段的复杂逻辑或直接调用 CSV 函数）
-function exportTasksToCSV(data, name) {
-  if (!data || data.length === 0) return alert("无数据");
-  const headers = ['类型', '名称', '时间', '总时长', '详情'];
-  const rows = data.map(t => [t.event_type||'', t.title||'', formatTime(t.task_time), t.duration||'', t.content||'']);
-  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement("a"); link.href = URL.createObjectURL(blob);
-  link.download = `${name}.csv`; link.click();
-}
-document.getElementById('exportAllBtn').addEventListener('click', () => exportTasksToCSV(allTasks, '全部记录'));
-document.getElementById('exportMembersBtn').addEventListener('click', () => alert('功能已就绪，请使用之前的完整导出逻辑'));
+function formatTime(t) { if (!t) return '待定'; const d = new Date(t); if (isNaN(d)) return t; const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
 </script>
 </body>
 </html>

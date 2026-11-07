@@ -8,78 +8,38 @@
 <!-- 引入 ECharts 图表库 -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <style>
-  /* 全局字体设置 */
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
-    font-weight: 300; 
-    background: #e4e7eb; /* 银灰色背景 */
-    color: #333;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 300; background: #e4e7eb; color: #333; }
 
-  /* 头部：深蓝底白字 */
   header {
-    background: #0d47a1;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-    padding: 30px 20px 20px;
-    text-align: center;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    background: #0d47a1; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    padding: 30px 20px 20px; text-align: center; position: relative;
+    display: flex; flex-direction: column; align-items: center;
   }
-  
   .logo-container { margin-bottom: 12px; width: 100%; display: flex; justify-content: center; }
   .logo-container img { height: 65px; max-width: 100%; object-fit: contain; }
-
-  .main-title {
-    font-size: 28px; font-weight: 400; color: #ffffff;
-    letter-spacing: 3px; margin: 0; line-height: 1.2; 
-  }
-
-  .slogan {
-    color: rgba(255, 255, 255, 0.85); font-size: 13px; font-weight: 300;
-    margin-top: 6px; letter-spacing: 1px;
-  }
+  .main-title { font-size: 28px; font-weight: 400; color: #ffffff; letter-spacing: 3px; margin: 0; line-height: 1.2; }
+  .slogan { color: rgba(255, 255, 255, 0.85); font-size: 13px; font-weight: 300; margin-top: 6px; letter-spacing: 1px; }
   .slogan span { margin: 0 6px; }
-
   .top-nav { position: absolute; right: 20px; top: 20px; font-size: 14px; }
   .top-nav a { color: #ffffff; text-decoration: none; margin-left: 15px; transition: color 0.2s; }
   .top-nav a:hover { color: #90caf9; }
-
   .bottom-nav { display: none; }
-
   main { max-width: 800px; margin: 30px auto; padding: 0 14px; }
 
   /* 折叠面板 */
-  details {
-    background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    margin-bottom: 16px; overflow: hidden; border: none;
-  }
-  summary {
-    padding: 16px 20px; font-size: 16px; font-weight: 400; letter-spacing: 1px;
-    cursor: pointer; background: #64b5f6; color: #ffffff; list-style: none;
-    display: flex; align-items: center; justify-content: space-between; 
-    user-select: none; transition: background 0.2s;
-  }
+  details { background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 16px; overflow: hidden; border: none; }
+  summary { padding: 16px 20px; font-size: 16px; font-weight: 400; letter-spacing: 1px; cursor: pointer; background: #64b5f6; color: #ffffff; list-style: none; display: flex; align-items: center; justify-content: space-between; user-select: none; transition: background 0.2s; }
   summary:hover { background: #42a5f5; } 
   summary::-webkit-details-marker { display: none; }
-  
   .summary-inner { display: flex; align-items: center; gap: 10px; }
   .icon-svg { width: 20px; height: 20px; fill: #ffffff; }
-  
-  summary::after {
-    content: '▼'; font-size: 12px; color: rgba(255, 255, 255, 0.7); transition: transform 0.3s ease;
-  }
+  summary::after { content: '▼'; font-size: 12px; color: rgba(255, 255, 255, 0.7); transition: transform 0.3s ease; }
   details[open] summary::after { transform: rotate(180deg); }
   details[open] summary { border-bottom: 1px solid #e3f2fd; }
-  
   .details-content { padding: 16px 20px; background: #ffffff; color: #333; }
 
   /* 图表容器 */
-  .charts-container {
-    display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;
-    background: #f9fbfd; padding: 15px; border-radius: 8px;
-  }
+  .charts-container { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; background: #f9fbfd; padding: 15px; border-radius: 8px; }
   .chart-box { flex: 1; min-width: 300px; height: 260px; }
 
   /* 排行榜表格 */
@@ -87,17 +47,14 @@
   .stats-table th, .stats-table td { padding: 14px 8px; border-bottom: 1px solid #eceff1; font-weight: 300; }
   .stats-table th { color: #78909c; font-weight: 400; background: #fafbfc; }
   .stats-table td:nth-child(2) { text-align: left; }
-  
   .clickable-name { cursor: pointer; color: #1565c0; font-weight: 400; display: inline-flex; align-items: center; gap: 6px; }
   .arrow { font-size: 10px; color: #b0bec5; transition: transform 0.3s ease; }
   .arrow.open { transform: rotate(180deg); }
-
   .rank { font-weight: 400; color: #90a4ae; width: 50px;}
   .rank-1 { color: #f57f17; font-size: 18px; font-weight: 500;}
   .rank-2 { color: #78909c; font-size: 18px; font-weight: 500;}
   .rank-3 { color: #8d6e63; font-size: 18px; font-weight: 500;}
   .total-col { font-weight: 500; color: #1565c0; }
-
   .details-row td { background: #f9fbfd; padding: 12px 15px; border-bottom: 1px solid #eceff1; }
   .details-flex { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
   .detail-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 300; background: #fff; border: 1px solid #cfd8dc; color: #546e7a; }
@@ -107,38 +64,20 @@
 
   /* 个人查询区 */
   .search-box { display: flex; gap: 10px; margin-bottom: 15px; }
-  .search-box input {
-    flex: 1; padding: 12px 16px; border: 1px solid #cfd8dc; border-radius: 8px;
-    font-size: 15px; outline: none; transition: border-color 0.2s;
-  }
+  .search-box input { flex: 1; padding: 12px 16px; border: 1px solid #cfd8dc; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; }
   .search-box input:focus { border-color: #1565c0; }
-  .search-box button {
-    padding: 0 24px; background: #1565c0; color: #fff; border: none; border-radius: 8px;
-    font-size: 15px; cursor: pointer; transition: background 0.2s;
-  }
+  .search-box button { padding: 0 24px; background: #1565c0; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: background 0.2s; }
   .search-box button:hover { background: #0d47a1; }
-  
-  .personal-result {
-    background: #f4f7fb; padding: 20px; border-radius: 8px; margin-top: 15px; display: none;
-    border-left: 4px solid #1565c0;
-  }
-  .personal-result h3 { margin: 0 0 10px; font-size: 16px; font-weight: 500; color: #1f2d3d; }
+  .personal-result { background: #f4f7fb; padding: 20px; border-radius: 8px; margin-top: 15px; display: none; border-left: 4px solid #1565c0; }
+  .personal-result h3 { margin: 0 0 10px; font-size: 16px; font-weight: 500; color: #1f2d3d; display:flex; align-items:center; gap:8px;}
   .personal-result p { margin: 6px 0; font-size: 14px; color: #546e7a; }
+  .personal-result .svg-big { width: 24px; height: 24px; fill: #1565c0; }
 
   /* 通讯录密码锁 */
-  .privacy-lock {
-    text-align: center; padding: 30px 20px; background: #f9fbfd; border-radius: 8px;
-    border: 1px dashed #cfd8dc;
-  }
-  .privacy-lock p { color: #78909c; font-size: 14px; margin-bottom: 15px; }
-  .privacy-lock input {
-    padding: 10px 14px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 14px;
-    width: 200px; margin-right: 10px; outline: none;
-  }
-  .privacy-lock button {
-    padding: 10px 20px; background: #1565c0; color: #fff; border: none; border-radius: 6px;
-    cursor: pointer; font-size: 14px;
-  }
+  .privacy-lock { text-align: center; padding: 30px 20px; background: #f9fbfd; border-radius: 8px; border: 1px dashed #cfd8dc; }
+  .privacy-lock p { color: #78909c; font-size: 14px; margin-bottom: 15px; display:flex; justify-content:center; align-items:center; gap:6px;}
+  .privacy-lock input { padding: 10px 14px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 14px; width: 200px; margin-right: 10px; outline: none; }
+  .privacy-lock button { padding: 10px 20px; background: #1565c0; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
 
   /* 通讯录表格 */
   .contact-table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -147,41 +86,27 @@
   .contact-table td { font-weight: 300; }
   .contact-table td:first-child { font-weight: 400; color: #1f2d3d; }
 
-  /* 招募接龙面板 (红字高亮) */
-  .recruit-panel-red {
-    border: 1px solid #e53935 !important;
-    box-shadow: 0 4px 15px rgba(229,57,53,0.1) !important;
-  }
-  .recruit-panel-red summary {
-    background: #e53935 !important;
-  }
-  .recruit-panel-red summary:hover {
-    background: #d32f2f !important;
-  }
-  .recruit-card {
-    background: #fff; border: 1px solid #ffcdd2; border-radius: 8px;
-    padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-  }
+  /* 招募接龙面板 */
+  .recruit-panel-red { border: 1px solid #e53935 !important; box-shadow: 0 4px 15px rgba(229,57,53,0.1) !important; }
+  .recruit-panel-red summary { background: #e53935 !important; }
+  .recruit-panel-red summary:hover { background: #d32f2f !important; }
+  .recruit-card { background: #fff; border: 1px solid #ffcdd2; border-radius: 8px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
   .signup-tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 16px; font-size: 13px; margin: 4px; }
+  
+  .info-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #546e7a; margin: 4px 0; }
+  .info-icon { width: 14px; height: 14px; fill: #78909c; }
 
   /* 历史活动卡片 */
-  .type-tag {
-    display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717;
-    border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 8px; vertical-align: middle;
-  }
+  .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 8px; vertical-align: middle; }
   .card { font-weight: 300; }
   .card h2 { font-weight: 400; font-size: 15px; color: #1f2d3d; }
   .members { color: #546e7a; }
 
-  /* 手机端适配 */
   @media (max-width: 600px) {
     .main-title { font-size: 24px; }
     .top-nav { display: none; }
     .bottom-nav { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
-    .bottom-nav a {
-      color: #607d8b; text-decoration: none; font-size: 14px; padding: 8px 20px;
-      border: 1px solid #cfd8dc; border-radius: 20px; background: #fff; transition: all 0.2s;
-    }
+    .bottom-nav a { color: #607d8b; text-decoration: none; font-size: 14px; padding: 8px 20px; border: 1px solid #cfd8dc; border-radius: 20px; background: #fff; transition: all 0.2s; }
     .bottom-nav a:hover { color: #1565c0; border-color: #1565c0; }
     header { padding: 20px; }
     .details-content { padding: 12px; }
@@ -212,11 +137,10 @@
 <main>
   <div id="loading" class="empty" style="font-weight: 300; color: #fff; text-align:center; padding:20px;">加载数据中…</div>
 
-  <!-- 1. 任务招募接龙 (新增) -->
+  <!-- 1. 任务招募接龙 -->
   <details id="recruitPanel" class="recruit-panel-red" style="display:none;" open>
     <summary>
       <div class="summary-inner">
-        <!-- 喇叭图标 -->
         <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
         <span>任务招募接龙</span>
       </div>
@@ -258,7 +182,7 @@
     </div>
   </details>
 
-  <!-- 4. 通讯录 (密码锁) -->
+  <!-- 4. 通讯录 -->
   <details id="contactPanel" style="display:none;">
     <summary>
       <div class="summary-inner">
@@ -268,7 +192,10 @@
     </summary>
     <div class="details-content" id="contactContainer">
       <div class="privacy-lock" id="lockView">
-        <p>为保护队员隐私，请输入队内访问口令：</p>
+        <p>
+          <svg style="width:16px; height:16px; fill:#e53935;" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+          为保护队员隐私，请输入队内访问口令：
+        </p>
         <input type="password" id="contactPassword" placeholder="输入口令">
         <button onclick="unlockContacts()">解锁</button>
       </div>
@@ -300,11 +227,10 @@
 <script type="module">
 import { supabase } from './supabaseClient.js';
 
-// --- 全局变量与初始化 ---
 let globalMemberStats = {}; 
 let globalAllTasks = [];
 let globalAllMembers = [];
-const CONTACT_PASSWORD = "9958"; // 通讯录解锁口令
+const CONTACT_PASSWORD = "9958";
 
 const { data: { session } } = await supabase.auth.getSession();
 const nav = document.getElementById('nav');
@@ -314,16 +240,13 @@ if (session) {
   const html = `<a href="admin.html">管理后台</a><a href="#" class="logout-btn">退出</a>`;
   nav.innerHTML = html; bottomNav.innerHTML = html;
   document.querySelectorAll('.logout-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault(); await supabase.auth.signOut(); location.reload();
-    });
+    btn.addEventListener('click', async (e) => { e.preventDefault(); await supabase.auth.signOut(); location.reload(); });
   });
 } else {
   const html = `<a href="login.html">管理员登录</a>`;
   nav.innerHTML = html; bottomNav.innerHTML = html;
 }
 
-// --- 获取所有数据 (一次性拉取) ---
 const [tasksRes, membersRes, recruitsRes, signupsRes] = await Promise.all([
   supabase.from('tasks').select('*').order('task_time', { ascending: false }),
   supabase.from('members').select('*').order('name'),
@@ -332,23 +255,27 @@ const [tasksRes, membersRes, recruitsRes, signupsRes] = await Promise.all([
 ]);
 
 document.getElementById('loading').style.display = 'none';
-
 globalAllTasks = tasksRes.data || [];
 globalAllMembers = membersRes.data || [];
 
-// --- 1. 渲染招募接龙 ---
+// 渲染招募接龙
 if (recruitsRes.data && recruitsRes.data.length > 0) {
   document.getElementById('recruitPanel').style.display = 'block';
-  
   document.getElementById('recruitList').innerHTML = recruitsRes.data.map(r => {
     const signups = (signupsRes.data || []).filter(s => s.recruitment_id === r.id);
     const signupNames = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
     
     return `
       <div class="recruit-card">
-        <h3 style="margin:0 0 8px; font-size:16px; color:#e53935; font-weight:500;">🔥 ${esc(r.title)}</h3>
-        <p style="margin:4px 0; font-size:13px; color:#546e7a;">📍 地点：${esc(r.location) || '待定'}</p>
-        <p style="margin:4px 0; font-size:13px; color:#546e7a;">⏰ 时间：${formatTime(r.task_time)}</p>
+        <h3 style="margin:0 0 8px; font-size:16px; color:#e53935; font-weight:500;">${esc(r.title)}</h3>
+        <div class="info-row">
+          <svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          地点：${esc(r.location) || '待定'}
+        </div>
+        <div class="info-row">
+          <svg class="info-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+          时间：${formatTime(r.task_time)}
+        </div>
         ${r.content ? `<p style="margin:10px 0; font-size:13px; color:#78909c; background:#f9fbfd; padding:8px; border-radius:4px;">${esc(r.content)}</p>` : ''}
         
         <div style="margin: 12px 0;">
@@ -365,37 +292,26 @@ if (recruitsRes.data && recruitsRes.data.length > 0) {
   }).join('');
 }
 
-// 接龙报名逻辑
 window.handleSignup = async (id) => {
   const input = document.getElementById(`signupName_${id}`);
   const name = input.value.trim();
   if (!name) { alert('请输入姓名'); return; }
   
-  // 检查是否在队员名单里
   const isMember = globalAllMembers.some(m => m.name === name);
   if (!isMember) { alert('报名失败：你不是本队队员，或姓名输入有误。'); return; }
   
-  // 查重 (前端先查，防止重复点击)
   const { data: existing } = await supabase.from('recruitment_signups').select('*').eq('recruitment_id', id).eq('member_name', name);
-  if (existing && existing.length > 0) {
-    alert('你已经报过名啦，无需重复报名！'); return;
-  }
+  if (existing && existing.length > 0) { alert('你已经报过名啦，无需重复报名！'); return; }
 
   const { error } = await supabase.from('recruitment_signups').insert({ recruitment_id: id, member_name: name });
-  if (error) {
-    alert('报名失败：' + error.message);
-  } else {
-    alert('接龙成功！请准时参加。');
-    location.reload(); 
-  }
+  if (error) alert('报名失败：' + error.message);
+  else { alert('接龙成功！请准时参加。'); location.reload(); }
 };
 
-// --- 2. 处理任务数据与渲染 ---
 if (!tasksRes.error && globalAllTasks.length > 0) {
   document.getElementById('statsPanel').style.display = 'block';
   document.getElementById('personalPanel').style.display = 'block';
   document.getElementById('tasksPanel').style.display = 'block';
-  
   processTasksData(globalAllTasks); 
   renderTaskList(globalAllTasks);   
   renderStatsTable();      
@@ -404,9 +320,7 @@ if (!tasksRes.error && globalAllTasks.length > 0) {
   document.getElementById('emptyState').style.display = 'block';
 }
 
-if (globalAllMembers.length > 0) {
-  document.getElementById('contactPanel').style.display = 'block';
-}
+if (globalAllMembers.length > 0) document.getElementById('contactPanel').style.display = 'block';
 
 function processTasksData(tasks) {
   globalMemberStats = {};
@@ -427,36 +341,22 @@ function processTasksData(tasks) {
   });
 }
 
-// --- 3. 渲染图表 (ECharts) ---
 function renderCharts() {
   if (Object.keys(globalMemberStats).length === 0) return;
-  
   const sortedMembers = Object.entries(globalMemberStats).sort((a, b) => b[1].total - a[1].total);
   const top10 = sortedMembers.slice(0, 10);
   
   const barChart = echarts.init(document.getElementById('barChart'));
   barChart.setOption({
     title: { text: '出勤前十名 (小时)', left: 'center', textStyle: { fontSize: 14, fontWeight: 400, color: '#546e7a' } },
-    tooltip: { trigger: 'axis' },
-    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    tooltip: { trigger: 'axis' }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
     xAxis: { type: 'category', data: top10.map(x => x[0]), axisLabel: { color: '#78909c' } },
     yAxis: { type: 'value', axisLabel: { color: '#78909c' }, splitLine: { lineStyle: { type: 'dashed' } } },
-    series: [{
-      data: top10.map(x => x[1].total), type: 'bar',
-      itemStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: '#64b5f6' }, { offset: 1, color: '#1565c0' }
-        ]),
-        borderRadius: [4, 4, 0, 0]
-      },
-      barMaxWidth: 30
-    }]
+    series: [{ data: top10.map(x => x[1].total), type: 'bar', itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#64b5f6' }, { offset: 1, color: '#1565c0' }]), borderRadius: [4, 4, 0, 0] }, barMaxWidth: 30 }]
   });
 
   let totalRescue = 0, totalTraining = 0, totalFire = 0;
-  Object.values(globalMemberStats).forEach(d => {
-    totalRescue += d.rescue; totalTraining += d.training; totalFire += d.fire;
-  });
+  Object.values(globalMemberStats).forEach(d => { totalRescue += d.rescue; totalTraining += d.training; totalFire += d.fire; });
   
   const pieChart = echarts.init(document.getElementById('pieChart'));
   pieChart.setOption({
@@ -464,31 +364,15 @@ function renderCharts() {
     tooltip: { trigger: 'item', formatter: '{b}: {c} 小时 ({d}%)' },
     legend: { bottom: '0%', icon: 'circle', textStyle: { color: '#78909c' } },
     color: ['#42a5f5', '#66bb6a', '#ef5350'],
-    series: [{
-      type: 'pie', radius: ['40%', '70%'], avoidLabelOverlap: false,
-      itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
-      label: { show: false },
-      data: [
-        { value: parseFloat(totalRescue.toFixed(1)), name: '公益救援' },
-        { value: parseFloat(totalTraining.toFixed(1)), name: '技能培训' },
-        { value: parseFloat(totalFire.toFixed(1)), name: '森林消防' }
-      ]
-    }]
+    series: [{ type: 'pie', radius: ['40%', '70%'], avoidLabelOverlap: false, itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 }, label: { show: false }, data: [{ value: parseFloat(totalRescue.toFixed(1)), name: '公益救援' }, { value: parseFloat(totalTraining.toFixed(1)), name: '技能培训' }, { value: parseFloat(totalFire.toFixed(1)), name: '森林消防' }] }]
   });
-
   window.addEventListener('resize', () => { barChart.resize(); pieChart.resize(); });
 }
 
-// --- 4. 渲染排行榜表格 ---
 function renderStatsTable() {
   const statsBox = document.getElementById('statsBox');
   const sortedMembers = Object.entries(globalMemberStats).sort((a, b) => b[1].total - a[1].total);
-
-  if (sortedMembers.length === 0) {
-    statsBox.innerHTML = '<div class="empty">暂无记录</div>';
-    return;
-  }
-
+  if (sortedMembers.length === 0) { statsBox.innerHTML = '<div class="empty">暂无记录</div>'; return; }
   const fmt = (num) => parseFloat(num.toFixed(1));
 
   statsBox.innerHTML = `
@@ -498,7 +382,6 @@ function renderStatsTable() {
         ${sortedMembers.map((item, index) => {
           const name = item[0], data = item[1];
           let rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
-          
           let detailsHtml = '';
           if (data.rescue > 0) detailsHtml += `<span class="detail-badge rescue">公益救援：${fmt(data.rescue)}h</span>`;
           if (data.training > 0) detailsHtml += `<span class="detail-badge training">技能培训：${fmt(data.training)}h</span>`;
@@ -519,7 +402,6 @@ function renderStatsTable() {
   `;
 }
 
-// --- 5. 个人查询 ---
 document.getElementById('queryBtn').addEventListener('click', () => {
   const name = document.getElementById('queryNameInput').value.trim();
   const resultBox = document.getElementById('personalResult');
@@ -527,14 +409,17 @@ document.getElementById('queryBtn').addEventListener('click', () => {
   
   const data = globalMemberStats[name];
   if (!data) {
-    resultBox.innerHTML = `<h3 style="color:#e53935;">未找到“${esc(name)}”的出勤记录</h3><p>请检查输入是否正确，或联系管理员录入。</p>`;
+    resultBox.innerHTML = `<h3 style="color:#e53935;">未找到“${esc(name)}”的记录</h3><p>请检查输入是否正确，或联系管理员录入。</p>`;
     resultBox.style.display = 'block'; return;
   }
 
   const fmt = (num) => parseFloat(num.toFixed(1));
   resultBox.innerHTML = `
-    <h3>👋 ${esc(name)}，你的出勤报告如下：</h3>
-    <p>🏆 累计总时长：<strong style="color:#1565c0; font-size:18px;">${fmt(data.total)}</strong> 小时</p>
+    <h3>
+      <svg class="svg-big" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      ${esc(name)}，你的出勤报告：
+    </h3>
+    <p>累计总时长：<strong style="color:#1565c0; font-size:18px;">${fmt(data.total)}</strong> 小时</p>
     <p style="margin-top:10px;">
       公益救援：<span class="detail-badge rescue">${fmt(data.rescue)}h</span> &nbsp;
       技能培训：<span class="detail-badge training">${fmt(data.training)}h</span> &nbsp;
@@ -544,15 +429,12 @@ document.getElementById('queryBtn').addEventListener('click', () => {
   resultBox.style.display = 'block';
 });
 
-// --- 6. 通讯录密码锁 ---
 window.unlockContacts = async () => {
   const pwd = document.getElementById('contactPassword').value;
   if (pwd === CONTACT_PASSWORD) {
     document.getElementById('lockView').style.display = 'none';
     document.getElementById('contactDataView').style.display = 'block';
-    
     document.getElementById('contactDataView').innerHTML = `
-      <div style="font-size:12px; color:#e53935; background:#ffebee; padding:8px 12px; border-radius:6px; margin-bottom:15px; display:inline-block;">⚠️ 请勿随意外传。</div>
       <table class="contact-table">
         <thead><tr><th>姓名</th><th>联系电话</th><th>紧急联系人</th></tr></thead>
         <tbody>
@@ -572,12 +454,10 @@ window.unlockContacts = async () => {
   }
 };
 
-// --- 7. 历史活动 ---
 function renderTaskList(tasks) {
   document.getElementById('taskList').innerHTML = tasks.map(t => {
     let membersHtml = (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) 
-      ? t.member_hours.map(m => `${esc(m.name)}(${m.hours}h)`).join('、') 
-      : esc(t.members).replace(/\n/g, '、');
+      ? t.member_hours.map(m => `${esc(m.name)}(${m.hours}h)`).join('、') : esc(t.members).replace(/\n/g, '、');
 
     let displayDuration = t.duration;
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
@@ -602,27 +482,15 @@ function renderTaskList(tasks) {
   }).join('');
 }
 
-// --- 辅助工具 ---
 window.toggleDetail = (detailId, nameElement) => {
   const detailRow = document.getElementById(detailId);
   const arrow = nameElement.querySelector('.arrow');
-  if (detailRow.style.display === 'none') {
-    detailRow.style.display = 'table-row'; arrow.classList.add('open');
-  } else {
-    detailRow.style.display = 'none'; arrow.classList.remove('open');
-  }
+  if (detailRow.style.display === 'none') { detailRow.style.display = 'table-row'; arrow.classList.add('open'); }
+  else { detailRow.style.display = 'none'; arrow.classList.remove('open'); }
 };
 
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function formatTime(t) {
-  if (!t) return '待定';
-  const d = new Date(t);
-  if (isNaN(d)) return t;
-  const p = n => String(n).padStart(2,'0');
-  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
-}
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function formatTime(t) { if (!t) return '待定'; const d = new Date(t); if (isNaN(d)) return t; const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
 </script>
 </body>
 </html>

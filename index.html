@@ -105,6 +105,10 @@
   
   .info-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #546e7a; margin: 4px 0; }
   .info-icon { width: 14px; height: 14px; fill: #78909c; }
+  
+  /* 导航链接特殊样式 */
+  .map-link { color: #e53935; text-decoration: none; display: inline-flex; align-items: center; gap: 2px; font-weight: 500;}
+  .map-link:hover { text-decoration: underline; }
 
   /* 历史活动卡片 */
   .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 8px; vertical-align: middle; }
@@ -271,6 +275,9 @@ if (recruitsRes.data && recruitsRes.data.length > 0) {
     const signups = (signupsRes.data || []).filter(s => s.recruitment_id === r.id);
     const signupNames = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
     
+    // 生成地图链接 (使用高德地图 URI API)
+    const mapUrl = r.location ? `https://uri.amap.com/search?keyword=${encodeURIComponent(r.location)}&src=mypage&callnative=1` : '#';
+    
     return `
       <div class="recruit-card">
         <h3 style="margin:0 0 8px; font-size:16px; color:#e53935; font-weight:500;">
@@ -279,7 +286,8 @@ if (recruitsRes.data && recruitsRes.data.length > 0) {
         </h3>
         <div class="info-row">
           <svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          地点：${esc(r.location) || '待定'}
+          地点：
+          ${r.location ? `<a href="${mapUrl}" target="_blank" class="map-link">${esc(r.location)} <svg style="width:12px; height:12px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>` : '待定'}
         </div>
         <div class="info-row">
           <svg class="info-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>

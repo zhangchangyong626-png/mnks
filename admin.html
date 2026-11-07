@@ -6,7 +6,7 @@
 <title>管理后台 · 云和蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  /* 全局字体设置，与首页保持一致的纤细感 */
+  /* 全局字体设置 */
   body {
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
     font-weight: 300;
@@ -36,42 +36,18 @@
     font-size: 13px; display: none;
   }
   
-  /* 优化队员标签的样式 */
   .member-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 12px; 
-    background: #e3f2fd; 
-    color: #1565c0;
-    border-radius: 6px; 
-    font-size: 13px; 
-    margin: 4px; 
-    line-height: 1.4;
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 8px 12px; background: #e3f2fd; color: #1565c0;
+    border-radius: 6px; font-size: 13px; margin: 4px; line-height: 1.4;
   }
-  .tag-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    color: #546e7a;
-  }
-  .member-icon {
-    width: 14px;
-    height: 14px;
-    fill: currentColor;
-  }
-  .member-tag button { 
-    border: none; background: none; color: #e53935; 
-    cursor: pointer; font-weight: bold; font-size: 16px; padding: 0 4px; 
-  }
+  .tag-item { display: inline-flex; align-items: center; gap: 4px; color: #546e7a; }
+  .member-icon { width: 14px; height: 14px; fill: currentColor; }
+  .member-tag button { border: none; background: none; color: #e53935; cursor: pointer; font-weight: bold; font-size: 16px; padding: 0 4px; }
   
-  /* 成员表单改用网格布局 */
   .member-form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
-    gap: 10px;
-    align-items: end;
-    margin-bottom: 15px;
+    display: grid; grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 10px; align-items: end; margin-bottom: 15px;
   }
   @media (max-width: 600px) {
     .member-form-grid { grid-template-columns: 1fr; }
@@ -79,59 +55,39 @@
 
   /* 历史记录头部布局 */
   .history-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-    gap: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 15px; flex-wrap: wrap; gap: 10px;
   }
   .history-header h2 { margin: 0; }
-  .header-btns { display: flex; gap: 10px; }
-
+  
+  /* 导出工具栏 */
+  .export-toolbar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: #f4f7fb; padding: 8px 12px; border-radius: 8px;
+  }
+  .date-input {
+    width: 135px; padding: 6px 10px; border: 1px solid #cfd8dc; border-radius: 4px;
+    font-size: 13px; color: #546e7a;
+  }
+  
   /* 好看的表格样式 */
   .admin-table-wrapper {
-    overflow-x: auto;
-    border-radius: 8px;
-    border: 1px solid #eceff1;
+    overflow-x: auto; border-radius: 8px; border: 1px solid #eceff1;
   }
   .admin-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 14px;
-    min-width: 800px; /* 防止表格被挤压变形 */
+    width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; min-width: 800px;
   }
   .admin-table th, .admin-table td {
-    padding: 12px 14px;
-    border-bottom: 1px solid #eceff1;
-    vertical-align: middle;
+    padding: 12px 14px; border-bottom: 1px solid #eceff1; vertical-align: middle;
   }
   .admin-table th {
-    background-color: #fafbfc;
-    color: #78909c;
-    font-weight: 400;
-    white-space: nowrap;
+    background-color: #fafbfc; color: #78909c; font-weight: 400; white-space: nowrap;
   }
-  .admin-table tbody tr:hover {
-    background-color: #f9fbfd;
-  }
-  .admin-table tbody tr:last-child td {
-    border-bottom: none;
-  }
+  .admin-table tbody tr:hover { background-color: #f9fbfd; }
+  .admin-table tbody tr:last-child td { border-bottom: none; }
   
-  .col-members {
-    max-width: 200px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .action-btns {
-    display: flex;
-    gap: 6px;
-    white-space: nowrap;
-  }
+  .col-members { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .action-btns { display: flex; gap: 6px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -148,18 +104,9 @@
   <div class="card">
     <h2>队员名单管理</h2>
     <form id="memberForm" class="member-form-grid">
-      <div>
-        <label>姓名 *</label>
-        <input type="text" id="newMemberName" placeholder="请输入姓名" required>
-      </div>
-      <div>
-        <label>联系电话</label>
-        <input type="text" id="newMemberPhone" placeholder="选填">
-      </div>
-      <div>
-        <label>紧急联系人</label>
-        <input type="text" id="newMemberEmergency" placeholder="选填">
-      </div>
+      <div><label>姓名 *</label><input type="text" id="newMemberName" placeholder="请输入姓名" required></div>
+      <div><label>联系电话</label><input type="text" id="newMemberPhone" placeholder="选填"></div>
+      <div><label>紧急联系人</label><input type="text" id="newMemberEmergency" placeholder="选填"></div>
       <button class="btn" type="submit" id="addMemberBtn" style="height: 38px;">添加</button>
     </form>
     <div id="memberList" style="margin-top:15px;">加载名单中...</div>
@@ -188,9 +135,7 @@
       <textarea id="content" placeholder="事件详情、地点、注意事项等"></textarea>
 
       <label>参与成员及个人时长（勾选后填写具体小时数）</label>
-      <div id="memberCheckboxes" class="checkbox-group">
-        <!-- 动态生成勾选框 -->
-      </div>
+      <div id="memberCheckboxes" class="checkbox-group"></div>
 
       <div id="error" class="msg err" style="display:none"></div>
       <p style="margin-top:16px">
@@ -204,13 +149,18 @@
   <div class="card">
     <div class="history-header">
       <h2>历史记录管理</h2>
-      <div class="header-btns">
-        <button class="btn sm" id="exportMembersBtn" style="background: #1565c0; display: flex; align-items: center; gap: 5px;">
-          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      
+      <!-- 新增：时间段选择与导出按钮 -->
+      <div class="export-toolbar">
+        <span style="font-size:13px; color:#78909c;">导出时间段：</span>
+        <input type="date" id="exportStart" class="date-input" title="开始日期">
+        <span style="color:#90a4ae;">-</span>
+        <input type="date" id="exportEnd" class="date-input" title="结束日期">
+        
+        <button class="btn sm" id="exportMembersBtn" style="background: #1565c0; margin-left: 10px;">
           导出成员时长
         </button>
-        <button class="btn sm gray" id="exportAllBtn" style="display: flex; align-items: center; gap: 5px;">
-          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        <button class="btn sm gray" id="exportAllBtn">
           导出全部记录
         </button>
       </div>
@@ -256,37 +206,23 @@ async function loadMembers() {
   const box = document.getElementById('memberList');
   const checkboxGroup = document.getElementById('memberCheckboxes');
 
-  if (error) {
-    box.innerHTML = `<div class="msg err">名单加载失败：${error.message}</div>`;
-    return;
-  }
+  if (error) { box.innerHTML = `<div class="msg err">名单加载失败：${error.message}</div>`; return; }
 
   allMembers = data || [];
   
   if (allMembers.length === 0) {
     box.innerHTML = '<span class="empty">暂无队员，请在上方添加</span>';
+    checkboxGroup.innerHTML = '<span style="color:#90a4ae;font-size:13px;">请先在上方添加队员名单</span>';
   } else {
     box.innerHTML = allMembers.map(m => `
       <span class="member-tag">
         <strong>${esc(m.name)}</strong> 
-        ${m.phone ? `
-          <span class="tag-item">
-            <svg class="member-icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg> 
-            ${esc(m.phone)}
-          </span>` : ''} 
-        ${m.emergency_contact ? `
-          <span class="tag-item">
-            <svg class="member-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> 
-            ${esc(m.emergency_contact)}
-          </span>` : ''}
+        ${m.phone ? `<span class="tag-item"><svg class="member-icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg> ${esc(m.phone)}</span>` : ''} 
+        ${m.emergency_contact ? `<span class="tag-item"><svg class="member-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> ${esc(m.emergency_contact)}</span>` : ''}
         <button type="button" onclick="deleteMember('${m.id}')" title="删除">×</button>
       </span>
     `).join('');
-  }
 
-  if (allMembers.length === 0) {
-    checkboxGroup.innerHTML = '<span style="color:#90a4ae;font-size:13px;">请先在上方添加队员名单</span>';
-  } else {
     checkboxGroup.innerHTML = allMembers.map(m => `
       <label class="checkbox-item">
         <input type="checkbox" name="task_members" value="${esc(m.name)}" onchange="toggleHoursInput(this)">
@@ -299,14 +235,8 @@ async function loadMembers() {
 
 window.toggleHoursInput = (checkbox) => {
   const input = checkbox.parentElement.querySelector('.member-hours-input');
-  if (checkbox.checked) {
-    input.style.display = 'inline-block';
-    input.required = true;
-  } else {
-    input.style.display = 'none';
-    input.required = false;
-    input.value = '';
-  }
+  if (checkbox.checked) { input.style.display = 'inline-block'; input.required = true; }
+  else { input.style.display = 'none'; input.required = false; input.value = ''; }
 };
 
 window.deleteMember = async (id) => {
@@ -321,23 +251,15 @@ document.getElementById('memberForm').addEventListener('submit', async (e) => {
   const name = document.getElementById('newMemberName').value.trim();
   const phone = document.getElementById('newMemberPhone').value.trim();
   const emergency = document.getElementById('newMemberEmergency').value.trim();
-  
   if(!name) return;
   
   const btn = document.getElementById('addMemberBtn');
   btn.disabled = true;
-  
-  const { error } = await supabase.from('members').insert({ 
-    name: name,
-    phone: phone,
-    emergency_contact: emergency
-  });
-  
+  const { error } = await supabase.from('members').insert({ name, phone, emergency_contact: emergency });
   btn.disabled = false;
   
-  if(error) {
-    alert('添加失败（可能是名字重复）：' + error.message);
-  } else {
+  if(error) { alert('添加失败（可能是名字重复）：' + error.message); }
+  else {
     document.getElementById('newMemberName').value = '';
     document.getElementById('newMemberPhone').value = '';
     document.getElementById('newMemberEmergency').value = '';
@@ -346,7 +268,6 @@ document.getElementById('memberForm').addEventListener('submit', async (e) => {
 });
 
 // --- 活动记录逻辑 ---
-
 const form = document.getElementById('taskForm');
 const taskIdEl = document.getElementById('taskId');
 const formTitle = document.getElementById('formTitle');
@@ -356,10 +277,7 @@ const errorEl = document.getElementById('error');
 
 let allTasks = [];
 
-function showError(msg) {
-  errorEl.textContent = msg;
-  errorEl.style.display = 'block';
-}
+function showError(msg) { errorEl.textContent = msg; errorEl.style.display = 'block'; }
 function resetForm() {
   form.reset();
   taskIdEl.value = '';
@@ -367,10 +285,7 @@ function resetForm() {
   submitBtn.textContent = '保存记录';
   cancelEdit.style.display = 'none';
   errorEl.style.display = 'none';
-  document.querySelectorAll('input[name="task_members"]').forEach(cb => {
-    cb.checked = false;
-    toggleHoursInput(cb);
-  });
+  document.querySelectorAll('input[name="task_members"]').forEach(cb => { cb.checked = false; toggleHoursInput(cb); });
 }
 cancelEdit.addEventListener('click', (e) => { e.preventDefault(); resetForm(); });
 
@@ -391,20 +306,13 @@ form.addEventListener('submit', async (e) => {
     if (cb.checked) {
       const input = cb.parentElement.querySelector('.member-hours-input');
       const hours = parseFloat(input.value) || 0;
-      
       memberHoursArr.push({ name: cb.value, hours: hours });
       membersNames.push(cb.value);
-      
-      if (hours > maxDuration) {
-        maxDuration = hours;
-      }
+      if (hours > maxDuration) maxDuration = hours;
     }
   });
 
-  if (membersNames.length === 0) {
-    showError('请至少勾选一名参与成员');
-    return;
-  }
+  if (membersNames.length === 0) { showError('请至少勾选一名参与成员'); return; }
 
   const payload = {
     title: document.getElementById('title').value.trim(),
@@ -419,9 +327,7 @@ form.addEventListener('submit', async (e) => {
   if (!payload.title) { showError('请填写事件/活动名称'); return; }
 
   submitBtn.disabled = true;
-  const res = id
-    ? await supabase.from('tasks').update(payload).eq('id', id)
-    : await supabase.from('tasks').insert(payload);
+  const res = id ? await supabase.from('tasks').update(payload).eq('id', id) : await supabase.from('tasks').insert(payload);
   submitBtn.disabled = false;
 
   if (res.error) { showError('保存失败：' + res.error.message); return; }
@@ -430,20 +336,13 @@ form.addEventListener('submit', async (e) => {
 });
 
 async function loadTasks() {
-  const { data, error } = await supabase
-    .from('tasks').select('*').order('task_time', { ascending: false });
+  const { data, error } = await supabase.from('tasks').select('*').order('task_time', { ascending: false });
   const tbody = document.getElementById('taskTableBody');
 
-  if (error) { 
-    tbody.innerHTML = `<tr><td colspan="6" class="msg err">加载失败：${esc(error.message)}</td></tr>`; 
-    return; 
-  }
+  if (error) { tbody.innerHTML = `<tr><td colspan="6" class="msg err">加载失败：${esc(error.message)}</td></tr>`; return; }
   
   allTasks = data || [];
-  if (allTasks.length === 0) { 
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#90a4ae;">暂无记录</td></tr>'; 
-    return; 
-  }
+  if (allTasks.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#90a4ae;">暂无记录</td></tr>'; return; }
 
   tbody.innerHTML = allTasks.map(t => {
     let displayDuration = t.duration;
@@ -451,17 +350,11 @@ async function loadTasks() {
       const arr = t.member_hours.map(m => parseFloat(m.hours) || 0);
       if (arr.length > 0) displayDuration = Math.max(...arr);
     }
+    let membersStr = (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) 
+      ? t.member_hours.map(m => `${m.name}(${m.hours}h)`).join('、') 
+      : (t.members || '-');
 
-    let membersStr = '';
-    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
-      membersStr = t.member_hours.map(m => `${m.name}(${m.hours}h)`).join('、');
-    } else {
-      membersStr = t.members || '-';
-    }
-
-    let typeTag = t.event_type 
-      ? `<span style="background:#e3f2fd;color:#1565c0;padding:2px 6px;border-radius:4px;font-size:12px;">${esc(t.event_type)}</span>` 
-      : '-';
+    let typeTag = t.event_type ? `<span style="background:#e3f2fd;color:#1565c0;padding:2px 6px;border-radius:4px;font-size:12px;">${esc(t.event_type)}</span>` : '-';
 
     return `
     <tr>
@@ -480,45 +373,58 @@ async function loadTasks() {
     </tr>
   `}).join('');
 
-  // 绑定编辑事件
-  tbody.querySelectorAll('[data-edit]').forEach(btn =>
-    btn.addEventListener('click', () =>
-      startEdit(allTasks.find(x => String(x.id) === btn.dataset.edit))));
-  
-  // 绑定删除事件
-  tbody.querySelectorAll('[data-del]').forEach(btn =>
-    btn.addEventListener('click', async () => {
+  tbody.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => startEdit(allTasks.find(x => String(x.id) === btn.dataset.edit))));
+  tbody.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', async () => {
       if (!confirm('确定删除该记录？')) return;
       const { error } = await supabase.from('tasks').delete().eq('id', btn.dataset.del);
-      if (error) { alert('删除失败：' + error.message); return; }
-      loadTasks();
+      if (error) alert('删除失败：' + error.message);
+      else loadTasks();
     }));
-
-  // 绑定单条导出事件
-  tbody.querySelectorAll('[data-export]').forEach(btn =>
-    btn.addEventListener('click', () => {
+  tbody.querySelectorAll('[data-export]').forEach(btn => btn.addEventListener('click', () => {
       const task = allTasks.find(x => String(x.id) === btn.dataset.export);
       if (task) exportTasksToCSV([task], `出勤记录_${task.title}`);
     }));
 }
 
+// 新增：筛选时间段数据的通用函数
+function getFilteredTasks() {
+  const startVal = document.getElementById('exportStart').value;
+  const endVal = document.getElementById('exportEnd').value;
+  
+  // 如果都没选，就返回全部
+  if (!startVal && !endVal) return allTasks;
+
+  return allTasks.filter(t => {
+    if (!t.task_time) return false; // 如果任务没填时间，排除
+    
+    const taskTime = new Date(t.task_time).getTime();
+    
+    if (startVal) {
+      // 开始日期的 00:00:00
+      const startTime = new Date(startVal + 'T00:00:00').getTime();
+      if (taskTime < startTime) return false;
+    }
+    
+    if (endVal) {
+      // 结束日期的 23:59:59
+      const endTime = new Date(endVal + 'T23:59:59').getTime();
+      if (taskTime > endTime) return false;
+    }
+    
+    return true;
+  });
+}
+
 // --- 导出任务记录 CSV ---
 function exportTasksToCSV(tasksData, fileNamePrefix) {
-  if (!tasksData || tasksData.length === 0) {
-    alert("暂无数据可导出");
-    return;
-  }
+  if (!tasksData || tasksData.length === 0) { alert("该时间段内暂无数据可导出"); return; }
 
   const headers = ['任务类型', '事件/活动名称', '发生时间', '任务时长(小时)', '参与成员(个人时长)', '事件详情'];
-  
   const rows = tasksData.map(t => {
-    let membersStr = '';
-    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
-      membersStr = t.member_hours.map(m => `${m.name}(${m.hours}h)`).join('、');
-    } else {
-      membersStr = t.members || '';
-    }
-
+    let membersStr = (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) 
+      ? t.member_hours.map(m => `${m.name}(${m.hours}h)`).join('、') 
+      : (t.members || '');
+      
     let displayDuration = t.duration;
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
       const arr = t.member_hours.map(m => parseFloat(m.hours) || 0);
@@ -526,42 +432,33 @@ function exportTasksToCSV(tasksData, fileNamePrefix) {
     }
 
     return [
-      t.event_type || '',
-      t.title || '',
-      formatTime(t.task_time),
-      displayDuration || '',
-      membersStr,
-      (t.content || '').replace(/\n/g, ' ')
+      t.event_type || '', t.title || '', formatTime(t.task_time),
+      displayDuration || '', membersStr, (t.content || '').replace(/\n/g, ' ')
     ];
   });
 
   downloadCSV(headers, rows, fileNamePrefix);
 }
 
-// --- 导出成员总时长 CSV (新增功能) ---
+// --- 导出成员总时长 CSV ---
 function exportMembersTimeCSV() {
-  if (!allTasks || allTasks.length === 0) {
-    alert("暂无数据可导出");
+  const filteredTasks = getFilteredTasks(); // 获取筛选后的数据
+
+  if (!filteredTasks || filteredTasks.length === 0) {
+    alert("该时间段内暂无数据可导出");
     return;
   }
 
-  const memberStats = {}; // name -> { rescue: 0, training: 0, fire: 0, total: 0 }
+  const memberStats = {}; 
+  allMembers.forEach(m => { memberStats[m.name] = { rescue: 0, training: 0, fire: 0, total: 0 }; });
 
-  // 1. 先遍历所有队员名单，确保没出勤的人也有一行（0小时）
-  allMembers.forEach(m => {
-    memberStats[m.name] = { rescue: 0, training: 0, fire: 0, total: 0 };
-  });
-
-  // 2. 统计任务数据
-  allTasks.forEach(t => {
+  filteredTasks.forEach(t => {
     const type = t.event_type || ''; 
-    
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
       t.member_hours.forEach(m => {
         const hours = parseFloat(m.hours) || 0;
         if (hours > 0 && m.name) {
           if (!memberStats[m.name]) memberStats[m.name] = { rescue: 0, training: 0, fire: 0, total: 0 };
-          
           memberStats[m.name].total += hours;
           if (type === '公益救援') memberStats[m.name].rescue += hours;
           else if (type === '技能培训') memberStats[m.name].training += hours;
@@ -572,7 +469,6 @@ function exportMembersTimeCSV() {
     else if (t.members && t.duration) {
       const hours = parseFloat(String(t.duration).replace(/[^\d.]/g, '')) || 0;
       const membersArray = t.members.split(/[,，\s]+/).filter(Boolean);
-      
       membersArray.forEach(name => {
         if (!memberStats[name]) memberStats[name] = { rescue: 0, training: 0, fire: 0, total: 0 };
         memberStats[name].total += hours;
@@ -583,22 +479,26 @@ function exportMembersTimeCSV() {
     }
   });
 
-  // 3. 转为数组并按总时长降序排序
   const sortedMembers = Object.entries(memberStats).sort((a, b) => b[1].total - a[1].total);
   
   const headers = ['排名', '姓名', '公益救援(小时)', '技能培训(小时)', '森林消防(小时)', '总时长(小时)'];
   const rows = sortedMembers.map((item, index) => {
     return [
-      index + 1,
-      item[0],
-      parseFloat(item[1].rescue.toFixed(1)),
-      parseFloat(item[1].training.toFixed(1)),
-      parseFloat(item[1].fire.toFixed(1)),
-      parseFloat(item[1].total.toFixed(1))
+      index + 1, item[0],
+      parseFloat(item[1].rescue.toFixed(1)), parseFloat(item[1].training.toFixed(1)),
+      parseFloat(item[1].fire.toFixed(1)), parseFloat(item[1].total.toFixed(1))
     ];
   });
 
-  downloadCSV(headers, rows, '成员出勤总时长统计');
+  // 如果选了日期，文件名里带上日期范围
+  const startVal = document.getElementById('exportStart').value;
+  const endVal = document.getElementById('exportEnd').value;
+  let fileName = '成员出勤总时长统计';
+  if (startVal || endVal) {
+    fileName += `_${startVal || '起'}_至_${endVal || '今'}`;
+  }
+
+  downloadCSV(headers, rows, fileName);
 }
 
 // --- 通用 CSV 下载逻辑 ---
@@ -617,9 +517,16 @@ function downloadCSV(headers, rows, fileNamePrefix) {
   document.body.removeChild(link);
 }
 
-// 绑定按钮事件
+// 绑定按钮事件（加入时间过滤）
 document.getElementById('exportAllBtn').addEventListener('click', () => {
-  exportTasksToCSV(allTasks, '云和蓝天救援队_全部记录');
+  const filteredTasks = getFilteredTasks();
+  const startVal = document.getElementById('exportStart').value;
+  const endVal = document.getElementById('exportEnd').value;
+  let fileName = '云和蓝天救援队_活动记录';
+  if (startVal || endVal) {
+    fileName += `_${startVal || '起'}_至_${endVal || '今'}`;
+  }
+  exportTasksToCSV(filteredTasks, fileName);
 });
 
 document.getElementById('exportMembersBtn').addEventListener('click', () => {
@@ -634,29 +541,19 @@ function startEdit(t) {
   document.getElementById('content').value = t.content || '';
   document.getElementById('task_time').value = toLocalInput(t.task_time);
   
-  document.querySelectorAll('input[name="event_type"]').forEach(radio => {
-    radio.checked = (radio.value === t.event_type);
-  });
+  document.querySelectorAll('input[name="event_type"]').forEach(radio => { radio.checked = (radio.value === t.event_type); });
 
   const taskMembers = t.members ? t.members.split(',').map(s => s.trim()) : [];
   const memberHoursData = t.member_hours || [];
 
   document.querySelectorAll('input[name="task_members"]').forEach(cb => {
     if (taskMembers.includes(cb.value)) {
-      cb.checked = true;
-      toggleHoursInput(cb);
-      
+      cb.checked = true; toggleHoursInput(cb);
       const found = memberHoursData.find(x => x.name === cb.value);
       const input = cb.parentElement.querySelector('.member-hours-input');
-      
-      if (found) {
-        input.value = found.hours;
-      } else {
-        input.value = t.duration || 0; 
-      }
+      input.value = found ? found.hours : (t.duration || 0);
     } else {
-      cb.checked = false;
-      toggleHoursInput(cb);
+      cb.checked = false; toggleHoursInput(cb);
     }
   });
 
@@ -680,8 +577,7 @@ function formatTime(t) {
   return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 loadMembers();

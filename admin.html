@@ -17,7 +17,8 @@
   
   /* 外层大折叠面板样式 */
   .details-card { padding: 0; overflow: hidden; margin-bottom: 16px; background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.06); border: none;}
-  .details-card summary { padding: 18px 20px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; background: #fff; border-bottom: 1px solid transparent; }
+  .details-card summary { padding: 18px 20px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; background: #fff; border-bottom: 1px solid transparent; transition: background 0.2s; }
+  .details-card summary:hover { background: #f9fbfd; }
   .details-card[open] summary { border-bottom: 1px solid #eceff1; background: #fafbfc; }
   .details-card summary::-webkit-details-marker { display: none; }
   .details-card summary h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px;}
@@ -84,8 +85,8 @@
 </header>
 <main>
 
-  <!-- 1. 队员管理 (外层折叠) -->
-  <details class="details-card" open>
+  <!-- 1. 队员管理 (默认合着) -->
+  <details class="details-card">
     <summary>
       <h2>
         <svg class="title-icon blue" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
@@ -111,8 +112,8 @@
     </div>
   </details>
 
-  <!-- 2. 任务招募管理 (外层折叠) -->
-  <details class="details-card border-red" open>
+  <!-- 2. 任务招募管理 (默认合着) -->
+  <details class="details-card border-red">
     <summary>
       <h2>
         <svg class="title-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
@@ -141,8 +142,8 @@
     </div>
   </details>
 
-  <!-- 3. 录入出勤记录 (外层折叠) -->
-  <details class="details-card" open>
+  <!-- 3. 录入出勤记录 (默认合着) -->
+  <details class="details-card">
     <summary>
       <h2 id="formTitle">录入新活动记录</h2>
     </summary>
@@ -179,8 +180,8 @@
     </div>
   </details>
 
-  <!-- 4. 历史记录管理 (外层折叠) -->
-  <details class="details-card" open>
+  <!-- 4. 历史记录管理 (默认合着) -->
+  <details class="details-card">
     <summary>
       <h2>历史记录管理</h2>
     </summary>
@@ -366,7 +367,10 @@ window.convertToTask = async (id) => {
     }
   });
   
+  // 自动展开出勤记录面板和成员选择面板
   document.querySelector('.member-select-details').open = true;
+  document.querySelectorAll('.details-card')[2].open = true; // 第3个卡片是录入活动
+  
   window.scrollTo({ top: 0, behavior: 'smooth' });
   alert('报名人员已自动勾选，请核对时长后保存出勤记录。');
 };
@@ -516,6 +520,11 @@ function startEdit(t) {
       cb.checked = false; toggleHoursInput(cb);
     }
   });
+
+  // 自动展开出勤面板和成员选择面板
+  document.querySelectorAll('.details-card')[2].open = true; 
+  document.querySelector('.member-select-details').open = true;
+
   document.getElementById('submitBtn').textContent = '保存修改';
   document.getElementById('cancelEdit').style.display = 'inline-block';
   window.scrollTo({ top: 0, behavior: 'smooth' });

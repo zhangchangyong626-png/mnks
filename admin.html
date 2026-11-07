@@ -76,6 +76,9 @@
   /* 工具栏 */
   .export-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #f4f7fb; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eceff1;}
   .date-input { width: 130px; padding: 6px 10px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; color: #546e7a; }
+
+  /* 事件类型标签 */
+  .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 6px; vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -85,7 +88,7 @@
 </header>
 <main>
 
-  <!-- 1. 队员管理 (默认合着) -->
+  <!-- 1. 队员管理 -->
   <details class="details-card">
     <summary>
       <h2>
@@ -112,7 +115,7 @@
     </div>
   </details>
 
-  <!-- 2. 任务招募管理 (默认合着) -->
+  <!-- 2. 任务招募管理 -->
   <details class="details-card border-red">
     <summary>
       <h2>
@@ -126,6 +129,15 @@
           <div><label>任务标题 *</label><input type="text" id="rTitle" required placeholder="如：水域救援技能训练"></div>
           <div><label>活动地点</label><input type="text" id="rLocation" placeholder="如：云和湖码头"></div>
         </div>
+        
+        <!-- 新增：招募类型选择 -->
+        <label>任务类型 *</label>
+        <div style="display:flex; gap:15px; margin-bottom: 10px;">
+          <label class="checkbox-item" style="border:none; padding:0;"><input type="radio" name="r_event_type" value="公益救援" required> 公益救援</label>
+          <label class="checkbox-item" style="border:none; padding:0;"><input type="radio" name="r_event_type" value="技能培训"> 技能培训</label>
+          <label class="checkbox-item" style="border:none; padding:0;"><input type="radio" name="r_event_type" value="森林消防"> 森林消防</label>
+        </div>
+
         <label>集合时间</label>
         <input type="datetime-local" id="rTime">
         <label>任务详情/要求</label>
@@ -142,7 +154,7 @@
     </div>
   </details>
 
-  <!-- 3. 录入出勤记录 (默认合着) -->
+  <!-- 3. 录入出勤记录 -->
   <details class="details-card">
     <summary>
       <h2 id="formTitle">录入新活动记录</h2>
@@ -180,7 +192,7 @@
     </div>
   </details>
 
-  <!-- 4. 历史记录管理 (默认合着) -->
+  <!-- 4. 历史记录管理 -->
   <details class="details-card">
     <summary>
       <h2>历史记录管理</h2>
@@ -290,12 +302,13 @@ function renderRecruits() {
     const signups = allSignups.filter(s => s.recruitment_id === r.id);
     const names = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
     const statusTag = r.status === '招募中' ? '<span style="color:#2e7d32; font-weight:bold;">● 招募中</span>' : '<span style="color:#78909c;">○ 已结束</span>';
+    const typeTag = r.event_type ? `<span class="type-tag">${esc(r.event_type)}</span>` : '';
     
     return `
       <tr>
         <td>${statusTag}</td>
         <td>
-          <div style="font-weight:500; color:#1f2d3d;">${esc(r.title)}</div>
+          <div style="font-weight:500; color:#1f2d3d;">${typeTag}${esc(r.title)}</div>
           <div class="info-row" style="margin-top:6px;">
             <svg class="info-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
             ${formatTime(r.task_time)}
@@ -324,8 +337,10 @@ function renderRecruits() {
 
 document.getElementById('recruitForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const typeEl = document.querySelector('input[name="r_event_type"]:checked');
   const payload = {
     title: document.getElementById('rTitle').value.trim(),
+    event_type: typeEl ? typeEl.value : null, // 新增：保存类型
     location: document.getElementById('rLocation').value.trim(),
     task_time: document.getElementById('rTime').value ? new Date(document.getElementById('rTime').value).toISOString() : null,
     content: document.getElementById('rContent').value.trim(),
@@ -358,6 +373,13 @@ window.convertToTask = async (id) => {
   document.getElementById('task_time').value = toLocalInput(r.task_time);
   document.getElementById('content').value = r.content || '';
   
+  // 自动同步事件类型
+  if (r.event_type) {
+    document.querySelectorAll('input[name="event_type"]').forEach(radio => {
+      radio.checked = (radio.value === r.event_type);
+    });
+  }
+  
   document.querySelectorAll('input[name="task_members"]').forEach(cb => {
     cb.checked = false; toggleHoursInput(cb);
     if (signups.some(s => s.member_name === cb.value)) {
@@ -369,10 +391,10 @@ window.convertToTask = async (id) => {
   
   // 自动展开出勤记录面板和成员选择面板
   document.querySelector('.member-select-details').open = true;
-  document.querySelectorAll('.details-card')[2].open = true; // 第3个卡片是录入活动
+  document.querySelectorAll('.details-card')[2].open = true; 
   
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  alert('报名人员已自动勾选，请核对时长后保存出勤记录。');
+  alert('报名人员及活动类型已自动填好，请核对时长后保存出勤记录。');
 };
 
 // 一键生成微信群分享文案
@@ -382,6 +404,7 @@ window.shareToWeChat = (id) => {
   let siteUrl = window.location.href.replace('admin.html', 'index.html');
   
   let text = `【云和·蓝天救援队 任务招募】\n\n`;
+  text += `[类型] ${r.event_type || '待定'}\n`;
   text += `[任务] ${r.title}\n`;
   text += `[时间] ${formatTime(r.task_time)}\n`;
   text += `[地点] ${r.location || '待定'}\n`;
@@ -425,7 +448,7 @@ function renderTasks() {
     let membersStr = (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) 
       ? t.member_hours.map(m => `${m.name}(${m.hours}h)`).join('、') : (t.members || '-');
 
-    let typeTag = t.event_type ? `<span style="background:#e3f2fd;color:#1565c0;padding:2px 6px;border-radius:4px;font-size:12px;">${esc(t.event_type)}</span>` : '-';
+    let typeTag = t.event_type ? `<span class="type-tag">${esc(t.event_type)}</span>` : '-';
 
     return `
     <tr>
@@ -521,7 +544,6 @@ function startEdit(t) {
     }
   });
 
-  // 自动展开出勤面板和成员选择面板
   document.querySelectorAll('.details-card')[2].open = true; 
   document.querySelector('.member-select-details').open = true;
 

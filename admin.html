@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>管理后台 · 云和蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
-<!-- 引入 html2canvas 用于生成海报 -->
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
   /* 全局字体设置 */
   body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 300; background: #f4f7fb; color: #333; }
@@ -74,39 +72,6 @@
   .export-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #f4f7fb; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eceff1;}
   .date-input { width: 130px; padding: 6px 10px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; color: #546e7a; }
   .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 6px; vertical-align: middle; }
-
-  /* 海报容器（默认隐藏，屏幕外生成） */
-  #posterContainer {
-    position: fixed; left: -9999px; top: 0;
-    width: 375px; background: #fff; padding: 20px;
-    border-radius: 12px; box-sizing: border-box;
-    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-  }
-  .poster-header { text-align: center; border-bottom: 2px solid #e53935; padding-bottom: 10px; margin-bottom: 15px; }
-  .poster-title { color: #e53935; font-size: 22px; font-weight: bold; margin: 10px 0 5px; }
-  .poster-subtitle { color: #666; font-size: 14px; }
-  .poster-content { color: #333; font-size: 15px; line-height: 1.6; margin-bottom: 20px; }
-  .poster-content strong { color: #e53935; }
-  .poster-qr { text-align: center; margin-top: 20px; }
-  .poster-qr img { width: 120px; height: 120px; }
-  .poster-qr p { font-size: 13px; color: #666; margin-top: 5px; }
-
-  /* 手机端图片弹窗 */
-  #imageModal {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85); z-index: 99999;
-    flex-direction: column; align-items: center; justify-content: center;
-  }
-  #imageModal img {
-    max-width: 90%; max-height: 75%; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  }
-  #imageModal .tip {
-    color: #fff; margin-top: 20px; font-size: 16px; font-weight: bold; letter-spacing: 1px;
-    background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 20px;
-  }
-  #imageModal .close-btn {
-    position: absolute; top: 20px; right: 25px; color: #fff; font-size: 35px; cursor: pointer;
-  }
 </style>
 </head>
 <body>
@@ -234,33 +199,6 @@
 
 </main>
 
-<!-- 隐藏的海报 DOM 容器 -->
-<div id="posterContainer" style="display:none;">
-  <div class="poster-header">
-    <img src="https://img.alicdn.com/imgextra/i3/706125935/O1CN01KcQnpNaiagF49oPo_!!706125935.png" style="height:50px; margin-bottom:10px;">
-    <div class="poster-title">任务招募令</div>
-    <div class="poster-subtitle">云和·蓝天救援队</div>
-  </div>
-  <div class="poster-content">
-    <p><strong>【任务类型】</strong> <span id="pType"></span></p>
-    <p><strong>【任务标题】</strong> <span id="pTitle"></span></p>
-    <p><strong>【集合时间】</strong> <span id="pTime"></span></p>
-    <p><strong>【活动地点】</strong> <span id="pLoc"></span></p>
-    <p><strong>【任务详情】</strong> <span id="pContent"></span></p>
-  </div>
-  <div class="poster-qr">
-    <img id="pQrCode" src="" alt="扫码报名">
-    <p>长按识别二维码，进入网页接龙报名</p>
-  </div>
-</div>
-
-<!-- 手机端图片弹窗展示 -->
-<div id="imageModal">
-  <div class="close-btn" onclick="closeImageModal()">×</div>
-  <img id="posterImg" src="" alt="海报">
-  <div class="tip">长按图片，保存到手机相册</div>
-</div>
-
 <script type="module">
 import { supabase } from './supabaseClient.js';
 
@@ -357,9 +295,9 @@ function renderRecruits() {
         <td style="max-width:300px;">${names || '<span style="color:#b0bec5; font-size:12px;">暂无人报名</span>'}</td>
         <td>
           <div class="action-btns">
-            <button class="btn sm" style="padding:4px 8px; background:#e53935;" onclick="generatePoster(${r.id})">
-              <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:#fff;"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-              生成海报
+            <button class="btn sm" style="padding:4px 8px; background:#e53935;" onclick="shareToWeChat(${r.id})">
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:#fff;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+              分享文案
             </button>
             <button class="btn sm" style="padding:4px 8px; background:#1565c0;" onclick="convertToTask(${r.id})">转出勤</button>
             <button class="btn sm gray" style="padding:4px 8px;" onclick="toggleRecruitStatus(${r.id}, '${r.status}')">${r.status === '招募中' ? '结束' : '开启'}</button>
@@ -399,53 +337,36 @@ window.deleteRecruit = async (id) => {
   loadRecruits().then(renderRecruits);
 };
 
-// 生成招募海报（自适应移动端）
-window.generatePoster = (id) => {
+// 一键生成微信群分享文案
+window.shareToWeChat = (id) => {
   const r = allRecruits.find(x => x.id === id);
-  const siteUrl = window.location.href.replace('admin.html', 'index.html');
+  const signups = allSignups.filter(s => s.recruitment_id === r.id);
+  let siteUrl = window.location.href.replace('admin.html', 'index.html');
   
-  document.getElementById('pType').textContent = r.event_type || '待定';
-  document.getElementById('pTitle').textContent = r.title;
-  document.getElementById('pTime').textContent = formatTime(r.task_time);
-  document.getElementById('pLoc').textContent = r.location || '待定';
-  document.getElementById('pContent').textContent = r.content || '无';
+  let text = `【云和·蓝天救援队 任务招募】\n\n`;
+  text += `[类型] ${r.event_type || '待定'}\n`;
+  text += `[任务] ${r.title}\n`;
+  text += `[时间] ${formatTime(r.task_time)}\n`;
+  text += `[地点] ${r.location || '待定'}\n`;
+  if (r.content) text += `[详情] ${r.content}\n`;
   
-  // 生成二维码 API
-  document.getElementById('pQrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(siteUrl)}`;
+  text += `\n[报名] 已有 ${signups.length} 人报名：\n`;
+  if (signups.length > 0) {
+    text += signups.map(s => s.member_name).join('、') + '\n';
+  } else {
+    text += `（暂无，快来抢沙发！）\n`;
+  }
 
-  // 等二维码图片加载完成后截图
-  document.getElementById('pQrCode').onload = () => {
-    const posterEl = document.getElementById('posterContainer');
-    posterEl.style.display = 'block'; // 临时显示（在屏幕外）
-    
-    html2canvas(posterEl, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
-      posterEl.style.display = 'none';
-      const imgData = canvas.toDataURL('image/png');
+  text += `\n请点击下方链接，打开网页输入真实姓名进行接龙报名：\n${siteUrl}\n\n`;
+  text += `（请大家积极报名，注意安全！）`;
 
-      // 判断是否为移动端
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-      if (isMobile) {
-        // 手机端：弹窗展示，引导长按保存
-        document.getElementById('posterImg').src = imgData;
-        document.getElementById('imageModal').style.display = 'flex';
-      } else {
-        // PC端：直接下载
-        const link = document.createElement('a');
-        link.download = `招募海报_${r.title}.png`;
-        link.href = imgData;
-        link.click();
-      }
-    }).catch(err => {
-      posterEl.style.display = 'none';
-      alert('生成海报失败：' + err.message);
-    });
-  };
-};
-
-// 关闭图片弹窗
-window.closeImageModal = () => {
-  document.getElementById('imageModal').style.display = 'none';
+  navigator.clipboard.writeText(text).then(() => {
+    alert('招募文案已复制！\n\n请打开微信群，直接粘贴发送即可。');
+  }).catch(err => {
+    const textarea = document.createElement('textarea');
+    textarea.value = text; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea);
+    alert('招募文案已复制！\n\n请打开微信群，直接粘贴发送即可。');
+  });
 };
 
 // 一键转为出勤记录

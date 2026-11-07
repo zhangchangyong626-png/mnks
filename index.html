@@ -6,23 +6,25 @@
 <title>云和·蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
 <style>
+  /* 全局字体设置 */
   body {
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
     font-weight: 300; 
-    background: #f4f7fb;
+    background: #e4e7eb; /* 整体背景改为银色 */
     color: #333;
   }
 
+  /* 头部：深蓝色背景，白色字体 */
   header {
-    background: #fff;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    background: #0d47a1; /* 深蓝色 */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
     padding: 30px 20px 20px;
     text-align: center;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-bottom: 1px solid #eceff1;
+    border-bottom: 1px solid #0d47a1;
   }
   
   .logo-container {
@@ -40,14 +42,14 @@
   .main-title {
     font-size: 28px;
     font-weight: 400; 
-    color: #1565c0;
+    color: #ffffff; /* 标题改为白色 */
     letter-spacing: 2px;
     margin: 0;
     line-height: 1.2; 
   }
 
   .slogan {
-    color: #90a4ae; 
+    color: rgba(255, 255, 255, 0.85); /* 标语改为半透明白色 */
     font-size: 13px; 
     font-weight: 300;
     margin-top: 4px; 
@@ -62,12 +64,12 @@
     font-size: 14px;
   }
   .top-nav a {
-    color: #607d8b;
+    color: #ffffff; /* 导航字体白色 */
     text-decoration: none;
     margin-left: 15px;
     transition: color 0.2s;
   }
-  .top-nav a:hover { color: #1565c0; }
+  .top-nav a:hover { color: #90caf9; } /* 悬浮时变浅蓝 */
 
   .bottom-nav { display: none; }
 
@@ -77,46 +79,59 @@
     padding: 0 14px;
   }
 
+  /* 折叠面板 */
   details {
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
     margin-bottom: 20px;
     overflow: hidden;
-    border: 1px solid #eceff1;
+    border: none;
   }
+  
+  /* 折叠面板头部：浅蓝色背景，白色字体 */
   summary {
     padding: 20px;
     font-size: 17px;
     font-weight: 400;
     cursor: pointer;
-    background: #fff;
+    background: #64b5f6; /* 浅蓝色 */
+    color: #ffffff; /* 白色字体 */
     list-style: none;
     display: flex;
     align-items: center; 
     user-select: none;
     transition: background 0.2s;
   }
-  summary:hover { background: #f9fbfd; }
+  summary:hover { background: #42a5f5; } /* 悬浮颜色稍深一点 */
   summary::-webkit-details-marker { display: none; }
   
+  /* 图标改为白色 */
   .icon-svg {
     width: 24px;
     height: 24px;
     margin-right: 12px;
-    fill: #1565c0;
+    fill: #ffffff; 
   }
   .summary-text { flex: 1; }
   
+  /* 右侧小箭头改为白色 */
   summary::after {
     content: '▼';
     font-size: 12px;
-    color: #b0bec5;
+    color: #ffffff;
     transition: transform 0.3s ease;
   }
+  
   details[open] summary::after { transform: rotate(180deg); }
-  details[open] summary { border-bottom: 1px solid #eceff1; }
-  .details-content { padding: 15px 20px; }
+  details[open] summary { border-bottom: 1px solid #e3f2fd; }
+  
+  /* 展开后的内容区保留白底，方便阅读表格 */
+  .details-content { 
+    padding: 15px 20px; 
+    background: #ffffff; 
+    color: #333;
+  }
 
   /* 排行榜表格 */
   .stats-table { width: 100%; border-collapse: collapse; font-size: 15px; text-align: center; }
@@ -159,6 +174,7 @@
   .card h2 { font-weight: 400; }
   .members { color: #546e7a; }
 
+  /* 手机端适配 */
   @media (max-width: 600px) {
     .main-title { font-size: 22px; }
     .top-nav { display: none; }
@@ -195,23 +211,22 @@
 
 <main>
   
-  <div id="loading" class="empty" style="font-weight: 300;">加载中…</div>
+  <div id="loading" class="empty" style="font-weight: 300; color: #fff;">加载中…</div>
 
   <!-- 排行榜 -->
   <details id="statsPanel" style="display:none;">
     <summary>
       <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
-      <span class="summary-text">2027年出勤时长榜</span>
+      <span class="summary-text">2026年出勤时长榜</span>
     </summary>
     <div class="details-content" id="statsBox"></div>
   </details>
 
-  <!-- 新增：通讯录面板 -->
+  <!-- 通讯录 -->
   <details id="contactPanel" style="display:none;">
     <summary>
-      <!-- 通讯录 SVG 图标 (电话簿) -->
       <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-      <span class="summary-text">队 员 通 讯 录</span>
+      <span class="summary-text">队员通讯录</span>
     </summary>
     <div class="details-content" id="contactBox"></div>
   </details>
@@ -220,16 +235,16 @@
   <details id="tasksPanel" style="display:none;">
     <summary>
       <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-      <span class="summary-text">出 勤 事 件 表</span>
+      <span class="summary-text">出勤事件详情表</span>
     </summary>
     <div class="details-content" id="taskList"></div>
   </details>
 
-  <div id="emptyState" class="empty" style="display:none; font-weight: 300;">暂无活动记录</div>
+  <div id="emptyState" class="empty" style="display:none; font-weight: 300; color: #fff;">暂无活动记录</div>
 </main>
 
 <footer style="font-weight: 300; text-align: center; color: #90a4ae; font-size: 12px; padding: 20px 0 40px;">
-  <div>云和·蓝天救援队 · 活动公示 内测版</div>
+  <div>云和·蓝天救援队 · 活动公示</div>
   
   <nav class="bottom-nav" id="bottomNav">
     <a href="login.html">管理员登录</a>
@@ -261,7 +276,6 @@ if (session) {
   bottomNav.innerHTML = html;
 }
 
-// 同时获取任务数据和队员数据
 const [tasksRes, membersRes] = await Promise.all([
   supabase.from('tasks').select('*').order('task_time', { ascending: false }),
   supabase.from('members').select('*').order('name')

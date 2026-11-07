@@ -16,7 +16,7 @@
     color: #333;
   }
 
-  /* 头部 */
+  /* 头部：深蓝底白字 */
   header {
     background: #0d47a1;
     box-shadow: 0 2px 10px rgba(0,0,0,0.15);
@@ -42,9 +42,7 @@
   }
   .slogan span { margin: 0 6px; }
 
-  .top-nav {
-    position: absolute; right: 20px; top: 20px; font-size: 14px;
-  }
+  .top-nav { position: absolute; right: 20px; top: 20px; font-size: 14px; }
   .top-nav a { color: #ffffff; text-decoration: none; margin-left: 15px; transition: color 0.2s; }
   .top-nav a:hover { color: #90caf9; }
 
@@ -77,7 +75,7 @@
   
   .details-content { padding: 16px 20px; background: #ffffff; color: #333; }
 
-  /* 排行榜图表区 */
+  /* 图表容器 */
   .charts-container {
     display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;
     background: #f9fbfd; padding: 15px; border-radius: 8px;
@@ -108,9 +106,7 @@
   .detail-badge.fire { border-color: #ef9a9a; color: #c62828; background: #ffebee; }
 
   /* 个人查询区 */
-  .search-box {
-    display: flex; gap: 10px; margin-bottom: 15px;
-  }
+  .search-box { display: flex; gap: 10px; margin-bottom: 15px; }
   .search-box input {
     flex: 1; padding: 12px 16px; border: 1px solid #cfd8dc; border-radius: 8px;
     font-size: 15px; outline: none; transition: border-color 0.2s;
@@ -151,11 +147,28 @@
   .contact-table td { font-weight: 300; }
   .contact-table td:first-child { font-weight: 400; color: #1f2d3d; }
 
+  /* 招募接龙面板 (红字高亮) */
+  .recruit-panel-red {
+    border: 1px solid #e53935 !important;
+    box-shadow: 0 4px 15px rgba(229,57,53,0.1) !important;
+  }
+  .recruit-panel-red summary {
+    background: #e53935 !important;
+  }
+  .recruit-panel-red summary:hover {
+    background: #d32f2f !important;
+  }
+  .recruit-card {
+    background: #fff; border: 1px solid #ffcdd2; border-radius: 8px;
+    padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+  .signup-tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 16px; font-size: 13px; margin: 4px; }
+
+  /* 历史活动卡片 */
   .type-tag {
     display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717;
     border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 8px; vertical-align: middle;
   }
-
   .card { font-weight: 300; }
   .card h2 { font-weight: 400; font-size: 15px; color: #1f2d3d; }
   .members { color: #546e7a; }
@@ -177,6 +190,7 @@
     .stats-table th, .stats-table td { padding: 12px 4px; font-size: 13px; }
     .contact-table th, .contact-table td { padding: 10px 4px; font-size: 13px; }
     .chart-box { min-width: 100%; height: 200px; }
+    .search-box input { width: 100%; }
   }
 </style>
 </head>
@@ -196,10 +210,22 @@
 </header>
 
 <main>
-  <div id="loading" class="empty" style="font-weight: 300; color: #fff;">加载中…</div>
+  <div id="loading" class="empty" style="font-weight: 300; color: #fff; text-align:center; padding:20px;">加载数据中…</div>
 
-  <!-- 新增：个人出勤查询 -->
-  <details id="personalPanel" style="display:none;" open>
+  <!-- 1. 任务招募接龙 (新增) -->
+  <details id="recruitPanel" class="recruit-panel-red" style="display:none;" open>
+    <summary>
+      <div class="summary-inner">
+        <!-- 喇叭图标 -->
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <span>任务招募接龙</span>
+      </div>
+    </summary>
+    <div class="details-content" id="recruitList"></div>
+  </details>
+
+  <!-- 2. 个人出勤查询 -->
+  <details id="personalPanel" style="display:none;">
     <summary>
       <div class="summary-inner">
         <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
@@ -215,7 +241,7 @@
     </div>
   </details>
 
-  <!-- 排行榜与图表 -->
+  <!-- 3. 排行榜与图表 -->
   <details id="statsPanel" style="display:none;">
     <summary>
       <div class="summary-inner">
@@ -224,17 +250,15 @@
       </div>
     </summary>
     <div class="details-content">
-      <!-- 图表容器 -->
       <div class="charts-container">
         <div id="barChart" class="chart-box"></div>
         <div id="pieChart" class="chart-box"></div>
       </div>
-      <!-- 表格容器 -->
       <div id="statsBox"></div>
     </div>
   </details>
 
-  <!-- 通讯录（加了密码锁） -->
+  <!-- 4. 通讯录 (密码锁) -->
   <details id="contactPanel" style="display:none;">
     <summary>
       <div class="summary-inner">
@@ -243,18 +267,16 @@
       </div>
     </summary>
     <div class="details-content" id="contactContainer">
-      <!-- 密码锁界面 -->
       <div class="privacy-lock" id="lockView">
         <p>为保护队员隐私，请输入队内访问口令：</p>
         <input type="password" id="contactPassword" placeholder="输入口令">
         <button onclick="unlockContacts()">解锁</button>
       </div>
-      <!-- 真实通讯录（默认隐藏） -->
       <div id="contactDataView" style="display:none;"></div>
     </div>
   </details>
 
-  <!-- 历史活动 -->
+  <!-- 5. 历史活动 -->
   <details id="tasksPanel" style="display:none;">
     <summary>
       <div class="summary-inner">
@@ -265,7 +287,7 @@
     <div class="details-content" id="taskList"></div>
   </details>
 
-  <div id="emptyState" class="empty" style="display:none; font-weight: 300; color: #fff;">暂无活动记录</div>
+  <div id="emptyState" class="empty" style="display:none; font-weight: 300; color: #fff; text-align:center; padding:20px;">暂无活动记录</div>
 </main>
 
 <footer style="font-weight: 300; text-align: center; color: #90a4ae; font-size: 12px; padding: 20px 0 40px;">
@@ -278,10 +300,11 @@
 <script type="module">
 import { supabase } from './supabaseClient.js';
 
-// --- 1. 全局变量与初始化 ---
-let globalMemberStats = {}; // 缓存统计数据，供图表和查询使用
+// --- 全局变量与初始化 ---
+let globalMemberStats = {}; 
 let globalAllTasks = [];
-const CONTACT_PASSWORD = "9958"; // 通讯录解锁口令（可自行修改）
+let globalAllMembers = [];
+const CONTACT_PASSWORD = "9958"; // 通讯录解锁口令
 
 const { data: { session } } = await supabase.auth.getSession();
 const nav = document.getElementById('nav');
@@ -300,34 +323,91 @@ if (session) {
   nav.innerHTML = html; bottomNav.innerHTML = html;
 }
 
-// 获取数据
-const [tasksRes, membersRes] = await Promise.all([
+// --- 获取所有数据 (一次性拉取) ---
+const [tasksRes, membersRes, recruitsRes, signupsRes] = await Promise.all([
   supabase.from('tasks').select('*').order('task_time', { ascending: false }),
-  supabase.from('members').select('*').order('name')
+  supabase.from('members').select('*').order('name'),
+  supabase.from('recruitments').select('*').eq('status', '招募中').order('created_at', { ascending: false }),
+  supabase.from('recruitment_signups').select('*')
 ]);
 
 document.getElementById('loading').style.display = 'none';
 
-if (membersRes.data && membersRes.data.length > 0) {
-  document.getElementById('contactPanel').style.display = 'block';
+globalAllTasks = tasksRes.data || [];
+globalAllMembers = membersRes.data || [];
+
+// --- 1. 渲染招募接龙 ---
+if (recruitsRes.data && recruitsRes.data.length > 0) {
+  document.getElementById('recruitPanel').style.display = 'block';
+  
+  document.getElementById('recruitList').innerHTML = recruitsRes.data.map(r => {
+    const signups = (signupsRes.data || []).filter(s => s.recruitment_id === r.id);
+    const signupNames = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
+    
+    return `
+      <div class="recruit-card">
+        <h3 style="margin:0 0 8px; font-size:16px; color:#e53935; font-weight:500;">🔥 ${esc(r.title)}</h3>
+        <p style="margin:4px 0; font-size:13px; color:#546e7a;">📍 地点：${esc(r.location) || '待定'}</p>
+        <p style="margin:4px 0; font-size:13px; color:#546e7a;">⏰ 时间：${formatTime(r.task_time)}</p>
+        ${r.content ? `<p style="margin:10px 0; font-size:13px; color:#78909c; background:#f9fbfd; padding:8px; border-radius:4px;">${esc(r.content)}</p>` : ''}
+        
+        <div style="margin: 12px 0;">
+          <div style="font-size:12px; color:#78909c; margin-bottom:6px;">已报名 (${signups.length}人)：</div>
+          <div>${signupNames || '<span style="color:#b0bec5; font-size:12px;">暂无，快来抢沙发！</span>'}</div>
+        </div>
+        
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="text" id="signupName_${r.id}" placeholder="输入真实姓名报名" style="flex:1; padding:10px; border:1px solid #cfd8dc; border-radius:6px; font-size:14px;">
+          <button onclick="handleSignup(${r.id})" style="background:#e53935; color:#fff; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:400;">接龙</button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
-const tasks = tasksRes.data;
-if (!tasksRes.error && tasks && tasks.length > 0) {
+// 接龙报名逻辑
+window.handleSignup = async (id) => {
+  const input = document.getElementById(`signupName_${id}`);
+  const name = input.value.trim();
+  if (!name) { alert('请输入姓名'); return; }
+  
+  // 检查是否在队员名单里
+  const isMember = globalAllMembers.some(m => m.name === name);
+  if (!isMember) { alert('报名失败：你不是本队队员，或姓名输入有误。'); return; }
+  
+  // 查重 (前端先查，防止重复点击)
+  const { data: existing } = await supabase.from('recruitment_signups').select('*').eq('recruitment_id', id).eq('member_name', name);
+  if (existing && existing.length > 0) {
+    alert('你已经报过名啦，无需重复报名！'); return;
+  }
+
+  const { error } = await supabase.from('recruitment_signups').insert({ recruitment_id: id, member_name: name });
+  if (error) {
+    alert('报名失败：' + error.message);
+  } else {
+    alert('接龙成功！请准时参加。');
+    location.reload(); 
+  }
+};
+
+// --- 2. 处理任务数据与渲染 ---
+if (!tasksRes.error && globalAllTasks.length > 0) {
   document.getElementById('statsPanel').style.display = 'block';
   document.getElementById('personalPanel').style.display = 'block';
   document.getElementById('tasksPanel').style.display = 'block';
   
-  globalAllTasks = tasks;
-  processTasksData(tasks); // 计算统计数据
-  renderTaskList(tasks);   // 渲染历史记录
-  renderStatsTable();      // 渲染表格
-  renderCharts();          // 渲染图表
+  processTasksData(globalAllTasks); 
+  renderTaskList(globalAllTasks);   
+  renderStatsTable();      
+  renderCharts();          
 } else {
   document.getElementById('emptyState').style.display = 'block';
 }
 
-// --- 2. 数据处理与计算 ---
+if (globalAllMembers.length > 0) {
+  document.getElementById('contactPanel').style.display = 'block';
+}
+
 function processTasksData(tasks) {
   globalMemberStats = {};
   tasks.forEach(t => {
@@ -349,10 +429,11 @@ function processTasksData(tasks) {
 
 // --- 3. 渲染图表 (ECharts) ---
 function renderCharts() {
-  const sortedMembers = Object.entries(globalMemberStats).sort((a, b) => b[1].total - a[1].total);
+  if (Object.keys(globalMemberStats).length === 0) return;
   
-  // 柱状图：取前 10 名
+  const sortedMembers = Object.entries(globalMemberStats).sort((a, b) => b[1].total - a[1].total);
   const top10 = sortedMembers.slice(0, 10);
+  
   const barChart = echarts.init(document.getElementById('barChart'));
   barChart.setOption({
     title: { text: '出勤前十名 (小时)', left: 'center', textStyle: { fontSize: 14, fontWeight: 400, color: '#546e7a' } },
@@ -361,8 +442,7 @@ function renderCharts() {
     xAxis: { type: 'category', data: top10.map(x => x[0]), axisLabel: { color: '#78909c' } },
     yAxis: { type: 'value', axisLabel: { color: '#78909c' }, splitLine: { lineStyle: { type: 'dashed' } } },
     series: [{
-      data: top10.map(x => x[1].total),
-      type: 'bar',
+      data: top10.map(x => x[1].total), type: 'bar',
       itemStyle: {
         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
           { offset: 0, color: '#64b5f6' }, { offset: 1, color: '#1565c0' }
@@ -373,7 +453,6 @@ function renderCharts() {
     }]
   });
 
-  // 饼图：各类型总时长占比
   let totalRescue = 0, totalTraining = 0, totalFire = 0;
   Object.values(globalMemberStats).forEach(d => {
     totalRescue += d.rescue; totalTraining += d.training; totalFire += d.fire;
@@ -386,9 +465,7 @@ function renderCharts() {
     legend: { bottom: '0%', icon: 'circle', textStyle: { color: '#78909c' } },
     color: ['#42a5f5', '#66bb6a', '#ef5350'],
     series: [{
-      type: 'pie',
-      radius: ['40%', '70%'],
-      avoidLabelOverlap: false,
+      type: 'pie', radius: ['40%', '70%'], avoidLabelOverlap: false,
       itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
       label: { show: false },
       data: [
@@ -399,7 +476,6 @@ function renderCharts() {
     }]
   });
 
-  // 窗口缩放时自适应
   window.addEventListener('resize', () => { barChart.resize(); pieChart.resize(); });
 }
 
@@ -417,9 +493,7 @@ function renderStatsTable() {
 
   statsBox.innerHTML = `
     <table class="stats-table">
-      <thead>
-        <tr><th class="rank">排名</th><th>队员姓名</th><th>总时长</th></tr>
-      </thead>
+      <thead><tr><th class="rank">排名</th><th>队员姓名</th><th>总时长</th></tr></thead>
       <tbody>
         ${sortedMembers.map((item, index) => {
           const name = item[0], data = item[1];
@@ -434,16 +508,10 @@ function renderStatsTable() {
           return `
             <tr>
               <td class="rank ${rankClass}">${index + 1}</td>
-              <td>
-                <span class="clickable-name" onclick="toggleDetail('detail-${index}', this)">
-                  ${esc(name)} <span class="arrow">▼</span>
-                </span>
-              </td>
+              <td><span class="clickable-name" onclick="toggleDetail('detail-${index}', this)">${esc(name)} <span class="arrow">▼</span></span></td>
               <td class="total-col">${fmt(data.total)} 小时</td>
             </tr>
-            <tr id="detail-${index}" class="details-row" style="display: none;">
-              <td colspan="3"><div class="details-flex">${detailsHtml}</div></td>
-            </tr>
+            <tr id="detail-${index}" class="details-row" style="display: none;"><td colspan="3"><div class="details-flex">${detailsHtml}</div></td></tr>
           `;
         }).join('')}
       </tbody>
@@ -451,18 +519,16 @@ function renderStatsTable() {
   `;
 }
 
-// --- 5. 个人查询逻辑 ---
+// --- 5. 个人查询 ---
 document.getElementById('queryBtn').addEventListener('click', () => {
   const name = document.getElementById('queryNameInput').value.trim();
   const resultBox = document.getElementById('personalResult');
-  
   if (!name) { alert('请输入姓名'); return; }
   
   const data = globalMemberStats[name];
   if (!data) {
     resultBox.innerHTML = `<h3 style="color:#e53935;">未找到“${esc(name)}”的出勤记录</h3><p>请检查输入是否正确，或联系管理员录入。</p>`;
-    resultBox.style.display = 'block';
-    return;
+    resultBox.style.display = 'block'; return;
   }
 
   const fmt = (num) => parseFloat(num.toFixed(1));
@@ -478,21 +544,19 @@ document.getElementById('queryBtn').addEventListener('click', () => {
   resultBox.style.display = 'block';
 });
 
-// --- 6. 通讯录密码锁逻辑 ---
+// --- 6. 通讯录密码锁 ---
 window.unlockContacts = async () => {
   const pwd = document.getElementById('contactPassword').value;
   if (pwd === CONTACT_PASSWORD) {
     document.getElementById('lockView').style.display = 'none';
     document.getElementById('contactDataView').style.display = 'block';
     
-    // 渲染通讯录
-    const members = membersRes.data;
     document.getElementById('contactDataView').innerHTML = `
       <div style="font-size:12px; color:#e53935; background:#ffebee; padding:8px 12px; border-radius:6px; margin-bottom:15px; display:inline-block;">⚠️ 请勿随意外传。</div>
       <table class="contact-table">
         <thead><tr><th>姓名</th><th>联系电话</th><th>紧急联系人</th></tr></thead>
         <tbody>
-          ${members.map(m => `
+          ${globalAllMembers.map(m => `
             <tr>
               <td>${esc(m.name)}</td>
               <td>${m.phone ? `<a href="tel:${esc(m.phone)}" style="color:#1565c0;text-decoration:none;">${esc(m.phone)}</a>` : '-'}</td>
@@ -508,7 +572,7 @@ window.unlockContacts = async () => {
   }
 };
 
-// --- 7. 历史活动渲染 ---
+// --- 7. 历史活动 ---
 function renderTaskList(tasks) {
   document.getElementById('taskList').innerHTML = tasks.map(t => {
     let membersHtml = (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) 
@@ -538,7 +602,7 @@ function renderTaskList(tasks) {
   }).join('');
 }
 
-// --- 8. 通用工具函数 ---
+// --- 辅助工具 ---
 window.toggleDetail = (detailId, nameElement) => {
   const detailRow = document.getElementById(detailId);
   const arrow = nameElement.querySelector('.arrow');

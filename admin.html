@@ -55,20 +55,26 @@
   /* 折叠面板和滚动条 */
   .details-box { margin-top: 10px; border: 1px solid #cfd8dc; border-radius: 6px; overflow: hidden; background: #fff; }
   .details-box summary {
-    padding: 10px 15px; background: #f9fbfd; color: #1565c0; font-size: 14px;
-    cursor: pointer; user-select: none; list-style: none; display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 15px; background: #f9fbfd; color: #1565c0; font-size: 14px;
+    cursor: pointer; user-select: none; list-style: none; 
+    display: flex; align-items: center; /* 保证图标和文字垂直居中 */
+    justify-content: space-between; 
   }
   .details-box summary::-webkit-details-marker { display: none; }
-  .details-box summary::after { content: '▼'; font-size: 12px; color: #b0bec5; transition: transform 0.3s; }
+  .details-box summary::after { content: '▼'; font-size: 10px; color: #b0bec5; transition: transform 0.3s; }
   .details-box[open] summary::after { transform: rotate(180deg); }
   .details-box[open] summary { border-bottom: 1px solid #eceff1; }
   
+  /* 折叠标题左侧内容容器 */
+  .summary-title { display: flex; align-items: center; gap: 8px; }
+  /* SVG 图标样式 */
+  .summary-icon { width: 18px; height: 18px; fill: #1565c0; }
+
   .scroll-area {
-    max-height: 220px; /* 限制最高高度，超出滚动 */
+    max-height: 220px; 
     overflow-y: auto; 
     padding: 12px;
   }
-  /* 美化滚动条 */
   .scroll-area::-webkit-scrollbar { width: 6px; }
   .scroll-area::-webkit-scrollbar-thumb { background: #cfd8dc; border-radius: 3px; }
 
@@ -126,7 +132,13 @@
     
     <!-- 名单折叠区 -->
     <details class="details-box" style="margin-top: 15px;">
-      <summary>📋 查看已添加的队员（点击展开/收起）</summary>
+      <summary>
+        <div class="summary-title">
+          <!-- 通讯录图标 -->
+          <svg class="summary-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+          查看已添加的队员（点击展开/收起）
+        </div>
+      </summary>
       <div id="memberList" class="scroll-area" style="background: #f9fbfd;">
         <span class="empty">加载名单中...</span>
       </div>
@@ -158,7 +170,13 @@
       <label>参与成员及个人时长</label>
       <!-- 成员勾选折叠区 -->
       <details class="details-box member-select-details" style="margin-bottom: 15px;">
-        <summary>👥 点击展开选择参与成员</summary>
+        <summary>
+          <div class="summary-title">
+            <!-- 群组/人员图标 -->
+            <svg class="summary-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            点击展开选择参与成员
+          </div>
+        </summary>
         <input type="text" id="memberSearchInput" class="search-input" placeholder="🔍 输入姓名快速搜索过滤..." oninput="filterMemberCheckboxes(this.value)">
         <div id="memberCheckboxes" class="checkbox-group scroll-area">
           <!-- 动态生成勾选框 -->
@@ -240,7 +258,6 @@ async function loadMembers() {
     box.innerHTML = '<span class="empty">暂无队员，请在上方添加</span>';
     checkboxGroup.innerHTML = '<span style="color:#90a4ae;font-size:13px;">请先在上方添加队员名单</span>';
   } else {
-    // 渲染上方名单
     box.innerHTML = allMembers.map(m => `
       <span class="member-tag">
         <strong>${esc(m.name)}</strong> 
@@ -250,7 +267,6 @@ async function loadMembers() {
       </span>
     `).join('');
 
-    // 渲染勾选列表
     checkboxGroup.innerHTML = allMembers.map(m => `
       <label class="checkbox-item">
         <input type="checkbox" name="task_members" value="${esc(m.name)}" onchange="toggleHoursInput(this)">
@@ -261,7 +277,6 @@ async function loadMembers() {
   }
 }
 
-// 搜索过滤功能
 window.filterMemberCheckboxes = (keyword) => {
   const kw = keyword.trim().toLowerCase();
   document.querySelectorAll('#memberCheckboxes .checkbox-item').forEach(label => {
@@ -328,7 +343,7 @@ function resetForm() {
   cancelEdit.style.display = 'none';
   errorEl.style.display = 'none';
   memberSearchInput.value = '';
-  filterMemberCheckboxes(''); // 重置搜索
+  filterMemberCheckboxes('');
   
   document.querySelectorAll('input[name="task_members"]').forEach(cb => { cb.checked = false; toggleHoursInput(cb); });
 }
@@ -559,7 +574,6 @@ function startEdit(t) {
   const taskMembers = t.members ? t.members.split(',').map(s => s.trim()) : [];
   const memberHoursData = t.member_hours || [];
 
-  // 自动展开选择面板并重置搜索
   memberSearchInput.value = '';
   filterMemberCheckboxes('');
   const detailsEl = document.querySelector('.member-select-details');

@@ -83,8 +83,11 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
   }
   .history-header h2 { margin: 0; }
+  .header-btns { display: flex; gap: 10px; }
 
   /* 好看的表格样式 */
   .admin-table-wrapper {
@@ -117,7 +120,6 @@
     border-bottom: none;
   }
   
-  /* 限制参与人员列的宽度，防止太长撑爆 */
   .col-members {
     max-width: 200px;
     white-space: nowrap;
@@ -125,7 +127,6 @@
     text-overflow: ellipsis;
   }
   
-  /* 表格里的操作按钮组 */
   .action-btns {
     display: flex;
     gap: 6px;
@@ -203,10 +204,16 @@
   <div class="card">
     <div class="history-header">
       <h2>历史记录管理</h2>
-      <button class="btn sm gray" id="exportAllBtn" style="display: flex; align-items: center; gap: 5px;">
-        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-        全部导出
-      </button>
+      <div class="header-btns">
+        <button class="btn sm" id="exportMembersBtn" style="background: #1565c0; display: flex; align-items: center; gap: 5px;">
+          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          导出成员时长
+        </button>
+        <button class="btn sm gray" id="exportAllBtn" style="display: flex; align-items: center; gap: 5px;">
+          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          导出全部记录
+        </button>
+      </div>
     </div>
     
     <div class="admin-table-wrapper">
@@ -491,12 +498,12 @@ async function loadTasks() {
   tbody.querySelectorAll('[data-export]').forEach(btn =>
     btn.addEventListener('click', () => {
       const task = allTasks.find(x => String(x.id) === btn.dataset.export);
-      if (task) exportToCSV([task], `出勤记录_${task.title}`);
+      if (task) exportTasksToCSV([task], `出勤记录_${task.title}`);
     }));
 }
 
-// --- 导出 CSV 通用函数 ---
-function exportToCSV(tasksData, fileNamePrefix) {
+// --- 导出任务记录 CSV ---
+function exportTasksToCSV(tasksData, fileNamePrefix) {
   if (!tasksData || tasksData.length === 0) {
     alert("暂无数据可导出");
     return;
@@ -528,6 +535,74 @@ function exportToCSV(tasksData, fileNamePrefix) {
     ];
   });
 
+  downloadCSV(headers, rows, fileNamePrefix);
+}
+
+// --- 导出成员总时长 CSV (新增功能) ---
+function exportMembersTimeCSV() {
+  if (!allTasks || allTasks.length === 0) {
+    alert("暂无数据可导出");
+    return;
+  }
+
+  const memberStats = {}; // name -> { rescue: 0, training: 0, fire: 0, total: 0 }
+
+  // 1. 先遍历所有队员名单，确保没出勤的人也有一行（0小时）
+  allMembers.forEach(m => {
+    memberStats[m.name] = { rescue: 0, training: 0, fire: 0, total: 0 };
+  });
+
+  // 2. 统计任务数据
+  allTasks.forEach(t => {
+    const type = t.event_type || ''; 
+    
+    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
+      t.member_hours.forEach(m => {
+        const hours = parseFloat(m.hours) || 0;
+        if (hours > 0 && m.name) {
+          if (!memberStats[m.name]) memberStats[m.name] = { rescue: 0, training: 0, fire: 0, total: 0 };
+          
+          memberStats[m.name].total += hours;
+          if (type === '公益救援') memberStats[m.name].rescue += hours;
+          else if (type === '技能培训') memberStats[m.name].training += hours;
+          else if (type === '森林消防') memberStats[m.name].fire += hours;
+        }
+      });
+    } 
+    else if (t.members && t.duration) {
+      const hours = parseFloat(String(t.duration).replace(/[^\d.]/g, '')) || 0;
+      const membersArray = t.members.split(/[,，\s]+/).filter(Boolean);
+      
+      membersArray.forEach(name => {
+        if (!memberStats[name]) memberStats[name] = { rescue: 0, training: 0, fire: 0, total: 0 };
+        memberStats[name].total += hours;
+        if (type === '公益救援') memberStats[name].rescue += hours;
+        else if (type === '技能培训') memberStats[name].training += hours;
+        else if (type === '森林消防') memberStats[name].fire += hours;
+      });
+    }
+  });
+
+  // 3. 转为数组并按总时长降序排序
+  const sortedMembers = Object.entries(memberStats).sort((a, b) => b[1].total - a[1].total);
+  
+  const headers = ['排名', '姓名', '公益救援(小时)', '技能培训(小时)', '森林消防(小时)', '总时长(小时)'];
+  const rows = sortedMembers.map((item, index) => {
+    return [
+      index + 1,
+      item[0],
+      parseFloat(item[1].rescue.toFixed(1)),
+      parseFloat(item[1].training.toFixed(1)),
+      parseFloat(item[1].fire.toFixed(1)),
+      parseFloat(item[1].total.toFixed(1))
+    ];
+  });
+
+  downloadCSV(headers, rows, '成员出勤总时长统计');
+}
+
+// --- 通用 CSV 下载逻辑 ---
+function downloadCSV(headers, rows, fileNamePrefix) {
   const csvContent = [headers, ...rows].map(row => 
     row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
   ).join('\n');
@@ -542,9 +617,13 @@ function exportToCSV(tasksData, fileNamePrefix) {
   document.body.removeChild(link);
 }
 
-// 绑定全部导出
+// 绑定按钮事件
 document.getElementById('exportAllBtn').addEventListener('click', () => {
-  exportToCSV(allTasks, '云和蓝天救援队_全部记录');
+  exportTasksToCSV(allTasks, '云和蓝天救援队_全部记录');
+});
+
+document.getElementById('exportMembersBtn').addEventListener('click', () => {
+  exportMembersTimeCSV();
 });
 
 

@@ -75,7 +75,7 @@
   .date-input { width: 130px; padding: 6px 10px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; color: #546e7a; }
   .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 6px; vertical-align: middle; }
 
-  /* 海报容器（默认隐藏） */
+  /* 海报容器（默认隐藏，屏幕外生成） */
   #posterContainer {
     position: fixed; left: -9999px; top: 0;
     width: 375px; background: #fff; padding: 20px;
@@ -90,6 +90,23 @@
   .poster-qr { text-align: center; margin-top: 20px; }
   .poster-qr img { width: 120px; height: 120px; }
   .poster-qr p { font-size: 13px; color: #666; margin-top: 5px; }
+
+  /* 手机端图片弹窗 */
+  #imageModal {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 99999;
+    flex-direction: column; align-items: center; justify-content: center;
+  }
+  #imageModal img {
+    max-width: 90%; max-height: 75%; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  #imageModal .tip {
+    color: #fff; margin-top: 20px; font-size: 16px; font-weight: bold; letter-spacing: 1px;
+    background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 20px;
+  }
+  #imageModal .close-btn {
+    position: absolute; top: 20px; right: 25px; color: #fff; font-size: 35px; cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -187,7 +204,6 @@
     </summary>
     <div class="details-inner">
       <div class="export-toolbar">
-        <!-- 新增：本地搜索框 -->
         <div class="search-input-wrapper" style="flex:1; min-width:200px; border:1px solid #cfd8dc; border-radius:6px;">
           <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
           <input type="text" id="taskSearchInput" class="search-input" placeholder="搜索事件、成员或类型..." oninput="filterTasks(this.value)" style="padding-left:32px;">
@@ -236,6 +252,13 @@
     <img id="pQrCode" src="" alt="扫码报名">
     <p>长按识别二维码，进入网页接龙报名</p>
   </div>
+</div>
+
+<!-- 手机端图片弹窗展示 -->
+<div id="imageModal">
+  <div class="close-btn" onclick="closeImageModal()">×</div>
+  <img id="posterImg" src="" alt="海报">
+  <div class="tip">长按图片，保存到手机相册</div>
 </div>
 
 <script type="module">
@@ -376,19 +399,18 @@ window.deleteRecruit = async (id) => {
   loadRecruits().then(renderRecruits);
 };
 
-// 生成招募海报
+// 生成招募海报（自适应移动端）
 window.generatePoster = (id) => {
   const r = allRecruits.find(x => x.id === id);
   const siteUrl = window.location.href.replace('admin.html', 'index.html');
   
-  // 填充海报数据
   document.getElementById('pType').textContent = r.event_type || '待定';
   document.getElementById('pTitle').textContent = r.title;
   document.getElementById('pTime').textContent = formatTime(r.task_time);
   document.getElementById('pLoc').textContent = r.location || '待定';
   document.getElementById('pContent').textContent = r.content || '无';
   
-  // 生成二维码 API (使用免费的 qrserver)
+  // 生成二维码 API
   document.getElementById('pQrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(siteUrl)}`;
 
   // 等二维码图片加载完成后截图
@@ -396,20 +418,34 @@ window.generatePoster = (id) => {
     const posterEl = document.getElementById('posterContainer');
     posterEl.style.display = 'block'; // 临时显示（在屏幕外）
     
-    html2canvas(posterEl, { scale: 2, useCORS: true }).then(canvas => {
+    html2canvas(posterEl, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
       posterEl.style.display = 'none';
-      
-      // 下载图片
-      const link = document.createElement('a');
-      link.download = `招募海报_${r.title}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      alert('海报已生成并开始下载！可直接发微信群。');
+      const imgData = canvas.toDataURL('image/png');
+
+      // 判断是否为移动端
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        // 手机端：弹窗展示，引导长按保存
+        document.getElementById('posterImg').src = imgData;
+        document.getElementById('imageModal').style.display = 'flex';
+      } else {
+        // PC端：直接下载
+        const link = document.createElement('a');
+        link.download = `招募海报_${r.title}.png`;
+        link.href = imgData;
+        link.click();
+      }
     }).catch(err => {
       posterEl.style.display = 'none';
       alert('生成海报失败：' + err.message);
     });
   };
+};
+
+// 关闭图片弹窗
+window.closeImageModal = () => {
+  document.getElementById('imageModal').style.display = 'none';
 };
 
 // 一键转为出勤记录
@@ -506,7 +542,6 @@ function renderTasks(filterText = '') {
     }));
 }
 
-// 搜索防抖/过滤
 window.filterTasks = (val) => {
   renderTasks(val);
 };

@@ -56,6 +56,9 @@
   /* 工具栏 */
   .export-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #f4f7fb; padding: 8px 12px; border-radius: 8px; }
   .date-input { width: 130px; padding: 6px 10px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; color: #546e7a; }
+  
+  /* 标题图标 */
+  .title-icon { width: 20px; height: 20px; fill: #e53935; display: inline-block; vertical-align: text-bottom; margin-right: 6px; }
 </style>
 </head>
 <body>
@@ -87,7 +90,11 @@
 
   <!-- 任务招募管理 -->
   <div class="card" style="border-top: 4px solid #e53935;">
-    <h2>📢 任务招募管理</h2>
+    <h2>
+      <!-- 喇叭图标替换了 Emoji -->
+      <svg class="title-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+      任务招募管理
+    </h2>
     <form id="recruitForm" style="background: #f9fbfd; padding: 15px; border-radius: 8px; border: 1px solid #eceff1; margin-bottom: 15px;">
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
         <div><label>任务标题 *</label><input type="text" id="rTitle" required placeholder="如：水域救援技能训练"></div>
@@ -330,12 +337,10 @@ window.convertToTask = async (id) => {
   alert('报名人员已自动勾选，请核对时长后保存出勤记录。');
 };
 
-// --- 新增：一键生成微信群分享文案 ---
+// 一键生成微信群分享文案
 window.shareToWeChat = (id) => {
   const r = allRecruits.find(x => x.id === id);
   const signups = allSignups.filter(s => s.recruitment_id === r.id);
-  
-  // 获取首页绝对链接
   let siteUrl = window.location.href.replace('admin.html', 'index.html');
   
   let text = `📢【云和·蓝天救援队 任务招募】\n\n`;
@@ -354,18 +359,12 @@ window.shareToWeChat = (id) => {
   text += `\n👇 请点击下方链接，打开网页输入真实姓名进行接龙报名：\n${siteUrl}\n\n`;
   text += `（请大家积极报名，注意安全！）`;
 
-  // 复制到剪贴板
   navigator.clipboard.writeText(text).then(() => {
-    alert('✅ 招募文案已复制！\n\n请打开微信群，直接粘贴发送即可（报名链接会自动带上）。');
+    alert('招募文案已复制！\n\n请打开微信群，直接粘贴发送即可。');
   }).catch(err => {
-    // 降级处理（如果不支持 Clipboard API）
     const textarea = document.createElement('textarea');
-    textarea.value = text;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textarea);
-    alert('✅ 招募文案已复制！\n\n请打开微信群，直接粘贴发送即可。');
+    textarea.value = text; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea);
+    alert('招募文案已复制！\n\n请打开微信群，直接粘贴发送即可。');
   });
 };
 

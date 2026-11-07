@@ -91,7 +91,6 @@
   <!-- 任务招募管理 -->
   <div class="card" style="border-top: 4px solid #e53935;">
     <h2>
-      <!-- 喇叭图标替换了 Emoji -->
       <svg class="title-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
       任务招募管理
     </h2>
@@ -337,26 +336,26 @@ window.convertToTask = async (id) => {
   alert('报名人员已自动勾选，请核对时长后保存出勤记录。');
 };
 
-// 一键生成微信群分享文案
+// 一键生成微信群分享文案 (已去除Emoji，改为纯文字标签)
 window.shareToWeChat = (id) => {
   const r = allRecruits.find(x => x.id === id);
   const signups = allSignups.filter(s => s.recruitment_id === r.id);
   let siteUrl = window.location.href.replace('admin.html', 'index.html');
   
-  let text = `📢【云和·蓝天救援队 任务招募】\n\n`;
-  text += `🚑 任务：${r.title}\n`;
-  text += `⏰ 时间：${formatTime(r.task_time)}\n`;
-  text += `📍 地点：${r.location || '待定'}\n`;
-  if (r.content) text += `📝 详情：${r.content}\n`;
+  let text = `【云和·蓝天救援队 任务招募】\n\n`;
+  text += `[任务] ${r.title}\n`;
+  text += `[时间] ${formatTime(r.task_time)}\n`;
+  text += `[地点] ${r.location || '待定'}\n`;
+  if (r.content) text += `[详情] ${r.content}\n`;
   
-  text += `\n🙋 已有 ${signups.length} 人报名：\n`;
+  text += `\n[报名] 已有 ${signups.length} 人报名：\n`;
   if (signups.length > 0) {
     text += signups.map(s => s.member_name).join('、') + '\n';
   } else {
     text += `（暂无，快来抢沙发！）\n`;
   }
 
-  text += `\n👇 请点击下方链接，打开网页输入真实姓名进行接龙报名：\n${siteUrl}\n\n`;
+  text += `\n请点击下方链接，打开网页输入真实姓名进行接龙报名：\n${siteUrl}\n\n`;
   text += `（请大家积极报名，注意安全！）`;
 
   navigator.clipboard.writeText(text).then(() => {

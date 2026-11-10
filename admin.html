@@ -75,6 +75,13 @@
   
   /* 着装标签样式 */
   .uniform-tag { display: inline-block; padding: 2px 8px; background: #e3f2fd; color: #1565c0; border-radius: 4px; font-size: 12px; font-weight: 400; margin-left: 6px; vertical-align: middle; }
+
+  /* 队员名字旁的文字操作按钮 */
+  .action-text-btn {
+    font-size: 12px; cursor: pointer; margin-left: 4px; text-decoration: none;
+  }
+  .action-text-btn.edit { color: #1565c0; }
+  .action-text-btn.delete { color: #e53935; }
 </style>
 </head>
 <body>
@@ -95,8 +102,10 @@
         <div><label>姓名 *</label><input type="text" id="newMemberName" required></div>
         <div><label>联系电话</label><input type="text" id="newMemberPhone"></div>
         <div><label>紧急联系人</label><input type="text" id="newMemberEmergency"></div>
-        <button class="btn" type="submit" id="addMemberBtn" style="height: 38px;">添加队员</button>
-        <button class="btn gray" type="button" id="cancelMemberEdit" style="display:none; height: 38px;" onclick="cancelMemberEdit()">取消编辑</button>
+        <div style="display:flex; gap:10px; min-width: 170px;">
+          <button class="btn" type="submit" id="addMemberBtn" style="height: 38px; flex:1;">添加队员</button>
+          <button class="btn gray" type="button" id="cancelMemberEdit" style="display:none; height: 38px; flex:1;">取消编辑</button>
+        </div>
       </form>
       <details class="details-box">
         <summary><div class="summary-title"><svg class="summary-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>展开查看已录入的队员</div></summary>
@@ -143,7 +152,7 @@
         
         <div style="margin-top: 10px; display:flex; gap:10px;">
           <button class="btn" type="submit" id="recruitSubmitBtn" style="background:#e53935;">发布招募令</button>
-          <button class="btn gray" type="button" id="cancelRecruitEdit" style="display:none;" onclick="cancelRecruitEdit()">取消编辑</button>
+          <button class="btn gray" type="button" id="cancelRecruitEdit" style="display:none;">取消编辑</button>
         </div>
       </form>
       <div class="admin-table-wrapper">
@@ -244,7 +253,7 @@ async function init() {
 }
 init();
 
-// --- 2. 队员管理 (含编辑) ---
+// --- 2. 队员管理 ---
 async function loadMembers() {
   const { data } = await supabase.from('members').select('*').order('name');
   allMembers = data || [];
@@ -284,18 +293,19 @@ window.editMember = (id) => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-window.cancelMemberEdit = () => {
-  document.getElementById('memberEditId').value = '';
-  document.getElementById('memberForm').reset();
-  document.getElementById('addMemberBtn').textContent = '添加队员';
-  document.getElementById('cancelMemberEdit').style.display = 'none';
-};
-
 window.deleteMember = async (id) => {
   if(!confirm('确定删除该队员吗？')) return;
   await supabase.from('members').delete().eq('id', id);
   loadMembers();
 };
+
+// 修复：使用 addEventListener 避免与全局 id 冲突
+document.getElementById('cancelMemberEdit').addEventListener('click', () => {
+  document.getElementById('memberEditId').value = '';
+  document.getElementById('memberForm').reset();
+  document.getElementById('addMemberBtn').textContent = '添加队员';
+  document.getElementById('cancelMemberEdit').style.display = 'none';
+});
 
 document.getElementById('memberForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -315,10 +325,16 @@ document.getElementById('memberForm').addEventListener('submit', async (e) => {
   }
   
   if(res.error) alert(res.error.message);
-  else { cancelMemberEdit(); loadMembers(); }
+  else { 
+    document.getElementById('memberEditId').value = '';
+    document.getElementById('memberForm').reset();
+    document.getElementById('addMemberBtn').textContent = '添加队员';
+    document.getElementById('cancelMemberEdit').style.display = 'none';
+    loadMembers(); 
+  }
 });
 
-// --- 3. 招募管理 (含编辑) ---
+// --- 3. 招募管理 ---
 async function loadRecruits() {
   const [rRes, sRes] = await Promise.all([
     supabase.from('recruitments').select('*').order('created_at', { ascending: false }),
@@ -335,7 +351,6 @@ function renderRecruits() {
   tbody.innerHTML = allRecruits.map(r => {
     const signups = allSignups.filter(s => s.recruitment_id === r.id);
     const names = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
-    // 增加容错：如果旧数据没有 status 字段，默认按已结束展示
     const statusStr = r.status || '已结束';
     const statusTag = statusStr === '招募中' ? '<span style="color:#2e7d32; font-weight:bold;">● 招募中</span>' : '<span style="color:#78909c;">○ 已结束</span>';
     const typeTag = r.event_type ? `<span class="type-tag">${esc(r.event_type)}</span>` : '';
@@ -386,7 +401,6 @@ window.editRecruit = (id) => {
     radio.checked = (radio.value === r.event_type);
   });
   
-  // 回显着装类型
   document.querySelectorAll('input[name="r_uniform_type"]').forEach(radio => {
     radio.checked = (radio.value === r.uniform_type);
   });
@@ -398,12 +412,13 @@ window.editRecruit = (id) => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-window.cancelRecruitEdit = () => {
+// 修复：使用 addEventListener 避免冲突
+document.getElementById('cancelRecruitEdit').addEventListener('click', () => {
   document.getElementById('recruitEditId').value = '';
   document.getElementById('recruitForm').reset();
   document.getElementById('recruitSubmitBtn').textContent = '发布招募令';
   document.getElementById('cancelRecruitEdit').style.display = 'none';
-};
+});
 
 document.getElementById('recruitForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -414,14 +429,14 @@ document.getElementById('recruitForm').addEventListener('submit', async (e) => {
   const payload = {
     title: document.getElementById('rTitle').value.trim(),
     event_type: typeEl ? typeEl.value : null,
-    uniform_type: uniformEl ? uniformEl.value : null, // 保存着装
+    uniform_type: uniformEl ? uniformEl.value : null,
     location: document.getElementById('rLocation').value.trim(),
     task_time: document.getElementById('rTime').value ? new Date(document.getElementById('rTime').value).toISOString() : null,
     content: document.getElementById('rContent').value.trim(),
   };
   
   if (!id) {
-    payload.status = '招募中'; // 新建时默认招募中
+    payload.status = '招募中';
   }
   
   let res;
@@ -432,7 +447,13 @@ document.getElementById('recruitForm').addEventListener('submit', async (e) => {
   }
   
   if(res.error) alert(res.error.message);
-  else { cancelRecruitEdit(); loadRecruits().then(renderRecruits); }
+  else { 
+    document.getElementById('recruitEditId').value = '';
+    document.getElementById('recruitForm').reset();
+    document.getElementById('recruitSubmitBtn').textContent = '发布招募令';
+    document.getElementById('cancelRecruitEdit').style.display = 'none';
+    loadRecruits().then(renderRecruits); 
+  }
 });
 
 window.toggleRecruitStatus = async (id, currentStatus) => {
@@ -455,7 +476,7 @@ window.shareToWeChat = (id) => {
   
   let text = `【云和·蓝天救援队 任务招募】\n\n`;
   text += `[类型] ${r.event_type || '待定'}\n`;
-  text += `[着装] ${r.uniform_type || '无特殊要求'}\n`; // 加入着装
+  text += `[着装] ${r.uniform_type || '无特殊要求'}\n`;
   text += `[任务] ${r.title}\n`;
   text += `[时间] ${formatTime(r.task_time)}\n`;
   text += `[地点] ${r.location || '待定'}\n`;

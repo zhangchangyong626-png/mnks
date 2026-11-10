@@ -116,9 +116,7 @@
   .card h2 { font-weight: 400; font-size: 15px; color: #1f2d3d; }
   .members { color: #546e7a; }
 
-  /* 招募标签通用样式 */
   .recruit-type-tag { background:#ffcdd2; color:#c62828; padding:2px 6px; border-radius:4px; font-size:12px; margin-right:6px; }
-  .recruit-uniform-tag { background:#e3f2fd; color:#1565c0; padding:2px 6px; border-radius:4px; font-size:12px; margin-right:6px; }
 
   @media (max-width: 600px) {
     .main-title { font-size: 24px; }
@@ -280,14 +278,10 @@ if (recruitsRes.data && recruitsRes.data.length > 0) {
     const signupNames = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
     const mapUrl = r.location ? `https://uri.amap.com/search?keyword=${encodeURIComponent(r.location)}&src=mypage&callnative=1` : '#';
     
-    // 新增：渲染着装要求标签
-    const uniformTag = r.uniform_type ? `<span class="recruit-uniform-tag">${esc(r.uniform_type)}</span>` : '';
-    
     return `
       <div class="recruit-card">
         <h3 style="margin:0 0 8px; font-size:16px; color:#e53935; font-weight:500;">
           ${r.event_type ? `<span class="recruit-type-tag">${esc(r.event_type)}</span>` : ''}
-          ${uniformTag}
           ${esc(r.title)}
         </h3>
         <div class="info-row">
@@ -299,6 +293,11 @@ if (recruitsRes.data && recruitsRes.data.length > 0) {
           <svg class="info-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
           时间：${formatTime(r.task_time)}
         </div>
+        ${r.uniform_type ? `
+        <div class="info-row">
+          <svg class="info-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          着装：${esc(r.uniform_type)}
+        </div>` : ''}
         ${r.content ? `<p style="margin:10px 0; font-size:13px; color:#78909c; background:#f9fbfd; padding:8px; border-radius:4px;">${esc(r.content)}</p>` : ''}
         
         <div style="margin: 12px 0;">

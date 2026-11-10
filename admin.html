@@ -72,11 +72,9 @@
   .export-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #f4f7fb; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eceff1;}
   .date-input { width: 130px; padding: 6px 10px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; color: #546e7a; }
   .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 6px; vertical-align: middle; }
-
-  /* 队员名字旁的小编辑按钮 */
-  .edit-icon-btn {
-    border: none; background: none; color: #1565c0; cursor: pointer; padding: 0 4px; display: inline-flex; align-items: center;
-  }
+  
+  /* 着装标签样式 */
+  .uniform-tag { display: inline-block; padding: 2px 8px; background: #e3f2fd; color: #1565c0; border-radius: 4px; font-size: 12px; font-weight: 400; margin-left: 6px; vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -119,12 +117,27 @@
           <div><label>任务标题 *</label><input type="text" id="rTitle" required placeholder="如：水域救援技能训练"></div>
           <div><label>活动地点</label><input type="text" id="rLocation" placeholder="如：云和湖码头"></div>
         </div>
-        <label>任务类型 *</label>
-        <div class="radio-group">
-          <label class="radio-item"><input type="radio" name="r_event_type" value="公益救援" required> 公益救援</label>
-          <label class="radio-item"><input type="radio" name="r_event_type" value="技能培训"> 技能培训</label>
-          <label class="radio-item"><input type="radio" name="r_event_type" value="森林消防"> 森林消防</label>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div>
+            <label>任务类型 *</label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="r_event_type" value="公益救援" required> 公益救援</label>
+              <label class="radio-item"><input type="radio" name="r_event_type" value="技能培训"> 技能培训</label>
+              <label class="radio-item"><input type="radio" name="r_event_type" value="森林消防"> 森林消防</label>
+            </div>
+          </div>
+          <div>
+            <label>着装要求</label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="r_uniform_type" value="蓝天队服"> 蓝天队服</label>
+              <label class="radio-item"><input type="radio" name="r_uniform_type" value="体能服"> 体能服</label>
+              <label class="radio-item"><input type="radio" name="r_uniform_type" value="消防服"> 消防服</label>
+              <label class="radio-item"><input type="radio" name="r_uniform_type" value="便装"> 便装</label>
+            </div>
+          </div>
         </div>
+
         <label>集合时间</label><input type="datetime-local" id="rTime">
         <label>任务详情/要求</label><textarea id="rContent" placeholder="请填写招募要求、注意事项等..." style="min-height: 60px;"></textarea>
         
@@ -236,18 +249,14 @@ async function loadMembers() {
   const { data } = await supabase.from('members').select('*').order('name');
   allMembers = data || [];
   
-  // 这里加入了“编辑”按钮（小铅笔）
   document.getElementById('memberList').innerHTML = allMembers.map(m => `
     <span style="display:inline-flex; align-items:center; gap:8px; padding:6px 10px; background:#e3f2fd; color:#1565c0; border-radius:6px; font-size:13px; margin:4px;">
       <strong>${esc(m.name)}</strong> 
       ${m.phone ? `<span style="color:#546e7a; display:flex; align-items:center; gap:4px;"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>${esc(m.phone)}</span>` : ''} 
       ${m.emergency_contact ? `<span style="color:#546e7a; display:flex; align-items:center; gap:4px;"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>${esc(m.emergency_contact)}</span>` : ''}
       
-      <!-- 编辑按钮 -->
-      <button type="button" class="edit-icon-btn" onclick="editMember('${m.id}')" title="编辑">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-      </button>
-      <button type="button" onclick="deleteMember('${m.id}')" style="border:none;background:none;color:#e53935;cursor:pointer;font-weight:bold; padding:0 4px;">×</button>
+      <a class="action-text-btn edit" onclick="editMember('${m.id}')">编辑</a>
+      <a class="action-text-btn delete" onclick="deleteMember('${m.id}')">删除</a>
     </span>
   `).join('');
 
@@ -330,12 +339,13 @@ function renderRecruits() {
     const statusStr = r.status || '已结束';
     const statusTag = statusStr === '招募中' ? '<span style="color:#2e7d32; font-weight:bold;">● 招募中</span>' : '<span style="color:#78909c;">○ 已结束</span>';
     const typeTag = r.event_type ? `<span class="type-tag">${esc(r.event_type)}</span>` : '';
+    const uniformTag = r.uniform_type ? `<span class="uniform-tag">${esc(r.uniform_type)}</span>` : '';
     
     return `
       <tr>
         <td>${statusTag}</td>
         <td>
-          <div style="font-weight:500; color:#1f2d3d;">${typeTag}${esc(r.title)}</div>
+          <div style="font-weight:500; color:#1f2d3d;">${typeTag}${uniformTag}${esc(r.title)}</div>
           <div class="info-row" style="margin-top:6px;">
             <svg class="info-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
             ${formatTime(r.task_time)}
@@ -348,7 +358,6 @@ function renderRecruits() {
         <td style="max-width:300px;">${names || '<span style="color:#b0bec5; font-size:12px;">暂无人报名</span>'}</td>
         <td>
           <div class="action-btns">
-            <!-- 招募编辑按钮 -->
             <button class="btn sm gray" style="padding:4px 8px;" onclick="editRecruit(${r.id})">编辑</button>
             <button class="btn sm" style="padding:4px 8px; background:#e53935;" onclick="shareToWeChat(${r.id})">
               <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:#fff;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
@@ -377,6 +386,11 @@ window.editRecruit = (id) => {
     radio.checked = (radio.value === r.event_type);
   });
   
+  // 回显着装类型
+  document.querySelectorAll('input[name="r_uniform_type"]').forEach(radio => {
+    radio.checked = (radio.value === r.uniform_type);
+  });
+  
   document.getElementById('recruitSubmitBtn').textContent = '保存修改';
   document.getElementById('cancelRecruitEdit').style.display = 'inline-block';
   
@@ -395,9 +409,12 @@ document.getElementById('recruitForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('recruitEditId').value;
   const typeEl = document.querySelector('input[name="r_event_type"]:checked');
+  const uniformEl = document.querySelector('input[name="r_uniform_type"]:checked');
+  
   const payload = {
     title: document.getElementById('rTitle').value.trim(),
     event_type: typeEl ? typeEl.value : null,
+    uniform_type: uniformEl ? uniformEl.value : null, // 保存着装
     location: document.getElementById('rLocation').value.trim(),
     task_time: document.getElementById('rTime').value ? new Date(document.getElementById('rTime').value).toISOString() : null,
     content: document.getElementById('rContent').value.trim(),
@@ -438,6 +455,7 @@ window.shareToWeChat = (id) => {
   
   let text = `【云和·蓝天救援队 任务招募】\n\n`;
   text += `[类型] ${r.event_type || '待定'}\n`;
+  text += `[着装] ${r.uniform_type || '无特殊要求'}\n`; // 加入着装
   text += `[任务] ${r.title}\n`;
   text += `[时间] ${formatTime(r.task_time)}\n`;
   text += `[地点] ${r.location || '待定'}\n`;

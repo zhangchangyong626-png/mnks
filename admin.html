@@ -6,7 +6,6 @@
 <title>管理后台 · 云和蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  /* 全局字体设置 */
   body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 300; background: #f4f7fb; color: #333; }
   h2, h3 { font-weight: 400; color: #1f2d3d; }
   label { font-weight: 300; color: #607d8b; }
@@ -18,7 +17,6 @@
   .radio-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 14px; color: #1f2d3d; cursor: pointer; background: transparent; border: none; padding: 0; }
   .radio-item input[type="radio"] { width: 16px; height: 16px; margin: 0; cursor: pointer; }
 
-  /* 外层大折叠面板样式 */
   .details-card { padding: 0; overflow: hidden; margin-bottom: 16px; background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.06); border: none;}
   .details-card summary { padding: 18px 20px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; background: #fff; border-bottom: 1px solid transparent; transition: background 0.2s; }
   .details-card summary:hover { background: #f9fbfd; }
@@ -30,7 +28,6 @@
   .details-inner { padding: 20px; }
 
   .border-red { border-top: 4px solid #e53935; }
-
   .title-icon { width: 20px; height: 20px; fill: #e53935; }
   .title-icon.blue { fill: #1565c0; }
   .title-icon.green { fill: #2e7d32; }
@@ -72,14 +69,9 @@
   .export-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #f4f7fb; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eceff1;}
   .date-input { width: 130px; padding: 6px 10px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; color: #546e7a; }
   .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 6px; vertical-align: middle; }
-  
-  /* 着装标签样式 */
   .uniform-tag { display: inline-block; padding: 2px 8px; background: #e3f2fd; color: #1565c0; border-radius: 4px; font-size: 12px; font-weight: 400; margin-left: 6px; vertical-align: middle; }
 
-  /* 队员名字旁的文字操作按钮 */
-  .action-text-btn {
-    font-size: 12px; cursor: pointer; margin-left: 4px; text-decoration: none;
-  }
+  .action-text-btn { font-size: 12px; cursor: pointer; margin-left: 4px; text-decoration: none; }
   .action-text-btn.edit { color: #1565c0; }
   .action-text-btn.delete { color: #e53935; }
 </style>

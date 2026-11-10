@@ -320,6 +320,7 @@ if (!tasksRes.error && globalAllTasks.length > 0) {
 
 if (globalAllMembers.length > 0) document.getElementById('contactPanel').style.display = 'block';
 
+// 核心修复：计算时长时，过滤掉已经不在队员名单里的人
 function processTasksData(tasks) {
   globalMemberStats = {};
   tasks.forEach(t => {
@@ -327,7 +328,11 @@ function processTasksData(tasks) {
     if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
       t.member_hours.forEach(m => {
         const hours = parseFloat(m.hours) || 0;
-        if (hours > 0 && m.name) {
+        
+        // 新增判断：检查当前名字是否还在现有的队员名单中
+        const isCurrentMember = globalAllMembers.some(member => member.name === m.name);
+        
+        if (hours > 0 && m.name && isCurrentMember) {
           if (!globalMemberStats[m.name]) globalMemberStats[m.name] = { rescue: 0, training: 0, fire: 0, total: 0 };
           globalMemberStats[m.name].total += hours;
           if (type === '公益救援') globalMemberStats[m.name].rescue += hours;

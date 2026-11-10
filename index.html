@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>云和·蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
-<!-- 引入 ECharts 图表库 -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 300; background: #e4e7eb; color: #333; }
@@ -26,17 +25,9 @@
   .bottom-nav { display: none; }
   main { max-width: 800px; margin: 30px auto; padding: 0 14px; }
 
-  /* 顶部独立卡片 (个人查询) */
-  .standalone-card {
-    background: #fff; border-radius: 8px; padding: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 16px;
-  }
-  .standalone-title {
-    margin: 0 0 15px; font-size: 16px; font-weight: 400; color: #1565c0;
-    display: flex; align-items: center; gap: 8px;
-  }
+  .standalone-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 16px; }
+  .standalone-title { margin: 0 0 15px; font-size: 16px; font-weight: 400; color: #1565c0; display: flex; align-items: center; gap: 8px; }
 
-  /* 折叠面板 */
   details { background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 16px; overflow: hidden; border: none; }
   summary { padding: 16px 20px; font-size: 16px; font-weight: 400; letter-spacing: 1px; cursor: pointer; background: #64b5f6; color: #ffffff; list-style: none; display: flex; align-items: center; justify-content: space-between; user-select: none; transition: background 0.2s; }
   summary:hover { background: #42a5f5; } 
@@ -48,11 +39,9 @@
   details[open] summary { border-bottom: 1px solid #e3f2fd; }
   .details-content { padding: 16px 20px; background: #ffffff; color: #333; }
 
-  /* 图表容器 */
   .charts-container { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; background: #f9fbfd; padding: 15px; border-radius: 8px; }
   .chart-box { flex: 1; min-width: 300px; height: 260px; }
 
-  /* 排行榜表格 */
   .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
   .stats-table th, .stats-table td { padding: 14px 8px; border-bottom: 1px solid #eceff1; font-weight: 300; }
   .stats-table th { color: #78909c; font-weight: 400; background: #fafbfc; }
@@ -72,7 +61,6 @@
   .detail-badge.training { border-color: #a5d6a7; color: #2e7d32; background: #e8f5e9; }
   .detail-badge.fire { border-color: #ef9a9a; color: #c62828; background: #ffebee; }
 
-  /* 查询区 */
   .search-box { display: flex; gap: 10px; }
   .search-box input { flex: 1; padding: 12px 16px; border: 1px solid #cfd8dc; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; }
   .search-box input:focus { border-color: #1565c0; }
@@ -83,20 +71,17 @@
   .personal-result p { margin: 6px 0; font-size: 14px; color: #546e7a; }
   .personal-result .svg-big { width: 24px; height: 24px; fill: #1565c0; }
 
-  /* 通讯录密码锁 */
   .privacy-lock { text-align: center; padding: 30px 20px; background: #f9fbfd; border-radius: 8px; border: 1px dashed #cfd8dc; }
   .privacy-lock p { color: #78909c; font-size: 14px; margin-bottom: 15px; display:flex; justify-content:center; align-items:center; gap:6px;}
   .privacy-lock input { padding: 10px 14px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 14px; width: 200px; margin-right: 10px; outline: none; }
   .privacy-lock button { padding: 10px 20px; background: #1565c0; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
 
-  /* 通讯录表格 */
   .contact-table { width: 100%; border-collapse: collapse; font-size: 14px; }
   .contact-table th, .contact-table td { padding: 12px 8px; border-bottom: 1px solid #eceff1; text-align: left; }
   .contact-table th { color: #78909c; font-weight: 400; background: #fafbfc; }
   .contact-table td { font-weight: 300; }
   .contact-table td:first-child { font-weight: 400; color: #1f2d3d; }
 
-  /* 招募接龙面板 */
   .recruit-panel-red { border: 1px solid #e53935 !important; box-shadow: 0 4px 15px rgba(229,57,53,0.1) !important; }
   .recruit-panel-red summary { background: #e53935 !important; }
   .recruit-panel-red summary:hover { background: #d32f2f !important; }
@@ -106,16 +91,13 @@
   .info-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #546e7a; margin: 4px 0; }
   .info-icon { width: 14px; height: 14px; fill: #78909c; }
   
-  /* 导航链接特殊样式 */
   .map-link { color: #e53935; text-decoration: none; display: inline-flex; align-items: center; gap: 2px; font-weight: 500;}
   .map-link:hover { text-decoration: underline; }
 
-  /* 历史活动卡片 */
   .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 8px; vertical-align: middle; }
   .card { font-weight: 300; }
   .card h2 { font-weight: 400; font-size: 15px; color: #1f2d3d; }
   .members { color: #546e7a; }
-
   .recruit-type-tag { background:#ffcdd2; color:#c62828; padding:2px 6px; border-radius:4px; font-size:12px; margin-right:6px; }
 
   @media (max-width: 600px) {
@@ -153,7 +135,6 @@
 <main>
   <div id="loading" class="empty" style="font-weight: 300; color: #fff; text-align:center; padding:20px;">加载数据中…</div>
 
-  <!-- 1. 独立展示的个人查询 -->
   <div id="personalPanel" class="standalone-card" style="display:none;">
     <h2 class="standalone-title">
       <svg class="svg-big" style="width:20px; height:20px; fill:#1565c0;" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
@@ -166,7 +147,6 @@
     <div id="personalResult" class="personal-result"></div>
   </div>
 
-  <!-- 2. 任务招募接龙 -->
   <details id="recruitPanel" class="recruit-panel-red" style="display:none;" open>
     <summary>
       <div class="summary-inner">
@@ -177,7 +157,6 @@
     <div class="details-content" id="recruitList"></div>
   </details>
 
-  <!-- 3. 排行榜与图表 -->
   <details id="statsPanel" style="display:none;">
     <summary>
       <div class="summary-inner">
@@ -194,7 +173,6 @@
     </div>
   </details>
 
-  <!-- 4. 通讯录 -->
   <details id="contactPanel" style="display:none;">
     <summary>
       <div class="summary-inner">
@@ -215,7 +193,6 @@
     </div>
   </details>
 
-  <!-- 5. 历史活动 -->
   <details id="tasksPanel" style="display:none;">
     <summary>
       <div class="summary-inner">
@@ -270,7 +247,6 @@ document.getElementById('loading').style.display = 'none';
 globalAllTasks = tasksRes.data || [];
 globalAllMembers = membersRes.data || [];
 
-// 渲染招募接龙
 if (recruitsRes.data && recruitsRes.data.length > 0) {
   document.getElementById('recruitPanel').style.display = 'block';
   document.getElementById('recruitList').innerHTML = recruitsRes.data.map(r => {

@@ -6,68 +6,19 @@
 <title>管理员登录 · 云和蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  /* 全局字体设置，保持纤细感 */
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
-    font-weight: 300;
-    background: #f4f7fb;
-    color: #333;
-  }
-  
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 300; background: #f4f7fb; color: #333; }
   h2 { font-weight: 400; color: #1f2d3d; margin-bottom: 20px; text-align: center; }
   label { font-weight: 300; color: #607d8b; font-size: 13px; }
   input, button { font-weight: 300; font-family: inherit; }
-
-  /* 顶部导航 */
-  .top-nav {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    font-size: 14px;
-  }
-  .top-nav a {
-    color: #607d8b;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
+  .top-nav { position: absolute; right: 20px; top: 20px; font-size: 14px; }
+  .top-nav a { color: #607d8b; text-decoration: none; transition: color 0.2s; }
   .top-nav a:hover { color: #1565c0; }
-
-  /* 登录卡片美化 */
-  .login-card {
-    max-width: 400px;
-    margin: 100px auto 0;
-    background: #fff;
-    padding: 40px 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.04);
-    border: 1px solid #eceff1;
-  }
-
-  .login-card input {
-    width: 100%;
-    padding: 10px 12px;
-    margin-bottom: 15px;
-    border: 1px solid #cfd8dc;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: border-color 0.2s;
-  }
-  .login-card input:focus {
-    outline: none;
-    border-color: #1565c0;
-  }
-
-  .login-card .btn {
-    width: 100%;
-    padding: 10px;
-    font-size: 15px;
-    margin-top: 5px;
-  }
-
-  @media (max-width: 600px) {
-    .top-nav { position: static; text-align: center; margin-top: 20px; }
-    .login-card { margin: 20px auto; padding: 30px 20px; }
-  }
+  .login-card { max-width: 400px; margin: 100px auto 0; background: #fff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); border: 1px solid #eceff1; }
+  .login-card input { width: 100%; padding: 10px 12px; margin-bottom: 15px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 14px; transition: border-color 0.2s; }
+  .login-card input:focus { outline: none; border-color: #1565c0; }
+  .login-card .btn { width: 100%; padding: 10px; font-size: 15px; margin-top: 5px; background: #1565c0; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+  .login-card .btn:hover { background: #0d47a1; }
+  @media (max-width: 600px) { .top-nav { position: static; text-align: center; margin-top: 20px; } .login-card { margin: 20px auto; padding: 30px 20px; } }
 </style>
 </head>
 <body>
@@ -81,12 +32,9 @@
   <form id="loginForm">
     <label>邮箱</label>
     <input type="email" id="email" required autocomplete="username" placeholder="请输入管理员邮箱">
-    
     <label>密码</label>
     <input type="password" id="password" required autocomplete="current-password" placeholder="请输入密码">
-    
-    <div id="error" class="msg err" style="display:none; margin-bottom: 15px; font-weight: 300;"></div>
-    
+    <div id="error" class="msg err" style="display:none; margin-bottom: 15px; font-weight: 300; color: #e53935;"></div>
     <button class="btn" type="submit" id="submitBtn">登 录</button>
   </form>
 </div>
@@ -94,7 +42,6 @@
 <script type="module">
 import { supabase } from './supabaseClient.js';
 
-// 检查是否已登录，已登录直接跳后台
 const { data: { session } } = await supabase.auth.getSession();
 if (session) location.href = 'admin.html';
 

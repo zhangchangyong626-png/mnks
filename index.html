@@ -148,7 +148,7 @@
     <div id="personalResult" class="personal-result"></div>
   </div>
 
-  <!-- 新增：申请入队 -->
+  <!-- 申请入队 -->
   <details id="applyPanel">
     <summary>
       <div class="summary-inner">
@@ -299,16 +299,32 @@ if (recruitsRes.data && recruitsRes.data.length > 0) {
     const signupNames = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
     const mapUrl = r.location ? `https://uri.amap.com/search?keyword=${encodeURIComponent(r.location)}&src=mypage&callnative=1` : '#';
     
+    // 核心逻辑：判断是否过了集合时间
+    const isExpired = r.task_time ? new Date(r.task_time).getTime() < Date.now() : false;
+    
+    let actionHtml = '';
+    if (isExpired) {
+      actionHtml = `<div style="text-align:center; padding:10px; background:#f5f5f5; color:#9e9e9e; border-radius:6px; font-size:14px; border:1px dashed #e0e0e0;">该任务已过集合时间，接龙已结束</div>`;
+    } else {
+      actionHtml = `
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="text" id="signupName_${r.id}" placeholder="输入真实姓名报名" style="flex:1; padding:10px; border:1px solid #cfd8dc; border-radius:6px; font-size:14px;">
+          <button onclick="handleSignup(${r.id})" style="background:#e53935; color:#fff; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:400;">接龙</button>
+          <button onclick="handleQuit(${r.id})" style="background:#fff; color:#e53935; border:1px solid #e53935; padding:10px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:400;">退出</button>
+        </div>
+      `;
+    }
+    
     return `
-      <div class="recruit-card">
-        <h3 style="margin:0 0 8px; font-size:16px; color:#e53935; font-weight:500;">
-          ${r.event_type ? `<span class="recruit-type-tag">${esc(r.event_type)}</span>` : ''}
+      <div class="recruit-card" style="${isExpired ? 'opacity: 0.8;' : ''}">
+        <h3 style="margin:0 0 8px; font-size:16px; color:${isExpired ? '#78909c' : '#e53935'}; font-weight:500;">
+          ${r.event_type ? `<span class="recruit-type-tag" style="${isExpired ? 'background:#eceff1;color:#78909c;' : ''}">${esc(r.event_type)}</span>` : ''}
           ${esc(r.title)}
         </h3>
         <div class="info-row">
           <svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
           地点：
-          ${r.location ? `<a href="${mapUrl}" target="_blank" class="map-link">${esc(r.location)} <svg style="width:12px; height:12px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>` : '待定'}
+          ${r.location ? `<a href="${mapUrl}" target="_blank" class="map-link" style="${isExpired ? 'color:#78909c;' : ''}">${esc(r.location)} <svg style="width:12px; height:12px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>` : '待定'}
         </div>
         <div class="info-row">
           <svg class="info-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
@@ -326,21 +342,16 @@ if (recruitsRes.data && recruitsRes.data.length > 0) {
           <div>${signupNames || '<span style="color:#b0bec5; font-size:12px;">暂无，快来抢沙发！</span>'}</div>
         </div>
         
-        <div style="display:flex; gap:10px; align-items:center;">
-          <input type="text" id="signupName_${r.id}" placeholder="输入真实姓名报名" style="flex:1; padding:10px; border:1px solid #cfd8dc; border-radius:6px; font-size:14px;">
-          <button onclick="handleSignup(${r.id})" style="background:#e53935; color:#fff; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:400;">接龙</button>
-        </div>
+        ${actionHtml}
       </div>
     `;
   }).join('');
 }
 
+// 报名接龙
 window.handleSignup = async (id) => {
   const input = document.getElementById(`signupName_${id}`);
-  const rawName = input.value;
-  // 关键修复：清理掉所有不可见的空白字符（包括手机输入法自带的全角空格）
-  const name = rawName.replace(/[\s\u3000]+/g, '');
-  
+  const name = input.value.replace(/[\s\u3000]+/g, '');
   if (!name) { alert('请输入姓名'); return; }
   
   const isMember = globalAllMembers.some(m => m.name === name);
@@ -352,6 +363,22 @@ window.handleSignup = async (id) => {
   const { error } = await supabase.from('recruitment_signups').insert({ recruitment_id: id, member_name: name });
   if (error) alert('报名失败：' + error.message);
   else { alert('接龙成功！请准时参加。'); location.reload(); }
+};
+
+// 退出接龙
+window.handleQuit = async (id) => {
+  const input = document.getElementById(`signupName_${id}`);
+  const name = input.value.replace(/[\s\u3000]+/g, '');
+  if (!name) { alert('请输入姓名以退出接龙'); return; }
+  
+  const { data: existing } = await supabase.from('recruitment_signups').select('*').eq('recruitment_id', id).eq('member_name', name);
+  if (!existing || existing.length === 0) { alert('未找到你的报名记录，请核对姓名。'); return; }
+
+  if (!confirm(`确定要退出【${name}】的接龙报名吗？`)) return;
+
+  const { error } = await supabase.from('recruitment_signups').delete().eq('recruitment_id', id).eq('member_name', name);
+  if (error) alert('退出失败：' + error.message);
+  else { alert('已成功退出接龙。'); location.reload(); }
 };
 
 if (!tasksRes.error && globalAllTasks.length > 0) {

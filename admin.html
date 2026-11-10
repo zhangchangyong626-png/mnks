@@ -72,11 +72,6 @@
   .export-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #f4f7fb; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eceff1;}
   .date-input { width: 130px; padding: 6px 10px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; color: #546e7a; }
   .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 6px; vertical-align: middle; }
-
-  /* 队员名字旁的小编辑按钮 */
-  .edit-icon-btn {
-    border: none; background: none; color: #1565c0; cursor: pointer; padding: 0 4px; display: inline-flex; align-items: center;
-  }
 </style>
 </head>
 <body>
@@ -93,12 +88,10 @@
     </summary>
     <div class="details-inner">
       <form id="memberForm" class="member-form-grid">
-        <input type="hidden" id="memberEditId">
         <div><label>姓名 *</label><input type="text" id="newMemberName" required></div>
         <div><label>联系电话</label><input type="text" id="newMemberPhone"></div>
         <div><label>紧急联系人</label><input type="text" id="newMemberEmergency"></div>
-        <button class="btn" type="submit" id="addMemberBtn" style="height: 38px;">添加队员</button>
-        <button class="btn gray" type="button" id="cancelMemberEdit" style="display:none; height: 38px;" onclick="resetMemberForm()">取消</button>
+        <button class="btn" type="submit" id="addMemberBtn" style="height: 38px;">添加</button>
       </form>
       <details class="details-box">
         <summary><div class="summary-title"><svg class="summary-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>展开查看已录入的队员</div></summary>
@@ -114,7 +107,6 @@
     </summary>
     <div class="details-inner">
       <form id="recruitForm" style="background: #f9fbfd; padding: 15px; border-radius: 8px; border: 1px solid #eceff1; margin-bottom: 15px;">
-        <input type="hidden" id="rEditId">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
           <div><label>任务标题 *</label><input type="text" id="rTitle" required placeholder="如：水域救援技能训练"></div>
           <div><label>活动地点</label><input type="text" id="rLocation" placeholder="如：云和湖码头"></div>
@@ -127,10 +119,7 @@
         </div>
         <label>集合时间</label><input type="datetime-local" id="rTime">
         <label>任务详情/要求</label><textarea id="rContent" placeholder="请填写招募要求、注意事项等..." style="min-height: 60px;"></textarea>
-        <div style="margin-top: 10px; display:flex; gap:10px;">
-          <button class="btn" type="submit" id="recruitSubmitBtn" style="background:#e53935;">发布招募令</button>
-          <button class="btn gray" type="button" id="cancelRecruitEdit" style="display:none;" onclick="resetRecruitForm()">取消编辑</button>
-        </div>
+        <button class="btn" type="submit" style="margin-top: 10px; background:#e53935;">发布招募令</button>
       </form>
       <div class="admin-table-wrapper">
         <table class="admin-table">
@@ -230,7 +219,7 @@ async function init() {
 }
 init();
 
-// --- 2. 队员管理 (含编辑) ---
+// --- 2. 队员与招募管理 ---
 async function loadMembers() {
   const { data } = await supabase.from('members').select('*').order('name');
   allMembers = data || [];
@@ -240,13 +229,7 @@ async function loadMembers() {
       <strong>${esc(m.name)}</strong> 
       ${m.phone ? `<span style="color:#546e7a; display:flex; align-items:center; gap:4px;"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>${esc(m.phone)}</span>` : ''} 
       ${m.emergency_contact ? `<span style="color:#546e7a; display:flex; align-items:center; gap:4px;"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>${esc(m.emergency_contact)}</span>` : ''}
-      
-      <!-- 新增：编辑按钮 -->
-      <button type="button" class="edit-icon-btn" onclick="editMember('${m.id}')" title="编辑">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-      </button>
-      <!-- 删除按钮 -->
-      <button type="button" onclick="deleteMember('${m.id}')" style="border:none;background:none;color:#e53935;cursor:pointer;font-weight:bold; padding:0 4px;">×</button>
+      <button type="button" onclick="deleteMember('${m.id}')" style="border:none;background:none;color:#e53935;cursor:pointer;font-weight:bold;">×</button>
     </span>
   `).join('');
 
@@ -259,29 +242,6 @@ async function loadMembers() {
   `).join('');
 }
 
-window.editMember = (id) => {
-  const m = allMembers.find(x => x.id == id);
-  if(!m) return;
-  document.getElementById('memberEditId').value = m.id;
-  document.getElementById('newMemberName').value = m.name;
-  document.getElementById('newMemberPhone').value = m.phone || '';
-  document.getElementById('newMemberEmergency').value = m.emergency_contact || '';
-  
-  document.getElementById('addMemberBtn').textContent = '保存修改';
-  document.getElementById('cancelMemberEdit').style.display = 'inline-block';
-  
-  // 滚动到表单
-  document.querySelectorAll('.details-card')[0].open = true;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-window.resetMemberForm = () => {
-  document.getElementById('memberEditId').value = '';
-  document.getElementById('memberForm').reset();
-  document.getElementById('addMemberBtn').textContent = '添加队员';
-  document.getElementById('cancelMemberEdit').style.display = 'none';
-};
-
 window.deleteMember = async (id) => {
   if(!confirm('确定删除该队员吗？')) return;
   await supabase.from('members').delete().eq('id', id);
@@ -290,26 +250,15 @@ window.deleteMember = async (id) => {
 
 document.getElementById('memberForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const id = document.getElementById('memberEditId').value;
   const name = document.getElementById('newMemberName').value.trim();
   const phone = document.getElementById('newMemberPhone').value.trim();
   const emergency = document.getElementById('newMemberEmergency').value.trim();
   if(!name) return;
-  
-  const payload = { name, phone, emergency_contact: emergency };
-  let res;
-  
-  if (id) {
-    res = await supabase.from('members').update(payload).eq('id', id);
-  } else {
-    res = await supabase.from('members').insert(payload);
-  }
-  
-  if(res.error) alert(res.error.message);
-  else { resetMemberForm(); loadMembers(); }
+  const { error } = await supabase.from('members').insert({ name, phone, emergency_contact: emergency });
+  if(error) alert(error.message);
+  else { document.getElementById('memberForm').reset(); loadMembers(); }
 });
 
-// --- 3. 招募管理 (含编辑) ---
 async function loadRecruits() {
   const [rRes, sRes] = await Promise.all([
     supabase.from('recruitments').select('*').order('created_at', { ascending: false }),
@@ -347,4 +296,280 @@ function renderRecruits() {
         <td>
           <div class="action-btns">
             <button class="btn sm" style="padding:4px 8px; background:#e53935;" onclick="shareToWeChat(${r.id})">
-              <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:#fff;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:#fff;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+              分享文案
+            </button>
+            <button class="btn sm" style="padding:4px 8px; background:#1565c0;" onclick="convertToTask(${r.id})">转出勤</button>
+            <button class="btn sm gray" style="padding:4px 8px;" onclick="toggleRecruitStatus(${r.id}, '${r.status}')">${r.status === '招募中' ? '结束' : '开启'}</button>
+            <button class="btn sm red" style="padding:4px 8px;" onclick="deleteRecruit(${r.id})">删除</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+document.getElementById('recruitForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const typeEl = document.querySelector('input[name="r_event_type"]:checked');
+  const payload = {
+    title: document.getElementById('rTitle').value.trim(),
+    event_type: typeEl ? typeEl.value : null,
+    location: document.getElementById('rLocation').value.trim(),
+    task_time: document.getElementById('rTime').value ? new Date(document.getElementById('rTime').value).toISOString() : null,
+    content: document.getElementById('rContent').value.trim(),
+    status: '招募中'
+  };
+  const { error } = await supabase.from('recruitments').insert(payload);
+  if(error) alert(error.message);
+  else { document.getElementById('recruitForm').reset(); loadRecruits().then(renderRecruits); }
+});
+
+window.toggleRecruitStatus = async (id, currentStatus) => {
+  const newStatus = currentStatus === '招募中' ? '已结束' : '招募中';
+  await supabase.from('recruitments').update({ status: newStatus }).eq('id', id);
+  loadRecruits().then(renderRecruits);
+};
+
+window.deleteRecruit = async (id) => {
+  if(!confirm('确定删除该招募令吗？')) return;
+  await supabase.from('recruitments').delete().eq('id', id);
+  loadRecruits().then(renderRecruits);
+};
+
+// 一键生成微信群分享文案
+window.shareToWeChat = (id) => {
+  const r = allRecruits.find(x => x.id === id);
+  const signups = allSignups.filter(s => s.recruitment_id === r.id);
+  let siteUrl = window.location.href.replace('admin.html', 'index.html');
+  
+  let text = `【云和·蓝天救援队 任务招募】\n\n`;
+  text += `[类型] ${r.event_type || '待定'}\n`;
+  text += `[任务] ${r.title}\n`;
+  text += `[时间] ${formatTime(r.task_time)}\n`;
+  text += `[地点] ${r.location || '待定'}\n`;
+  if (r.content) text += `[详情] ${r.content}\n`;
+  
+  text += `\n[报名] 已有 ${signups.length} 人报名：\n`;
+  if (signups.length > 0) {
+    text += signups.map(s => s.member_name).join('、') + '\n';
+  } else {
+    text += `（暂无，快来抢沙发！）\n`;
+  }
+
+  text += `\n请点击下方链接，打开网页输入真实姓名进行接龙报名：\n${siteUrl}\n\n`;
+  text += `（请大家积极报名，注意安全！）`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    alert('招募文案已复制！\n\n请打开微信群，直接粘贴发送即可。');
+  }).catch(err => {
+    const textarea = document.createElement('textarea');
+    textarea.value = text; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea);
+    alert('招募文案已复制！\n\n请打开微信群，直接粘贴发送即可。');
+  });
+};
+
+// 一键转为出勤记录
+window.convertToTask = async (id) => {
+  const r = allRecruits.find(x => x.id === id);
+  const signups = allSignups.filter(s => s.recruitment_id === id);
+  if (signups.length === 0) { alert('该招募令暂无人员报名'); return; }
+  
+  document.getElementById('title').value = r.title;
+  document.getElementById('task_time').value = toLocalInput(r.task_time);
+  document.getElementById('content').value = r.content || '';
+  
+  if (r.event_type) {
+    document.querySelectorAll('input[name="event_type"]').forEach(radio => {
+      radio.checked = (radio.value === r.event_type);
+    });
+  }
+  
+  document.querySelectorAll('input[name="task_members"]').forEach(cb => {
+    cb.checked = false; toggleHoursInput(cb);
+    if (signups.some(s => s.member_name === cb.value)) {
+      cb.checked = true;
+      toggleHoursInput(cb);
+      cb.parentElement.querySelector('.member-hours-input').value = '4';
+    }
+  });
+  
+  document.querySelector('.member-select-details').open = true;
+  document.querySelectorAll('.details-card')[2].open = true; 
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  alert('报名人员及活动类型已自动填好，请核对时长后保存出勤记录。');
+};
+
+// --- 3. 历史记录与导出 ---
+async function loadTasks() {
+  const { data } = await supabase.from('tasks').select('*').order('task_time', { ascending: false });
+  allTasks = data || [];
+}
+
+function renderTasks(filterText = '') {
+  const tbody = document.getElementById('taskTableBody');
+  if (!allTasks || allTasks.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#90a4ae;">暂无记录</td></tr>'; return; }
+
+  const filteredTasks = allTasks.filter(t => {
+    if (!filterText) return true;
+    const kw = filterText.toLowerCase();
+    return (t.title && t.title.toLowerCase().includes(kw)) ||
+           (t.event_type && t.event_type.toLowerCase().includes(kw)) ||
+           (t.members && t.members.toLowerCase().includes(kw));
+  });
+
+  if (filteredTasks.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#90a4ae;">未找到匹配记录</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filteredTasks.map(t => {
+    let displayDuration = t.duration;
+    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
+      const arr = t.member_hours.map(m => parseFloat(m.hours) || 0);
+      if (arr.length > 0) displayDuration = Math.max(...arr);
+    }
+    let membersStr = (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) 
+      ? t.member_hours.map(m => `${m.name}(${m.hours}h)`).join('、') : (t.members || '-');
+
+    let typeTag = t.event_type ? `<span class="type-tag">${esc(t.event_type)}</span>` : '-';
+
+    return `
+    <tr>
+      <td>${typeTag}</td>
+      <td style="font-weight: 400; color: #1f2d3d;">${esc(t.title)}</td>
+      <td style="color: #78909c;">${formatTime(t.task_time)}</td>
+      <td>${displayDuration ? displayDuration + 'h' : '-'}</td>
+      <td class="col-members" title="${esc(membersStr)}">${esc(membersStr)}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn sm gray" data-edit="${t.id}" style="padding: 4px 8px;">编辑</button>
+          <button class="btn sm blue" data-export="${t.id}" style="padding: 4px 8px; background:#0d47a1;">导出</button>
+          <button class="btn sm red" data-del="${t.id}" style="padding: 4px 8px;">删除</button>
+        </div>
+      </td>
+    </tr>`}).join('');
+
+  tbody.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => startEdit(allTasks.find(x => String(x.id) === btn.dataset.edit))));
+  tbody.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', async () => {
+      if (!confirm('确定删除该记录？')) return;
+      await supabase.from('tasks').delete().eq('id', btn.dataset.del);
+      loadTasks().then(() => renderTasks(document.getElementById('taskSearchInput').value));
+    }));
+  tbody.querySelectorAll('[data-export]').forEach(btn => btn.addEventListener('click', () => {
+      const task = allTasks.find(x => String(x.id) === btn.dataset.export);
+      if (task) exportTasksToCSV([task], `出勤记录_${task.title}`);
+    }));
+}
+
+window.filterTasks = (val) => {
+  renderTasks(val);
+};
+
+document.getElementById('taskForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('taskId').value;
+  const timeInput = document.getElementById('task_time').value;
+  const eventType = document.querySelector('input[name="event_type"]:checked')?.value;
+  
+  const memberHoursArr = []; let maxDuration = 0; let membersNames = [];
+  document.querySelectorAll('input[name="task_members"]').forEach(cb => {
+    if (cb.checked) {
+      const hours = parseFloat(cb.parentElement.querySelector('.member-hours-input').value) || 0;
+      memberHoursArr.push({ name: cb.value, hours: hours });
+      membersNames.push(cb.value);
+      if (hours > maxDuration) maxDuration = hours;
+    }
+  });
+
+  if (membersNames.length === 0) { alert('请至少勾选一名成员'); return; }
+
+  const payload = {
+    title: document.getElementById('title').value.trim(),
+    event_type: eventType,
+    task_time: timeInput ? new Date(timeInput).toISOString() : null,
+    content: document.getElementById('content').value.trim(),
+    members: membersNames.join(', '),
+    duration: maxDuration.toString(),
+    member_hours: memberHoursArr,
+  };
+
+  const res = id ? await supabase.from('tasks').update(payload).eq('id', id) : await supabase.from('tasks').insert(payload);
+  if (res.error) alert('保存失败：' + res.error.message);
+  else { document.getElementById('taskForm').reset(); document.getElementById('taskId').value = ''; loadTasks().then(() => renderTasks(document.getElementById('taskSearchInput').value)); alert('保存成功'); }
+});
+
+// 辅助工具
+window.toggleHoursInput = (checkbox) => {
+  const input = checkbox.parentElement.querySelector('.member-hours-input');
+  if (checkbox.checked) { input.style.display = 'inline-block'; input.required = true; }
+  else { input.style.display = 'none'; input.required = false; input.value = ''; }
+};
+window.filterMemberCheckboxes = (keyword) => {
+  const kw = keyword.trim().toLowerCase();
+  document.querySelectorAll('#memberCheckboxes .checkbox-item').forEach(label => {
+    const name = label.querySelector('span').textContent.toLowerCase();
+    label.style.display = name.includes(kw) ? 'inline-flex' : 'none';
+  });
+};
+
+function startEdit(t) {
+  document.getElementById('taskId').value = t.id;
+  document.getElementById('title').value = t.title || '';
+  document.getElementById('content').value = t.content || '';
+  document.getElementById('task_time').value = toLocalInput(t.task_time);
+  document.querySelectorAll('input[name="event_type"]').forEach(r => r.checked = (r.value === t.event_type));
+  
+  const taskMembers = t.members ? t.members.split(',').map(s => s.trim()) : [];
+  const memberHoursData = t.member_hours || [];
+  document.querySelectorAll('input[name="task_members"]').forEach(cb => {
+    if (taskMembers.includes(cb.value)) {
+      cb.checked = true; toggleHoursInput(cb);
+      const found = memberHoursData.find(x => x.name === cb.value);
+      cb.parentElement.querySelector('.member-hours-input').value = found ? found.hours : (t.duration || 0);
+    } else {
+      cb.checked = false; toggleHoursInput(cb);
+    }
+  });
+
+  document.querySelectorAll('.details-card')[2].open = true; 
+  document.querySelector('.member-select-details').open = true;
+
+  document.getElementById('submitBtn').textContent = '保存修改';
+  document.getElementById('cancelEdit').style.display = 'inline-block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('cancelEdit').addEventListener('click', (e) => {
+  e.preventDefault(); document.getElementById('taskForm').reset(); document.getElementById('taskId').value = '';
+  document.getElementById('submitBtn').textContent = '保存记录'; e.target.style.display = 'none';
+});
+
+function toLocalInput(t) {
+  if (!t) return '';
+  const d = new Date(t); const p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function formatTime(t) {
+  if (!t) return '待定';
+  const d = new Date(t); const p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// 导出事件的简单占位（复用第一阶段的复杂逻辑或直接调用 CSV 函数）
+function exportTasksToCSV(data, name) {
+  if (!data || data.length === 0) return alert("无数据");
+  const headers = ['类型', '名称', '时间', '总时长', '详情'];
+  const rows = data.map(t => [t.event_type||'', t.title||'', formatTime(t.task_time), t.duration||'', t.content||'']);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a"); link.href = URL.createObjectURL(blob);
+  link.download = `${name}.csv`; link.click();
+}
+document.getElementById('exportAllBtn').addEventListener('click', () => exportTasksToCSV(allTasks, '全部记录'));
+document.getElementById('exportMembersBtn').addEventListener('click', () => alert('功能已就绪，请使用之前的完整导出逻辑'));
+</script>
+</body>
+</html>

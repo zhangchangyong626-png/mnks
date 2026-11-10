@@ -32,6 +32,7 @@
   .title-icon.blue { fill: #1565c0; }
   .title-icon.green { fill: #2e7d32; }
   .title-icon.orange { fill: #f57f17; }
+  .title-icon.purple { fill: #7b1fa2; }
 
   .details-box { margin-top: 10px; border: 1px solid #cfd8dc; border-radius: 6px; overflow: hidden; background: #fff; }
   .details-box summary { padding: 12px 15px; background: #f9fbfd; color: #1565c0; font-size: 14px; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
@@ -74,9 +75,6 @@
   .action-text-btn { font-size: 12px; cursor: pointer; margin-left: 4px; text-decoration: none; }
   .action-text-btn.edit { color: #1565c0; }
   .action-text-btn.delete { color: #e53935; }
-  
-  /* 待审核红点 */
-  .badge-dot { display: inline-block; width: 8px; height: 8px; background: #e53935; border-radius: 50%; margin-left: 5px; }
 </style>
 </head>
 <body>
@@ -86,24 +84,25 @@
 </header>
 <main>
 
+  <!-- 0. 待审核申请 (独立置顶) -->
+  <details class="details-card border-purple" open style="border-top: 4px solid #7b1fa2; margin-bottom: 20px;">
+    <summary style="background: #f3e5f5;">
+      <h2 style="color: #7b1fa2;">
+        <svg class="title-icon purple" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        待审核的入队申请 <span id="pendingCountBadge" style="background:#e53935; color:#fff; padding:2px 8px; border-radius:12px; font-size:12px; margin-left:8px; display:none;">0</span>
+      </h2>
+    </summary>
+    <div class="details-inner" style="background: #fdfafb;">
+      <div id="pendingList"></div>
+    </div>
+  </details>
+
   <!-- 1. 队员管理 -->
   <details class="details-card">
     <summary>
-      <h2><svg class="title-icon blue" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>队员名单管理</h2>
+      <h2><svg class="title-icon blue" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>正式队员名单管理</h2>
     </summary>
     <div class="details-inner">
-      <!-- 待审核申请区 -->
-      <details class="details-box" style="margin-bottom: 15px; border-color: #ffcdd2;">
-        <summary style="background: #ffebee; color: #c62828;">
-          <div class="summary-title">
-            <svg class="summary-icon" style="fill:#c62828;" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-            查看待审核的入队申请
-            <span id="pendingCountBadge" class="badge-dot" style="display:none;"></span>
-          </div>
-        </summary>
-        <div id="pendingList" class="scroll-area" style="background: #fff8f8;"></div>
-      </details>
-
       <form id="memberForm" class="member-form-grid">
         <input type="hidden" id="memberEditId">
         <div><label>姓名 *</label><input type="text" id="newMemberName" required></div>
@@ -114,9 +113,8 @@
           <button class="btn gray" type="button" id="cancelMemberEdit" style="display:none; height: 38px; flex:1;">取消编辑</button>
         </div>
       </form>
-      
-      <details class="details-box">
-        <summary><div class="summary-title"><svg class="summary-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>展开查看已录入的正式队员</div></summary>
+      <details class="details-box" open>
+        <summary><div class="summary-title"><svg class="summary-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>展开查看已录入的队员</div></summary>
         <div id="memberList" class="scroll-area" style="background: #f9fbfd;"></div>
       </details>
     </div>
@@ -266,32 +264,35 @@ async function loadMembers() {
   const { data } = await supabase.from('members').select('*').order('name');
   allMembers = data || [];
   
+  // 过滤出待审核的
   const pendingMembers = allMembers.filter(m => m.status === '待审核');
+  // 过滤出正式队员（包括没有status字段的老数据）
   const activeMembers = allMembers.filter(m => m.status !== '待审核');
 
-  // 显示待审核数量红点
+  // 更新红点数字
   const badge = document.getElementById('pendingCountBadge');
   if (pendingMembers.length > 0) {
+    badge.textContent = pendingMembers.length;
     badge.style.display = 'inline-block';
   } else {
     badge.style.display = 'none';
   }
 
-  // 渲染待审核列表
+  // 渲染置顶的待审核列表
   const pendingList = document.getElementById('pendingList');
   if (pendingMembers.length === 0) {
-    pendingList.innerHTML = '<span class="empty">暂无待审核申请</span>';
+    pendingList.innerHTML = '<div class="empty" style="padding: 10px 0; color: #90a4ae;">暂无待审核的申请</div>';
   } else {
     pendingList.innerHTML = pendingMembers.map(m => `
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #ffcdd2; font-size:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; background:#fff; border:1px solid #ffcdd2; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div>
-          <strong>${esc(m.name)}</strong>
-          ${m.phone ? ` | 电话: ${esc(m.phone)}` : ''}
-          ${m.emergency_contact ? ` | 紧急: ${esc(m.emergency_contact)}` : ''}
+          <strong style="color:#c62828; font-size:15px;">${esc(m.name)}</strong>
+          <span style="color:#78909c; margin-left:10px;">电话: ${esc(m.phone) || '未填'}</span>
+          <span style="color:#78909c; margin-left:10px;">紧急: ${esc(m.emergency_contact) || '未填'}</span>
         </div>
         <div>
-          <button class="btn sm" style="background:#2e7d32; padding:4px 10px;" onclick="approveMember(${m.id})">通过</button>
-          <button class="btn sm red" style="padding:4px 10px;" onclick="rejectMember(${m.id})">拒绝</button>
+          <button class="btn sm" style="background:#2e7d32; padding:6px 12px;" onclick="approveMember(${m.id})">通过并加入</button>
+          <button class="btn sm red" style="padding:6px 12px; margin-left:5px;" onclick="rejectMember(${m.id})">拒绝</button>
         </div>
       </div>
     `).join('');
@@ -344,7 +345,7 @@ window.editMember = (id) => {
   document.getElementById('addMemberBtn').textContent = '保存修改';
   document.getElementById('cancelMemberEdit').style.display = 'inline-block';
   
-  document.querySelectorAll('.details-card')[0].open = true;
+  document.querySelectorAll('.details-card')[1].open = true; // 定位到队员管理
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -409,7 +410,6 @@ function renderRecruits() {
     
     // 判断是否过期
     const isExpired = r.task_time ? new Date(r.task_time).getTime() < Date.now() : false;
-    // 如果过期，不管数据库里是什么，直接显示已结束
     const statusStr = isExpired ? '已结束' : (r.status || '已结束');
     
     const statusTag = statusStr === '招募中' ? '<span style="color:#2e7d32; font-weight:bold;">● 招募中</span>' : '<span style="color:#78909c;">○ 已结束</span>';
@@ -468,7 +468,7 @@ window.editRecruit = (id) => {
   document.getElementById('recruitSubmitBtn').textContent = '保存修改';
   document.getElementById('cancelRecruitEdit').style.display = 'inline-block';
   
-  document.querySelectorAll('.details-card')[1].open = true;
+  document.querySelectorAll('.details-card')[2].open = true; // 定位到招募管理
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -586,7 +586,7 @@ window.convertToTask = async (id) => {
   });
   
   document.querySelector('.member-select-details').open = true;
-  document.querySelectorAll('.details-card')[2].open = true; 
+  document.querySelectorAll('.details-card')[3].open = true; // 定位到出勤记录
   
   window.scrollTo({ top: 0, behavior: 'smooth' });
   alert('报名人员及活动类型已自动填好，请核对时长后保存出勤记录。');
@@ -724,7 +724,7 @@ function startEdit(t) {
     }
   });
 
-  document.querySelectorAll('.details-card')[2].open = true; 
+  document.querySelectorAll('.details-card')[3].open = true; 
   document.querySelector('.member-select-details').open = true;
 
   document.getElementById('submitBtn').textContent = '保存修改';

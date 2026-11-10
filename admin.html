@@ -74,6 +74,9 @@
   .action-text-btn { font-size: 12px; cursor: pointer; margin-left: 4px; text-decoration: none; }
   .action-text-btn.edit { color: #1565c0; }
   .action-text-btn.delete { color: #e53935; }
+  
+  /* 待审核红点 */
+  .badge-dot { display: inline-block; width: 8px; height: 8px; background: #e53935; border-radius: 50%; margin-left: 5px; }
 </style>
 </head>
 <body>
@@ -89,6 +92,18 @@
       <h2><svg class="title-icon blue" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>队员名单管理</h2>
     </summary>
     <div class="details-inner">
+      <!-- 待审核申请区 -->
+      <details class="details-box" style="margin-bottom: 15px; border-color: #ffcdd2;">
+        <summary style="background: #ffebee; color: #c62828;">
+          <div class="summary-title">
+            <svg class="summary-icon" style="fill:#c62828;" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+            查看待审核的入队申请
+            <span id="pendingCountBadge" class="badge-dot" style="display:none;"></span>
+          </div>
+        </summary>
+        <div id="pendingList" class="scroll-area" style="background: #fff8f8;"></div>
+      </details>
+
       <form id="memberForm" class="member-form-grid">
         <input type="hidden" id="memberEditId">
         <div><label>姓名 *</label><input type="text" id="newMemberName" required></div>
@@ -99,8 +114,9 @@
           <button class="btn gray" type="button" id="cancelMemberEdit" style="display:none; height: 38px; flex:1;">取消编辑</button>
         </div>
       </form>
+      
       <details class="details-box">
-        <summary><div class="summary-title"><svg class="summary-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>展开查看已录入的队员</div></summary>
+        <summary><div class="summary-title"><svg class="summary-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>展开查看已录入的正式队员</div></summary>
         <div id="memberList" class="scroll-area" style="background: #f9fbfd;"></div>
       </details>
     </div>
@@ -245,12 +261,44 @@ async function init() {
 }
 init();
 
-// --- 2. 队员管理 ---
+// --- 2. 队员管理 (含审核) ---
 async function loadMembers() {
   const { data } = await supabase.from('members').select('*').order('name');
   allMembers = data || [];
   
-  document.getElementById('memberList').innerHTML = allMembers.map(m => `
+  const pendingMembers = allMembers.filter(m => m.status === '待审核');
+  const activeMembers = allMembers.filter(m => m.status !== '待审核');
+
+  // 显示待审核数量红点
+  const badge = document.getElementById('pendingCountBadge');
+  if (pendingMembers.length > 0) {
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  // 渲染待审核列表
+  const pendingList = document.getElementById('pendingList');
+  if (pendingMembers.length === 0) {
+    pendingList.innerHTML = '<span class="empty">暂无待审核申请</span>';
+  } else {
+    pendingList.innerHTML = pendingMembers.map(m => `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #ffcdd2; font-size:14px;">
+        <div>
+          <strong>${esc(m.name)}</strong>
+          ${m.phone ? ` | 电话: ${esc(m.phone)}` : ''}
+          ${m.emergency_contact ? ` | 紧急: ${esc(m.emergency_contact)}` : ''}
+        </div>
+        <div>
+          <button class="btn sm" style="background:#2e7d32; padding:4px 10px;" onclick="approveMember(${m.id})">通过</button>
+          <button class="btn sm red" style="padding:4px 10px;" onclick="rejectMember(${m.id})">拒绝</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 渲染正式队员列表
+  document.getElementById('memberList').innerHTML = activeMembers.map(m => `
     <span style="display:inline-flex; align-items:center; gap:8px; padding:6px 10px; background:#e3f2fd; color:#1565c0; border-radius:6px; font-size:13px; margin:4px;">
       <strong>${esc(m.name)}</strong> 
       ${m.phone ? `<span style="color:#546e7a; display:flex; align-items:center; gap:4px;"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>${esc(m.phone)}</span>` : ''} 
@@ -261,7 +309,8 @@ async function loadMembers() {
     </span>
   `).join('');
 
-  document.getElementById('memberCheckboxes').innerHTML = allMembers.map(m => `
+  // 给勾选框填充可选成员
+  document.getElementById('memberCheckboxes').innerHTML = activeMembers.map(m => `
     <label class="checkbox-item" style="background:#fff; padding:6px 12px; border:1px solid #eceff1; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; white-space:nowrap;">
       <input type="checkbox" name="task_members" value="${esc(m.name)}" onchange="toggleHoursInput(this)">
       <span style="min-width: 40px;">${esc(m.name)}</span>
@@ -269,6 +318,20 @@ async function loadMembers() {
     </label>
   `).join('');
 }
+
+// 审核通过
+window.approveMember = async (id) => {
+  if(!confirm('确定通过该队员的入队申请吗？')) return;
+  await supabase.from('members').update({ status: '在队' }).eq('id', id);
+  loadMembers();
+};
+
+// 拒绝并删除
+window.rejectMember = async (id) => {
+  if(!confirm('确定拒绝并删除该申请吗？')) return;
+  await supabase.from('members').delete().eq('id', id);
+  loadMembers();
+};
 
 window.editMember = (id) => {
   const m = allMembers.find(x => String(x.id) === String(id));
@@ -291,7 +354,6 @@ window.deleteMember = async (id) => {
   loadMembers();
 };
 
-// 修复：使用 addEventListener 避免与全局 id 冲突
 document.getElementById('cancelMemberEdit').addEventListener('click', () => {
   document.getElementById('memberEditId').value = '';
   document.getElementById('memberForm').reset();
@@ -308,8 +370,9 @@ document.getElementById('memberForm').addEventListener('submit', async (e) => {
   if(!name) return;
   
   const payload = { name, phone, emergency_contact: emergency };
-  let res;
+  if (!id) payload.status = '在队'; // 后台手动添加的默认在队
   
+  let res;
   if (id) {
     res = await supabase.from('members').update(payload).eq('id', id);
   } else {
@@ -343,7 +406,12 @@ function renderRecruits() {
   tbody.innerHTML = allRecruits.map(r => {
     const signups = allSignups.filter(s => s.recruitment_id === r.id);
     const names = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
-    const statusStr = r.status || '已结束';
+    
+    // 判断是否过期
+    const isExpired = r.task_time ? new Date(r.task_time).getTime() < Date.now() : false;
+    // 如果过期，不管数据库里是什么，直接显示已结束
+    const statusStr = isExpired ? '已结束' : (r.status || '已结束');
+    
     const statusTag = statusStr === '招募中' ? '<span style="color:#2e7d32; font-weight:bold;">● 招募中</span>' : '<span style="color:#78909c;">○ 已结束</span>';
     const typeTag = r.event_type ? `<span class="type-tag">${esc(r.event_type)}</span>` : '';
     const uniformTag = r.uniform_type ? `<span class="uniform-tag">${esc(r.uniform_type)}</span>` : '';
@@ -371,7 +439,7 @@ function renderRecruits() {
               分享文案
             </button>
             <button class="btn sm" style="padding:4px 8px; background:#1565c0;" onclick="convertToTask(${r.id})">转出勤</button>
-            <button class="btn sm gray" style="padding:4px 8px;" onclick="toggleRecruitStatus(${r.id}, '${r.status}')">${r.status === '招募中' ? '结束' : '开启'}</button>
+            <button class="btn sm gray" style="padding:4px 8px;" onclick="toggleRecruitStatus(${r.id}, '${r.status}')">${statusStr === '招募中' ? '结束' : '开启'}</button>
             <button class="btn sm red" style="padding:4px 8px;" onclick="deleteRecruit(${r.id})">删除</button>
           </div>
         </td>
@@ -404,7 +472,6 @@ window.editRecruit = (id) => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// 修复：使用 addEventListener 避免冲突
 document.getElementById('cancelRecruitEdit').addEventListener('click', () => {
   document.getElementById('recruitEditId').value = '';
   document.getElementById('recruitForm').reset();

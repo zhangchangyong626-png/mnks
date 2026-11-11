@@ -101,6 +101,27 @@
   .apply-form-grid input:focus { border-color: #1565c0; }
   .apply-form-grid button { padding: 10px; background: #1565c0; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; margin-top: 5px; }
 
+  /* 强制分享弹窗样式 */
+  #shareModal {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); z-index: 99999;
+    flex-direction: column; align-items: center; justify-content: center;
+  }
+  .share-modal-content {
+    background: #fff; width: 90%; max-width: 400px; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center;
+  }
+  .share-modal-header { background: #e53935; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; }
+  .share-modal-body { padding: 20px; }
+  .share-modal-body p { margin: 0 0 15px; font-size: 15px; color: #333; line-height: 1.5; }
+  .share-modal-body textarea { width: 100%; height: 120px; padding: 10px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 13px; resize: none; background: #f9fbfd; color: #546e7a; }
+  .share-modal-footer { padding: 15px; background: #f4f7fb; display: flex; gap: 10px; }
+  .share-modal-footer button {
+    flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; font-weight: 500;
+  }
+  .btn-copy-again { background: #1565c0; color: #fff; }
+  .btn-close-modal { background: #eceff1; color: #546e7a; }
+
   @media (max-width: 600px) {
     .main-title { font-size: 24px; }
     .top-nav { display: none; }
@@ -232,6 +253,21 @@
   </nav>
 </footer>
 
+<!-- 强制分享弹窗 -->
+<div id="shareModal">
+  <div class="share-modal-content">
+    <div class="share-modal-header">✅ 接龙成功</div>
+    <div class="share-modal-body">
+      <p>已自动为您复制分享文案，<br><strong>请前往微信群粘贴转发！</strong></p>
+      <textarea id="shareTextArea" readonly></textarea>
+    </div>
+    <div class="share-modal-footer">
+      <button class="btn-copy-again" onclick="copyShareTextAgain()">再复制一次</button>
+      <button class="btn-close-modal" onclick="closeShareModal()">我知道了</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { supabase } from './supabaseClient.js';
 
@@ -255,7 +291,6 @@ if (session) {
   nav.innerHTML = html; bottomNav.innerHTML = html;
 }
 
-// 只拉取状态为“在队”的成员，用于接龙和通讯录
 const [tasksRes, membersRes, recruitsRes, signupsRes] = await Promise.all([
   supabase.from('tasks').select('*').order('task_time', { ascending: false }),
   supabase.from('members').select('*').eq('status', '在队').order('name'),
@@ -299,7 +334,17 @@ if (recruitsRes.data && recruitsRes.data.length > 0) {
     const signupNames = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
     const mapUrl = r.location ? `https://uri.amap.com/search?keyword=${encodeURIComponent(r.location)}&src=mypage&callnative=1` : '#';
     
-    // 核心逻辑：判断是否过了集合时间
+    let uniformHtml = '';
+    if (r.uniform_type) {
+      const uArr = r.uniform_type.split(',').map(u => u.trim());
+      uniformHtml = `
+        <div class="info-row">
+          <svg class="info-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          着装：${uArr.map(u => esc(u)).join('、')}
+        </div>
+      `;
+    }
+    
     const isExpired = r.task_time ? new Date(r.task_time).getTime() < Date.now() : false;
     
     let actionHtml = '';
@@ -308,9 +353,9 @@ if (recruitsRes.data && recruitsRes.data.length > 0) {
     } else {
       actionHtml = `
         <div style="display:flex; gap:10px; align-items:center;">
-          <input type="text" id="signupName_${r.id}" placeholder="输入真实姓名报名" style="flex:1; padding:10px; border:1px solid #cfd8dc; border-radius:6px; font-size:14px;">
+          <input type="text" id="signupName_${r.id}" placeholder="输入真实姓名" style="flex:1; padding:10px; border:1px solid #cfd8dc; border-radius:6px; font-size:14px;">
           <button onclick="handleSignup(${r.id})" style="background:#e53935; color:#fff; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:400;">接龙</button>
-          <button onclick="handleQuit(${r.id})" style="background:#fff; color:#e53935; border:1px solid #e53935; padding:10px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:400;">退出</button>
+          <button onclick="handleShare(${r.id})" style="background:#fff; color:#1565c0; border:1px solid #1565c0; padding:10px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:400;">分享</button>
         </div>
       `;
     }
@@ -330,11 +375,7 @@ if (recruitsRes.data && recruitsRes.data.length > 0) {
           <svg class="info-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
           时间：${formatTime(r.task_time)}
         </div>
-        ${r.uniform_type ? `
-        <div class="info-row">
-          <svg class="info-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-          着装：${esc(r.uniform_type)}
-        </div>` : ''}
+        ${uniformHtml}
         ${r.content ? `<p style="margin:10px 0; font-size:13px; color:#78909c; background:#f9fbfd; padding:8px; border-radius:4px;">${esc(r.content)}</p>` : ''}
         
         <div style="margin: 12px 0;">
@@ -348,7 +389,30 @@ if (recruitsRes.data && recruitsRes.data.length > 0) {
   }).join('');
 }
 
-// 报名接龙
+// 构造分享文案
+function generateShareText(r, signups) {
+  let siteUrl = window.location.href.split('?')[0];
+  let text = `【云和·蓝天救援队 任务招募】\n\n`;
+  text += `[类型] ${r.event_type || '待定'}\n`;
+  text += `[着装] ${r.uniform_type || '无特殊要求'}\n`;
+  text += `[任务] ${r.title}\n`;
+  text += `[时间] ${formatTime(r.task_time)}\n`;
+  text += `[地点] ${r.location || '待定'}\n`;
+  if (r.content) text += `[详情] ${r.content}\n`;
+  
+  text += `\n[报名] 已有 ${signups.length} 人报名：\n`;
+  if (signups.length > 0) {
+    text += signups.map(s => s.member_name).join('、') + '\n';
+  } else {
+    text += `（暂无，快来抢沙发！）\n`;
+  }
+
+  text += `\n请点击下方链接，打开网页输入真实姓名进行接龙报名：\n${siteUrl}\n\n`;
+  text += `（请大家积极报名，注意安全！）`;
+  return text;
+}
+
+// 点击接龙
 window.handleSignup = async (id) => {
   const input = document.getElementById(`signupName_${id}`);
   const name = input.value.replace(/[\s\u3000]+/g, '');
@@ -357,28 +421,57 @@ window.handleSignup = async (id) => {
   const isMember = globalAllMembers.some(m => m.name === name);
   if (!isMember) { alert('报名失败：你不是本队队员（或入队申请暂未通过审核）。'); return; }
   
-  const { data: existing } = await supabase.from('recruitment_signups').select('*').eq('recruitment_id', id).eq('member_name', name);
-  if (existing && existing.length > 0) { alert('你已经报过名啦，无需重复报名！'); return; }
+  const r = recruitsRes.data.find(x => x.id === id);
+  let signups = (signupsRes.data || []).filter(s => s.recruitment_id === id);
+  
+  if (signups.some(s => s.member_name === name)) { alert('你已经报过名啦，无需重复报名！'); return; }
 
   const { error } = await supabase.from('recruitment_signups').insert({ recruitment_id: id, member_name: name });
-  if (error) alert('报名失败：' + error.message);
-  else { alert('接龙成功！请准时参加。'); location.reload(); }
+  
+  if (error) {
+    alert('报名失败：' + error.message);
+  } else {
+    // 核心逻辑：报名成功，把当前人加到模拟数组里，生成文案并复制
+    signups.push({ member_name: name }); 
+    const shareText = generateShareText(r, signups);
+    
+    // 复制到剪贴板
+    copyToClipboard(shareText);
+    
+    // 显示强制转发弹窗
+    document.getElementById('shareTextArea').value = shareText;
+    document.getElementById('shareModal').style.display = 'flex';
+  }
 };
 
-// 退出接龙
-window.handleQuit = async (id) => {
-  const input = document.getElementById(`signupName_${id}`);
-  const name = input.value.replace(/[\s\u3000]+/g, '');
-  if (!name) { alert('请输入姓名以退出接龙'); return; }
+// 点击分享按钮
+window.handleShare = (id) => {
+  const r = recruitsRes.data.find(x => x.id === id);
+  const signups = (signupsRes.data || []).filter(s => s.recruitment_id === id);
+  const shareText = generateShareText(r, signups);
   
-  const { data: existing } = await supabase.from('recruitment_signups').select('*').eq('recruitment_id', id).eq('member_name', name);
-  if (!existing || existing.length === 0) { alert('未找到你的报名记录，请核对姓名。'); return; }
+  copyToClipboard(shareText);
+  alert('招募文案已复制！\n\n请打开微信群，直接粘贴发送即可。');
+};
 
-  if (!confirm(`确定要退出【${name}】的接龙报名吗？`)) return;
+// 复制辅助函数
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).catch(err => {
+    const textarea = document.createElement('textarea');
+    textarea.value = text; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea);
+  });
+}
 
-  const { error } = await supabase.from('recruitment_signups').delete().eq('recruitment_id', id).eq('member_name', name);
-  if (error) alert('退出失败：' + error.message);
-  else { alert('已成功退出接龙。'); location.reload(); }
+// 弹窗内再次复制
+window.copyShareTextAgain = () => {
+  const text = document.getElementById('shareTextArea').value;
+  copyToClipboard(text);
+  alert('已重新复制！');
+};
+
+// 关闭弹窗
+window.closeShareModal = () => {
+  location.reload(); // 刷新页面以显示最新的接龙名单
 };
 
 if (!tasksRes.error && globalAllTasks.length > 0) {

@@ -13,10 +13,10 @@
   }
   body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 400; background: var(--bg-color); color: #333; margin: 0; padding-bottom: 60px; max-width: 600px; margin: 0 auto; position: relative;}
 
-  /* ================= 1. 顶部结构 (行距已缩小) ================= */
+  /* ================= 1. 顶部结构 ================= */
   .app-header {
     background: #0d47a1;
-    padding: 30px 20px 20px; /* 上下内边距稍微调整 */
+    padding: 30px 20px 20px; 
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -41,14 +41,14 @@
   .app-logo {
     height: 70px;
     object-fit: contain;
-    margin-bottom: 10px; /* 缩小 logo 与标题间距 */
+    margin-bottom: 10px; 
   }
 
   .app-title {
     color: #ffffff;
     font-size: 24px;
     font-weight: 500;
-    margin: 0 0 4px 0; /* 缩小标题下边距 */
+    margin: 0 0 4px 0; 
     letter-spacing: 1px;
     line-height: 1.2;
   }
@@ -60,7 +60,6 @@
     letter-spacing: 1px;
     line-height: 1.2;
   }
-  /* ================================================= */
 
   /* 3. 金刚区 (宫格) */
   .grid-nav { background: #fff; display: grid; grid-template-columns: repeat(5, 1fr); padding: 15px 10px; gap: 15px 5px; margin-bottom: 10px; }
@@ -76,7 +75,42 @@
   .bg-pink { background: linear-gradient(135deg, #f06292, #d81b60); }
   .bg-green { background: linear-gradient(135deg, #81c784, #388e3c); }
 
-  /* 4. 列表 Tab (已删除放大镜) */
+  /* ================= 出勤榜单展开区域 (复刻最初排版) ================= */
+  #chart-section {
+    display: none;
+    background: #fff;
+    margin: 0 10px 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+  .charts-container { display: flex; flex-wrap: wrap; gap: 15px; padding: 15px; background: #f9fbfd; border-bottom: 1px solid #eee; }
+  .chart-box { flex: 1; min-width: 280px; height: 240px; }
+  
+  .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
+  .stats-table th, .stats-table td { padding: 14px 8px; border-bottom: 1px solid #eceff1; font-weight: 300; }
+  .stats-table th { color: #78909c; font-weight: 400; background: #fafbfc; }
+  .stats-table td:nth-child(2) { text-align: left; }
+  
+  .clickable-name { cursor: pointer; color: #1565c0; font-weight: 400; display: inline-flex; align-items: center; gap: 6px; }
+  .arrow { font-size: 10px; color: #b0bec5; transition: transform 0.3s ease; }
+  .arrow.open { transform: rotate(180deg); }
+
+  .rank { font-weight: 400; color: #90a4ae; width: 50px; }
+  .rank-1 { color: #f57f17; font-size: 18px; font-weight: 500; }
+  .rank-2 { color: #78909c; font-size: 18px; font-weight: 500; }
+  .rank-3 { color: #8d6e63; font-size: 18px; font-weight: 500; }
+  .total-col { font-weight: 500; color: #1565c0; }
+  
+  .details-row td { background: #f9fbfd; padding: 12px 15px; border-bottom: 1px solid #eceff1; }
+  .details-flex { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .detail-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 300; background: #fff; border: 1px solid #cfd8dc; color: #546e7a; }
+  .detail-badge.rescue { border-color: #90caf9; color: #1565c0; background: #e3f2fd; }
+  .detail-badge.training { border-color: #a5d6a7; color: #2e7d32; background: #e8f5e9; }
+  .detail-badge.fire { border-color: #ef9a9a; color: #c62828; background: #ffebee; }
+  /* ================================================================= */
+
+  /* 4. 列表 Tab */
   .tabs { background: #fff; display: flex; padding: 10px 15px; gap: 20px; border-bottom: 1px solid #eee; align-items: center;}
   .tab-item { font-size: 15px; color: #666; cursor: pointer; position: relative; padding-bottom: 5px; }
   .tab-item.active { color: #333; font-weight: bold; }
@@ -112,7 +146,7 @@
   .task-meta { font-size: 12px; color: #999; margin-bottom: 5px; }
   .task-members { font-size: 13px; color: #666; background: #f9fbfd; padding: 6px; border-radius: 4px; }
 
-  /* 7. 底部 TabBar (打卡改为查询) */
+  /* 7. 底部 TabBar */
   .bottom-tab { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background: #fff; display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid #eee; z-index: 100; }
   .tab-btn { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 11px; cursor: pointer; }
   .tab-btn.active { color: var(--primary); }
@@ -127,9 +161,9 @@
   .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
   .btn-block { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; }
   
-  /* 图表容器 */
-  .chart-container { display: none; padding: 10px; background: #fff; margin: 10px; border-radius: 8px; }
-  .chart-box { width: 100%; height: 220px; margin-bottom: 10px; }
+  @media (max-width: 600px) {
+    .chart-box { min-width: 100%; height: 200px; }
+  }
 </style>
 </head>
 <body>
@@ -166,11 +200,14 @@
   </div>
 </div>
 
-<!-- 隐藏的图表区域 -->
-<div id="chart-section" class="chart-container">
-  <div id="barChart" class="chart-box"></div>
-  <div id="pieChart" class="chart-box"></div>
-  <div style="text-align:center; font-size:12px; color:#999; padding-bottom:10px;">点击上方“出勤榜单”可收起图表</div>
+<!-- 出勤榜单 (包含图表和表格，默认隐藏) -->
+<div id="chart-section">
+  <div class="charts-container">
+    <div id="barChart" class="chart-box"></div>
+    <div id="pieChart" class="chart-box"></div>
+  </div>
+  <div id="statsTableBox"></div>
+  <div style="text-align:center; font-size:12px; color:#999; padding:10px;">点击上方“出勤榜单”可收起</div>
 </div>
 
 <!-- 4. 任务招募接龙 (置顶) -->
@@ -187,7 +224,6 @@
   <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#1565c0;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
   历史活动记录
 </div>
-<!-- 删除了搜索图标的 Tab -->
 <div class="tabs">
   <div class="tab-item active">全部</div>
   <div class="tab-item">救援</div>
@@ -195,7 +231,7 @@
 </div>
 <div id="task-list" class="task-list" style="padding-top: 10px;"></div>
 
-<!-- 底部 TabBar (打卡改为查询) -->
+<!-- 底部 TabBar -->
 <div class="bottom-tab">
   <div class="tab-btn active">
     <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -212,7 +248,6 @@
 </div>
 
 <!-- 模态框区 -->
-<!-- 1. 个人查询 -->
 <div id="modal-query" class="modal">
   <div class="modal-content">
     <div class="close-btn" onclick="closeModal('modal-query')">×</div>
@@ -225,7 +260,6 @@
   </div>
 </div>
 
-<!-- 2. 队员通讯录 -->
 <div id="modal-contact" class="modal">
   <div class="modal-content">
     <div class="close-btn" onclick="closeModal('modal-contact')">×</div>
@@ -239,7 +273,6 @@
   </div>
 </div>
 
-<!-- 3. 申请入队 -->
 <div id="modal-apply" class="modal">
   <div class="modal-content">
     <div class="close-btn" onclick="closeModal('modal-apply')">×</div>
@@ -449,6 +482,7 @@ window.submitApply = async () => {
   }
 };
 
+// 核心：点击出勤榜单展开图表和表格
 window.toggleChart = () => {
   const chartDiv = document.getElementById('chart-section');
   if (chartDiv.style.display === 'block') {
@@ -462,6 +496,7 @@ window.toggleChart = () => {
     const sorted = Object.entries(globalMemberStats).sort((a, b) => b[1].total - a[1].total);
     const top10 = sorted.slice(0, 10);
     
+    // 渲染图表
     const barChart = echarts.init(document.getElementById('barChart'));
     barChart.setOption({
       title: { text: '出勤前十名', left: 'center', textStyle:{fontSize:14,color:'#666'} },
@@ -487,6 +522,54 @@ window.toggleChart = () => {
     });
     
     window.addEventListener('resize', () => { barChart.resize(); pieChart.resize(); });
+
+    // 渲染排行榜表格
+    renderStatsTable(top10);
+  }
+};
+
+// 渲染原始风格的排行榜表格
+function renderStatsTable(top10) {
+  const statsBox = document.getElementById('statsTableBox');
+  const fmt = (num) => parseFloat(num.toFixed(1));
+
+  statsBox.innerHTML = `
+    <table class="stats-table">
+      <thead><tr><th class="rank">排名</th><th>队员姓名</th><th>总时长</th></tr></thead>
+      <tbody>
+        ${top10.map((item, index) => {
+          const name = item[0], data = item[1];
+          let rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
+          let detailsHtml = '';
+          if (data.rescue > 0) detailsHtml += `<span class="detail-badge rescue">公益救援：${fmt(data.rescue)}h</span>`;
+          if (data.training > 0) detailsHtml += `<span class="detail-badge training">技能培训：${fmt(data.training)}h</span>`;
+          if (data.fire > 0) detailsHtml += `<span class="detail-badge fire">森林消防：${fmt(data.fire)}h</span>`;
+          if (detailsHtml === '') detailsHtml = '<span class="detail-badge">暂无分类明细</span>';
+
+          return `
+            <tr>
+              <td class="rank ${rankClass}">${index + 1}</td>
+              <td><span class="clickable-name" onclick="toggleDetail('detail-${index}', this)">${esc(name)} <span class="arrow">▼</span></span></td>
+              <td class="total-col">${fmt(data.total)} 小时</td>
+            </tr>
+            <tr id="detail-${index}" class="details-row" style="display: none;"><td colspan="3"><div class="details-flex">${detailsHtml}</div></td></tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// 点击姓名展开明细
+window.toggleDetail = (detailId, nameElement) => {
+  const detailRow = document.getElementById(detailId);
+  const arrow = nameElement.querySelector('.arrow');
+  if (detailRow.style.display === 'none') { 
+    detailRow.style.display = 'table-row'; 
+    arrow.classList.add('open'); 
+  } else { 
+    detailRow.style.display = 'none'; 
+    arrow.classList.remove('open'); 
   }
 };
 

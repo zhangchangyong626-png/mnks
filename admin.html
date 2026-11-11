@@ -587,7 +587,6 @@ window.convertToTask = async (id) => {
     if (signups.some(s => s.member_name === cb.value)) {
       cb.checked = true;
       toggleHoursInput(cb);
-      // 关键修改：默认时长改为 0
       cb.parentElement.querySelector('.member-hours-input').value = '0';
       label.style.display = 'inline-flex';
       label.dataset.hiddenBySignup = 'false';
@@ -604,17 +603,22 @@ window.convertToTask = async (id) => {
   alert(`已带入任务信息！\n活动时间：${formatTime(r.task_time)}\n\n已为您自动勾选报名人员并隐藏未报名人员（如需添加未报名成员，请在搜索框输入其姓名）。`);
 };
 
-// 搜索功能
+// 搜索功能（核心优化：被勾选的人清空搜索后不会被隐藏）
 window.filterMemberCheckboxes = (keyword) => {
   const kw = keyword.trim().toLowerCase();
   document.querySelectorAll('#memberCheckboxes .checkbox-item').forEach(label => {
     const name = label.querySelector('span').textContent.toLowerCase();
     const isMatch = name.includes(kw);
+    const isChecked = label.querySelector('input[type="checkbox"]').checked;
     
     if (kw) {
+      // 如果有关键词，只要匹配就显示
       label.style.display = isMatch ? 'inline-flex' : 'none';
     } else {
-      if (label.dataset.hiddenBySignup === 'true') {
+      // 如果清空了搜索：
+      // 如果原本是没报名(hiddenBySignup=true) 且 现在也没勾选，才隐藏
+      // 如果已经勾选了，就强制显示出来，方便管理员核对
+      if (label.dataset.hiddenBySignup === 'true' && !isChecked) {
         label.style.display = 'none';
       } else {
         label.style.display = 'inline-flex';
@@ -794,7 +798,7 @@ function formatTime(t) {
 }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-// 导出单条记录（模仿截图样式）
+// 导出单条记录
 function exportSingleTaskToCSV(t) {
   let rows = [];
   rows.push(["云和县蓝天救援队救援记录表"]);

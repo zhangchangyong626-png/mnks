@@ -15,7 +15,7 @@
   
   .radio-group { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
   .radio-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 14px; color: #1f2d3d; cursor: pointer; background: transparent; border: none; padding: 0; }
-  .radio-item input[type="radio"] { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+  .radio-item input[type="radio"], .radio-item input[type="checkbox"] { width: 16px; height: 16px; margin: 0; cursor: pointer; }
 
   .details-card { padding: 0; overflow: hidden; margin-bottom: 16px; background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.06); border: none;}
   .details-card summary { padding: 18px 20px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; background: #fff; border-bottom: 1px solid transparent; transition: background 0.2s; }
@@ -70,7 +70,7 @@
   .export-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #f4f7fb; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eceff1;}
   .date-input { width: 130px; padding: 6px 10px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; color: #546e7a; }
   .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 6px; vertical-align: middle; }
-  .uniform-tag { display: inline-block; padding: 2px 8px; background: #e3f2fd; color: #1565c0; border-radius: 4px; font-size: 12px; font-weight: 400; margin-left: 6px; vertical-align: middle; }
+  .uniform-tag { display: inline-block; padding: 2px 8px; background: #e3f2fd; color: #1565c0; border-radius: 4px; font-size: 12px; font-weight: 400; margin-left: 6px; vertical-align: middle; margin-top: 4px;}
 
   .action-text-btn { font-size: 12px; cursor: pointer; margin-left: 4px; text-decoration: none; }
   .action-text-btn.edit { color: #1565c0; }
@@ -84,7 +84,7 @@
 </header>
 <main>
 
-  <!-- 0. 待审核申请 (独立置顶) -->
+  <!-- 0. 待审核申请 -->
   <details class="details-card" open style="border-top: 4px solid #7b1fa2; margin-bottom: 20px;">
     <summary style="background: #f3e5f5;">
       <h2 style="color: #7b1fa2;">
@@ -143,12 +143,12 @@
             </div>
           </div>
           <div>
-            <label>着装要求</label>
+            <label>着装要求 (可多选)</label>
             <div class="radio-group">
-              <label class="radio-item"><input type="radio" name="r_uniform_type" value="蓝天队服"> 蓝天队服</label>
-              <label class="radio-item"><input type="radio" name="r_uniform_type" value="体能服"> 体能服</label>
-              <label class="radio-item"><input type="radio" name="r_uniform_type" value="消防服"> 消防服</label>
-              <label class="radio-item"><input type="radio" name="r_uniform_type" value="便装"> 便装</label>
+              <label class="radio-item"><input type="checkbox" name="r_uniform_type" value="蓝天队服"> 蓝天队服</label>
+              <label class="radio-item"><input type="checkbox" name="r_uniform_type" value="体能服"> 体能服</label>
+              <label class="radio-item"><input type="checkbox" name="r_uniform_type" value="消防服"> 消防服</label>
+              <label class="radio-item"><input type="checkbox" name="r_uniform_type" value="便装"> 便装</label>
             </div>
           </div>
         </div>
@@ -314,14 +314,12 @@ async function loadMembers() {
   `).join('');
 }
 
-// 审核通过
 window.approveMember = async (id) => {
   if(!confirm('确定通过该队员的入队申请吗？')) return;
   await supabase.from('members').update({ status: '在队' }).eq('id', id);
   loadMembers();
 };
 
-// 拒绝并删除
 window.rejectMember = async (id) => {
   if(!confirm('确定拒绝并删除该申请吗？')) return;
   await supabase.from('members').delete().eq('id', id);
@@ -407,13 +405,19 @@ function renderRecruits() {
     
     const statusTag = statusStr === '招募中' ? '<span style="color:#2e7d32; font-weight:bold;">● 招募中</span>' : '<span style="color:#78909c;">○ 已结束</span>';
     const typeTag = r.event_type ? `<span class="type-tag">${esc(r.event_type)}</span>` : '';
-    const uniformTag = r.uniform_type ? `<span class="uniform-tag">${esc(r.uniform_type)}</span>` : '';
+    
+    // 多选着装标签拆分
+    let uniformTags = '';
+    if (r.uniform_type) {
+      uniformTags = r.uniform_type.split(',').map(u => `<span class="uniform-tag">${esc(u.trim())}</span>`).join('');
+    }
     
     return `
       <tr>
         <td>${statusTag}</td>
         <td>
-          <div style="font-weight:500; color:#1f2d3d;">${typeTag}${uniformTag}${esc(r.title)}</div>
+          <div style="font-weight:500; color:#1f2d3d;">${typeTag}${uniformTags}</div>
+          <div style="font-weight:500; color:#1f2d3d; margin-top:4px;">${esc(r.title)}</div>
           <div class="info-row" style="margin-top:6px;">
             <svg class="info-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
             ${formatTime(r.task_time)}
@@ -454,8 +458,10 @@ window.editRecruit = (id) => {
     radio.checked = (radio.value === r.event_type);
   });
   
-  document.querySelectorAll('input[name="r_uniform_type"]').forEach(radio => {
-    radio.checked = (radio.value === r.uniform_type);
+  // 多选着装回显：先将数据库里的逗号分隔字符串转为数组
+  const uniforms = r.uniform_type ? r.uniform_type.split(',').map(s => s.trim()) : [];
+  document.querySelectorAll('input[name="r_uniform_type"]').forEach(cb => {
+    cb.checked = uniforms.includes(cb.value);
   });
   
   document.getElementById('recruitSubmitBtn').textContent = '保存修改';
@@ -476,12 +482,15 @@ document.getElementById('recruitForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('recruitEditId').value;
   const typeEl = document.querySelector('input[name="r_event_type"]:checked');
-  const uniformEl = document.querySelector('input[name="r_uniform_type"]:checked');
+  
+  // 提取所有勾选的着装，拼接成逗号分隔的字符串
+  const uniformEls = document.querySelectorAll('input[name="r_uniform_type"]:checked');
+  const uniformStr = Array.from(uniformEls).map(el => el.value).join(', ');
   
   const payload = {
     title: document.getElementById('rTitle').value.trim(),
     event_type: typeEl ? typeEl.value : null,
-    uniform_type: uniformEl ? uniformEl.value : null,
+    uniform_type: uniformStr || null,
     location: document.getElementById('rLocation').value.trim(),
     task_time: document.getElementById('rTime').value ? new Date(document.getElementById('rTime').value).toISOString() : null,
     content: document.getElementById('rContent').value.trim(),
@@ -578,7 +587,8 @@ window.convertToTask = async (id) => {
     if (signups.some(s => s.member_name === cb.value)) {
       cb.checked = true;
       toggleHoursInput(cb);
-      cb.parentElement.querySelector('.member-hours-input').value = '4';
+      // 关键修改：默认时长改为 0
+      cb.parentElement.querySelector('.member-hours-input').value = '0';
       label.style.display = 'inline-flex';
       label.dataset.hiddenBySignup = 'false';
     } else {
@@ -784,35 +794,24 @@ function formatTime(t) {
 }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-// --- 🚀 核心导出逻辑大升级 ---
-
-// 1. 导出单条记录（模仿你的 Excel 表格样式）
+// 导出单条记录（模仿截图样式）
 function exportSingleTaskToCSV(t) {
   let rows = [];
-  
-  // 表头标题
   rows.push(["云和县蓝天救援队救援记录表"]);
-  // 事件名称与代码 (用任务ID的后四位模拟代码)
   const codeStr = String(t.id).padStart(4, '0').slice(-4);
   rows.push(["事件名称：", t.title, "", "", "代码：", codeStr]);
-  // 基本信息
   rows.push(["信息登记", "事件时间：", formatTime(t.task_time), "", "事件任务：", t.event_type || ""]);
   rows.push(["", "事件地点：", t.location || "", "", "", ""]);
   rows.push(["", "出发时间：", "", "", "结束时间：", ""]);
   rows.push(["", "现场指挥：", "", "", "现场协调人员：", ""]);
   rows.push(["", "现场拍照：", "", "", "设备调配：", ""]);
   rows.push(["", "救助人姓名：", "", "", "家属电话：", ""]);
-  
-  // 事件经过
   rows.push(["事件", "经过", "", "", "", ""]);
   rows.push(["", (t.content || "").replace(/\n/g, ' ')]);
-  
-  // 出勤记录分组标题
   rows.push(["", "救援人员出勤记录", "", "", "", ""]);
   
-  // 核心：按时长分组
   const grouped = {};
-  let maxNamesPerRow = 7; // 模仿截图，每行大概放 7-8 个名字
+  let maxNamesPerRow = 7; 
   
   if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
     t.member_hours.forEach(m => {
@@ -821,25 +820,19 @@ function exportSingleTaskToCSV(t) {
       grouped[h].push(m.name);
     });
   } else if (t.members && t.duration) {
-    // 兼容老数据
     const h = parseFloat(t.duration) || 0;
     grouped[h] = t.members.split(',').map(s => s.trim()).filter(Boolean);
   }
 
-  // 遍历分组，输出名字和总结
   for (const [hours, names] of Object.entries(grouped)) {
-    // 名字可能需要分多行
     for (let i = 0; i < names.length; i += maxNamesPerRow) {
       const chunk = names.slice(i, i + maxNamesPerRow);
-      rows.push(["参与队员", ...chunk]); // 填充名字
+      rows.push(["参与队员", ...chunk]); 
     }
-    // 紧接着说明时长
     rows.push(["", `以上人员记 ${hours} 个小时`]);
-    // 组与组之间加个空行
     rows.push([""]);
   }
 
-  // 把二维数组转成 CSV 格式并下载
   const csvContent = rows.map(row => 
     row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
   ).join('\n');
@@ -854,7 +847,7 @@ function exportSingleTaskToCSV(t) {
   document.body.removeChild(link);
 }
 
-// 2. 导出所有记录（列表格式）
+// 导出所有记录
 function exportTasksToCSV(tasksData, name) {
   if (!tasksData || tasksData.length === 0) return alert("无数据可导出");
   
@@ -887,7 +880,6 @@ function exportTasksToCSV(tasksData, name) {
 }
 
 document.getElementById('exportAllBtn').addEventListener('click', () => exportTasksToCSV(allTasks, '云和蓝天救援队_全部记录'));
-// 由于时长统计较复杂，暂用占位
 document.getElementById('exportMembersBtn').addEventListener('click', () => alert('功能已就绪，请使用之前的完整导出逻辑'));
 </script>
 </body>

@@ -2,269 +2,223 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>云和·蓝天救援队</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 300; background: #e4e7eb; color: #333; }
+  :root {
+    --primary: #1565c0;
+    --bg-color: #f4f5f7;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 400; background: var(--bg-color); color: #333; margin: 0; padding-bottom: 60px; max-width: 600px; margin: 0 auto; position: relative;}
 
-  header { background: #0d47a1; box-shadow: 0 2px 10px rgba(0,0,0,0.15); padding: 30px 20px 20px; text-align: center; position: relative; display: flex; flex-direction: column; align-items: center; }
-  .logo-container { margin-bottom: 12px; width: 100%; display: flex; justify-content: center; }
-  .logo-container img { height: 65px; max-width: 100%; object-fit: contain; }
-  .main-title { font-size: 28px; font-weight: 400; color: #ffffff; letter-spacing: 3px; margin: 0; line-height: 1.2; }
-  .slogan { color: rgba(255, 255, 255, 0.85); font-size: 13px; font-weight: 300; margin-top: 6px; letter-spacing: 1px; }
-  .slogan span { margin: 0 6px; }
-  .top-nav { position: absolute; right: 20px; top: 20px; font-size: 14px; }
-  .top-nav a { color: #ffffff; text-decoration: none; margin-left: 15px; transition: color 0.2s; }
-  .top-nav a:hover { color: #90caf9; }
-  .bottom-nav { display: none; }
-  main { max-width: 800px; margin: 30px auto; padding: 0 14px; }
+  /* 1. 顶部 Header */
+  header { background: var(--primary); color: #fff; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+  .header-title { font-size: 18px; font-weight: 500; letter-spacing: 1px; }
+  .header-icons { display: flex; gap: 15px; font-size: 20px; }
+  .header-icons a { color: #fff; text-decoration: none; }
 
-  .standalone-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 16px; }
-  .standalone-title { margin: 0 0 15px; font-size: 16px; font-weight: 400; color: #1565c0; display: flex; align-items: center; gap: 8px; }
+  /* 2. Banner */
+  .banner { width: 100%; height: 180px; position: relative; background: #cfd8dc; overflow: hidden; }
+  .banner img { width: 100%; height: 100%; object-fit: cover; }
+  .banner-tag { position: absolute; bottom: 10px; right: 10px; background: rgba(255,255,255,0.9); color: #1565c0; font-size: 12px; padding: 4px 10px; border-radius: 12px; font-weight: 500; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .banner-tag-left { position: absolute; bottom: 10px; left: 10px; background: rgba(255,255,255,0.9); color: #1565c0; font-size: 12px; padding: 4px 10px; border-radius: 12px; font-weight: 500; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-  details { background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 16px; overflow: hidden; border: none; }
-  summary { padding: 16px 20px; font-size: 16px; font-weight: 400; letter-spacing: 1px; cursor: pointer; background: #64b5f6; color: #ffffff; list-style: none; display: flex; align-items: center; justify-content: space-between; user-select: none; transition: background 0.2s; }
-  summary:hover { background: #42a5f5; } 
-  summary::-webkit-details-marker { display: none; }
-  .summary-inner { display: flex; align-items: center; gap: 10px; }
-  .icon-svg { width: 20px; height: 20px; fill: #ffffff; }
-  summary::after { content: '▼'; font-size: 12px; color: rgba(255, 255, 255, 0.7); transition: transform 0.3s ease; }
-  details[open] summary::after { transform: rotate(180deg); }
-  details[open] summary { border-bottom: 1px solid #e3f2fd; }
-  .details-content { padding: 16px 20px; background: #ffffff; color: #333; }
-
-  .charts-container { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; background: #f9fbfd; padding: 15px; border-radius: 8px; }
-  .chart-box { flex: 1; min-width: 300px; height: 260px; }
-
-  .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
-  .stats-table th, .stats-table td { padding: 14px 8px; border-bottom: 1px solid #eceff1; font-weight: 300; }
-  .stats-table th { color: #78909c; font-weight: 400; background: #fafbfc; }
-  .stats-table td:nth-child(2) { text-align: left; }
-  .clickable-name { cursor: pointer; color: #1565c0; font-weight: 400; display: inline-flex; align-items: center; gap: 6px; }
-  .arrow { font-size: 10px; color: #b0bec5; transition: transform 0.3s ease; }
-  .arrow.open { transform: rotate(180deg); }
-  .rank { font-weight: 400; color: #90a4ae; width: 50px;}
-  .rank-1 { color: #f57f17; font-size: 18px; font-weight: 500;}
-  .rank-2 { color: #78909c; font-size: 18px; font-weight: 500;}
-  .rank-3 { color: #8d6e63; font-size: 18px; font-weight: 500;}
-  .total-col { font-weight: 500; color: #1565c0; }
-  .details-row td { background: #f9fbfd; padding: 12px 15px; border-bottom: 1px solid #eceff1; }
-  .details-flex { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-  .detail-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 300; background: #fff; border: 1px solid #cfd8dc; color: #546e7a; }
-  .detail-badge.rescue { border-color: #90caf9; color: #1565c0; background: #e3f2fd; }
-  .detail-badge.training { border-color: #a5d6a7; color: #2e7d32; background: #e8f5e9; }
-  .detail-badge.fire { border-color: #ef9a9a; color: #c62828; background: #ffebee; }
-
-  .search-box { display: flex; gap: 10px; }
-  .search-box input { flex: 1; padding: 12px 16px; border: 1px solid #cfd8dc; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; }
-  .search-box input:focus { border-color: #1565c0; }
-  .search-box button { padding: 0 24px; background: #1565c0; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: background 0.2s; }
-  .search-box button:hover { background: #0d47a1; }
-  .personal-result { background: #f4f7fb; padding: 20px; border-radius: 8px; margin-top: 15px; display: none; border-left: 4px solid #1565c0; }
-  .personal-result h3 { margin: 0 0 10px; font-size: 16px; font-weight: 500; color: #1f2d3d; display:flex; align-items:center; gap:8px;}
-  .personal-result p { margin: 6px 0; font-size: 14px; color: #546e7a; }
-  .personal-result .svg-big { width: 24px; height: 24px; fill: #1565c0; }
-
-  .privacy-lock { text-align: center; padding: 30px 20px; background: #f9fbfd; border-radius: 8px; border: 1px dashed #cfd8dc; }
-  .privacy-lock p { color: #78909c; font-size: 14px; margin-bottom: 15px; display:flex; justify-content:center; align-items:center; gap:6px;}
-  .privacy-lock input { padding: 10px 14px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 14px; width: 200px; margin-right: 10px; outline: none; }
-  .privacy-lock button { padding: 10px 20px; background: #1565c0; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
-
-  .contact-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  .contact-table th, .contact-table td { padding: 12px 8px; border-bottom: 1px solid #eceff1; text-align: left; }
-  .contact-table th { color: #78909c; font-weight: 400; background: #fafbfc; }
-  .contact-table td { font-weight: 300; }
-  .contact-table td:first-child { font-weight: 400; color: #1f2d3d; }
-
-  .recruit-panel-red { border: 1px solid #e53935 !important; box-shadow: 0 4px 15px rgba(229,57,53,0.1) !important; }
-  .recruit-panel-red summary { background: #e53935 !important; }
-  .recruit-panel-red summary:hover { background: #d32f2f !important; }
-  .recruit-card { background: #fff; border: 1px solid #ffcdd2; border-radius: 8px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-  .signup-tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 16px; font-size: 13px; margin: 4px; }
+  /* 3. 金刚区 (宫格) */
+  .grid-nav { background: #fff; display: grid; grid-template-columns: repeat(5, 1fr); padding: 15px 10px; gap: 15px 5px; margin-bottom: 10px; }
+  .grid-item { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+  .grid-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
+  .grid-icon svg { width: 24px; height: 24px; fill: #fff; }
+  .grid-text { font-size: 11px; color: #546e7a; }
   
-  .info-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #546e7a; margin: 4px 0; }
-  .info-icon { width: 14px; height: 14px; fill: #78909c; }
+  /* 图标背景色 */
+  .bg-blue { background: linear-gradient(135deg, #64b5f6, #2196f3); }
+  .bg-orange { background: linear-gradient(135deg, #ffb74d, #f57c00); }
+  .bg-purple { background: linear-gradient(135deg, #ba68c8, #8e24aa); }
+  .bg-pink { background: linear-gradient(135deg, #f06292, #d81b60); }
+  .bg-green { background: linear-gradient(135deg, #81c784, #388e3c); }
+
+  /* 4. 列表 Tab */
+  .tabs { background: #fff; display: flex; padding: 10px 15px; gap: 20px; border-bottom: 1px solid #eee; align-items: center;}
+  .tab-item { font-size: 15px; color: #666; cursor: pointer; position: relative; padding-bottom: 5px; }
+  .tab-item.active { color: #333; font-weight: bold; }
+  .tab-item.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 20px; height: 3px; background: var(--primary); border-radius: 2px; }
+  .search-icon { margin-left: auto; font-size: 18px; color: #999; }
+
+  /* 5. 招募接龙区 (置顶) */
+  .section-title { padding: 15px 15px 5px; font-size: 16px; font-weight: bold; color: #333; display: flex; align-items: center; gap: 8px;}
+  .recruit-container { padding: 0 10px; }
+  .recruit-card { background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .recruit-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .recruit-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: bold; }
+  .recruit-info { flex: 1; }
+  .recruit-name { font-size: 15px; font-weight: 500; color: #333; display: flex; align-items: center; gap: 5px;}
+  .tag-admin { background: #ffb74d; color: #fff; font-size: 10px; padding: 1px 4px; border-radius: 4px; }
+  .recruit-time { font-size: 12px; color: #999; }
+  .recruit-title { font-size: 15px; font-weight: 500; color: #333; margin-bottom: 8px; line-height: 1.4; }
+  .recruit-detail { font-size: 13px; color: #666; margin-bottom: 5px; }
+  .recruit-detail span { color: #999; }
+  .recruit-members { background: #f9fbfd; padding: 8px; border-radius: 6px; font-size: 13px; color: #546e7a; margin: 10px 0; border: 1px solid #eee; }
+  .signup-tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin: 2px; }
+  .recruit-actions { display: flex; gap: 10px; margin-top: 10px; }
+  .recruit-actions input { flex: 1; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
+  .btn-primary { background: #e53935; color: #fff; border: none; padding: 0 15px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+  .btn-outline { background: #fff; color: #1565c0; border: 1px solid #1565c0; padding: 0 15px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+  .expired-box { background: #f5f5f5; color: #999; text-align: center; padding: 10px; border-radius: 6px; font-size: 13px; }
+
+  /* 6. 历史活动列表 */
+  .task-list { padding: 0 10px; }
+  .task-card { background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; gap: 10px; }
+  .task-card-avatar { width: 40px; height: 40px; border-radius: 50%; background: #e3f2fd; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #1565c0; font-weight: bold; }
+  .task-content { flex: 1; }
+  .task-title { font-size: 15px; font-weight: bold; margin-bottom: 5px; color: #333; }
+  .task-meta { font-size: 12px; color: #999; margin-bottom: 5px; }
+  .task-members { font-size: 13px; color: #666; background: #f9fbfd; padding: 6px; border-radius: 4px; }
+
+  /* 7. 底部 TabBar */
+  .bottom-tab { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background: #fff; display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid #eee; z-index: 100; }
+  .tab-btn { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 11px; cursor: pointer; }
+  .tab-btn.active { color: var(--primary); }
+  .tab-btn svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
+
+  /* 8. 弹窗样式 (个人查询/通讯录/入队) */
+  .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
+  .modal-content { background: #fff; width: 85%; max-width: 400px; border-radius: 12px; padding: 20px; position: relative; max-height: 80vh; overflow-y: auto;}
+  .close-btn { position: absolute; top: 15px; right: 15px; font-size: 20px; color: #999; cursor: pointer; }
+  .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #333; }
+  .input-group { margin-bottom: 15px; }
+  .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+  .btn-block { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; }
   
-  .map-link { color: #e53935; text-decoration: none; display: inline-flex; align-items: center; gap: 2px; font-weight: 500;}
-  .map-link:hover { text-decoration: underline; }
-
-  .type-tag { display: inline-block; padding: 2px 8px; background: #f0f4c3; color: #827717; border-radius: 4px; font-size: 12px; font-weight: 400; margin-right: 8px; vertical-align: middle; }
-  .card { font-weight: 300; }
-  .card h2 { font-weight: 400; font-size: 15px; color: #1f2d3d; }
-  .members { color: #546e7a; }
-  .recruit-type-tag { background:#ffcdd2; color:#c62828; padding:2px 6px; border-radius:4px; font-size:12px; margin-right:6px; }
-
-  .apply-form-grid { display: flex; flex-direction: column; gap: 10px; }
-  .apply-form-grid input { width: 100%; padding: 10px; border: 1px solid #cfd8dc; border-radius: 6px; outline: none; }
-  .apply-form-grid input:focus { border-color: #1565c0; }
-  .apply-form-grid button { padding: 10px; background: #1565c0; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; margin-top: 5px; }
-
-  /* 强制分享弹窗样式 */
-  #shareModal {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6); z-index: 99999;
-    flex-direction: column; align-items: center; justify-content: center;
-  }
-  .share-modal-content {
-    background: #fff; width: 90%; max-width: 400px; border-radius: 12px; overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center;
-  }
-  .share-modal-header { background: #e53935; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; }
-  .share-modal-body { padding: 20px; }
-  .share-modal-body p { margin: 0 0 15px; font-size: 15px; color: #333; line-height: 1.5; }
-  .share-modal-body textarea { width: 100%; height: 120px; padding: 10px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 13px; resize: none; background: #f9fbfd; color: #546e7a; }
-  .share-modal-footer { padding: 15px; background: #f4f7fb; display: flex; gap: 10px; }
-  .share-modal-footer button {
-    flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; font-weight: 500;
-  }
-  .btn-copy-again { background: #1565c0; color: #fff; }
-  .btn-close-modal { background: #eceff1; color: #546e7a; }
-
-  @media (max-width: 600px) {
-    .main-title { font-size: 24px; }
-    .top-nav { display: none; }
-    .bottom-nav { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
-    .bottom-nav a { color: #607d8b; text-decoration: none; font-size: 14px; padding: 8px 20px; border: 1px solid #cfd8dc; border-radius: 20px; background: #fff; transition: all 0.2s; }
-    .bottom-nav a:hover { color: #1565c0; border-color: #1565c0; }
-    header { padding: 20px; }
-    .details-content { padding: 12px; }
-    summary { padding: 14px 16px; font-size: 15px; }
-    .icon-svg { width: 18px; height: 18px; }
-    .stats-table th, .stats-table td { padding: 12px 4px; font-size: 13px; }
-    .contact-table th, .contact-table td { padding: 10px 4px; font-size: 13px; }
-    .chart-box { min-width: 100%; height: 200px; }
-    .search-box input { width: 100%; }
-  }
+  /* 图表容器 */
+  .chart-container { display: none; padding: 10px; background: #fff; margin: 10px; border-radius: 8px; }
+  .chart-box { width: 100%; height: 220px; margin-bottom: 10px; }
 </style>
 </head>
 <body>
 
+<!-- 1. 顶部 -->
 <header>
-  <nav class="top-nav" id="nav">
-    <a href="login.html">管理员登录</a>
-  </nav>
-  <div class="logo-container">
-    <img src="https://img.alicdn.com/imgextra/i3/706125935/O1CN01KcQnpNaiagF49oPo_!!706125935.png" alt="云和蓝天救援队">
-  </div>
-  <h1 class="main-title">云和·蓝天救援队</h1>
-  <div class="slogan">
-    同在蓝天下 <span>携手为公益</span> 400-600-9958
+  <div class="header-title">云和·蓝天救援队</div>
+  <div class="header-icons">
+    <a href="login.html">⚙</a>
   </div>
 </header>
 
-<main>
-  <div id="loading" class="empty" style="font-weight: 300; color: #fff; text-align:center; padding:20px;">加载数据中…</div>
+<!-- 2. Banner -->
+<div class="banner">
+  <img src="https://img.alicdn.com/imgextra/i3/706125935/O1CN01KcQnpNaiagF49oPo_!!706125935.png" alt="云和蓝天" style="object-fit: contain; background: #0d47a1;">
+  <div class="banner-tag-left">同在蓝天下</div>
+  <div class="banner-tag">携手为公益</div>
+</div>
 
-  <div id="personalPanel" class="standalone-card" style="display:none;">
-    <h2 class="standalone-title">
-      <svg class="svg-big" style="width:20px; height:20px; fill:#1565c0;" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-      查询出勤时长
-    </h2>
-    <div class="search-box">
-      <input type="text" id="queryNameInput" placeholder="请输入你的姓名，例如：张三">
-      <button id="queryBtn">查询</button>
-    </div>
-    <div id="personalResult" class="personal-result"></div>
+<!-- 3. 金刚区 (宫格) -->
+<div class="grid-nav">
+  <div class="grid-item" onclick="openModal('modal-query')">
+    <div class="grid-icon bg-blue"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></div>
+    <div class="grid-text">个人查询</div>
   </div>
+  <div class="grid-item" onclick="toggleChart()">
+    <div class="grid-icon bg-orange"><svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2z"/></svg></div>
+    <div class="grid-text">出勤榜单</div>
+  </div>
+  <div class="grid-item" onclick="openModal('modal-contact')">
+    <div class="grid-icon bg-purple"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>
+    <div class="grid-text">通讯录</div>
+  </div>
+  <div class="grid-item" onclick="openModal('modal-apply')">
+    <div class="grid-icon bg-pink"><svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+    <div class="grid-text">加入我们</div>
+  </div>
+  <div class="grid-item" onclick="scrollToHistory()">
+    <div class="grid-icon bg-green"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></div>
+    <div class="grid-text">历史记录</div>
+  </div>
+</div>
 
-  <!-- 申请入队 -->
-  <details id="applyPanel">
-    <summary>
-      <div class="summary-inner">
-        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-        <span>申请加入救援队</span>
-      </div>
-    </summary>
-    <div class="details-content">
-      <form id="applyForm" class="apply-form-grid">
-        <input type="text" id="applyName" placeholder="真实姓名" required>
-        <input type="text" id="applyPhone" placeholder="联系电话">
-        <input type="text" id="applyEmergency" placeholder="紧急联系人及电话">
-        <button type="submit" id="applySubmitBtn">提交入队申请</button>
-      </form>
+<!-- 隐藏的图表区域 -->
+<div id="chart-section" class="chart-container">
+  <div id="barChart" class="chart-box"></div>
+  <div id="pieChart" class="chart-box"></div>
+  <div style="text-align:center; font-size:12px; color:#999; padding-bottom:10px;">点击上方“出勤榜单”可收起图表</div>
+</div>
+
+<!-- 4. 任务招募接龙 (置顶) -->
+<div id="recruit-section">
+  <div class="section-title">
+    <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#e53935;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+    任务招募接龙
+  </div>
+  <div id="recruit-list" class="recruit-container"></div>
+</div>
+
+<!-- 5. 历史活动列表 -->
+<div id="history-section" class="section-title" style="margin-top: 10px;">
+  <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#1565c0;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+  历史活动记录
+</div>
+<div class="tabs">
+  <div class="tab-item active">全部</div>
+  <div class="tab-item">救援</div>
+  <div class="tab-item">培训</div>
+  <div class="search-icon">🔍</div>
+</div>
+<div id="task-list" class="task-list" style="padding-top: 10px;"></div>
+
+<!-- 底部 TabBar -->
+<div class="bottom-tab">
+  <div class="tab-btn active">
+    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    首页
+  </div>
+  <div class="tab-btn" onclick="openModal('modal-query')">
+    <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+    打卡
+  </div>
+  <div class="tab-btn" onclick="alert('请使用管理员账号登录电脑端后台进行管理。')">
+    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    我的
+  </div>
+</div>
+
+<!-- 模态框区 -->
+<!-- 1. 个人查询 -->
+<div id="modal-query" class="modal">
+  <div class="modal-content">
+    <div class="close-btn" onclick="closeModal('modal-query')">×</div>
+    <div class="modal-title">查询出勤时长</div>
+    <div class="input-group">
+      <input type="text" id="queryNameInput" placeholder="请输入真实姓名">
     </div>
-  </details>
+    <button class="btn-block" onclick="doQuery()">立即查询</button>
+    <div id="queryResult" style="margin-top:15px; font-size:14px; color:#333;"></div>
+  </div>
+</div>
 
-  <details id="recruitPanel" class="recruit-panel-red" style="display:none;" open>
-    <summary>
-      <div class="summary-inner">
-        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-        <span>任务招募接龙</span>
-      </div>
-    </summary>
-    <div class="details-content" id="recruitList"></div>
-  </details>
-
-  <details id="statsPanel" style="display:none;">
-    <summary>
-      <div class="summary-inner">
-        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
-        <span>出勤时长榜</span>
-      </div>
-    </summary>
-    <div class="details-content">
-      <div class="charts-container">
-        <div id="barChart" class="chart-box"></div>
-        <div id="pieChart" class="chart-box"></div>
-      </div>
-      <div id="statsBox"></div>
+<!-- 2. 队员通讯录 -->
+<div id="modal-contact" class="modal">
+  <div class="modal-content">
+    <div class="close-btn" onclick="closeModal('modal-contact')">×</div>
+    <div class="modal-title">队员通讯录</div>
+    <div id="contact-lock-view">
+      <p style="font-size:13px; color:#666; margin-bottom:10px;">为保护隐私，请输入口令：</p>
+      <div class="input-group"><input type="password" id="contactPassword" placeholder="输入队内口令"></div>
+      <button class="btn-block" onclick="unlockContacts()">解锁</button>
     </div>
-  </details>
+    <div id="contact-data-view" style="display:none;"></div>
+  </div>
+</div>
 
-  <details id="contactPanel" style="display:none;">
-    <summary>
-      <div class="summary-inner">
-        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-        <span>队员通讯录</span>
-      </div>
-    </summary>
-    <div class="details-content" id="contactContainer">
-      <div class="privacy-lock" id="lockView">
-        <p>
-          <svg style="width:16px; height:16px; fill:#e53935;" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-          为保护队员隐私，请输入队内访问口令：
-        </p>
-        <input type="password" id="contactPassword" placeholder="输入口令">
-        <button onclick="unlockContacts()">解锁</button>
-      </div>
-      <div id="contactDataView" style="display:none;"></div>
-    </div>
-  </details>
-
-  <details id="tasksPanel" style="display:none;">
-    <summary>
-      <div class="summary-inner">
-        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-        <span>历史活动记录</span>
-      </div>
-    </summary>
-    <div class="details-content" id="taskList"></div>
-  </details>
-
-  <div id="emptyState" class="empty" style="display:none; font-weight: 300; color: #fff; text-align:center; padding:20px;">暂无活动记录</div>
-</main>
-
-<footer style="font-weight: 300; text-align: center; color: #90a4ae; font-size: 12px; padding: 20px 0 40px;">
-  <div>云和·蓝天救援队</div>
-  <nav class="bottom-nav" id="bottomNav">
-    <a href="login.html">管理员登录</a>
-  </nav>
-</footer>
-
-<!-- 强制分享弹窗 -->
-<div id="shareModal">
-  <div class="share-modal-content">
-    <div class="share-modal-header">✅ 接龙成功</div>
-    <div class="share-modal-body">
-      <p>已自动为您复制分享文案，<br><strong>请前往微信群粘贴转发！</strong></p>
-      <textarea id="shareTextArea" readonly></textarea>
-    </div>
-    <div class="share-modal-footer">
-      <button class="btn-copy-again" onclick="copyShareTextAgain()">再复制一次</button>
-      <button class="btn-close-modal" onclick="closeShareModal()">我知道了</button>
-    </div>
+<!-- 3. 申请入队 -->
+<div id="modal-apply" class="modal">
+  <div class="modal-content">
+    <div class="close-btn" onclick="closeModal('modal-apply')">×</div>
+    <div class="modal-title">申请加入救援队</div>
+    <div class="input-group"><input type="text" id="applyName" placeholder="真实姓名" required></div>
+    <div class="input-group"><input type="text" id="applyPhone" placeholder="联系电话"></div>
+    <div class="input-group"><input type="text" id="applyEmergency" placeholder="紧急联系人及电话"></div>
+    <button class="btn-block" onclick="submitApply()" id="applySubmitBtn">提交申请</button>
   </div>
 </div>
 
@@ -274,23 +228,13 @@ import { supabase } from './supabaseClient.js';
 let globalMemberStats = {}; 
 let globalAllTasks = [];
 let globalAllMembers = [];
+let recruitsResData = null;
+let signupsResData = null;
 const CONTACT_PASSWORD = "9958";
 
 const { data: { session } } = await supabase.auth.getSession();
-const nav = document.getElementById('nav');
-const bottomNav = document.getElementById('bottomNav');
 
-if (session) {
-  const html = `<a href="admin.html">管理后台</a><a href="#" class="logout-btn">退出</a>`;
-  nav.innerHTML = html; bottomNav.innerHTML = html;
-  document.querySelectorAll('.logout-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => { e.preventDefault(); await supabase.auth.signOut(); location.reload(); });
-  });
-} else {
-  const html = `<a href="login.html">管理员登录</a>`;
-  nav.innerHTML = html; bottomNav.innerHTML = html;
-}
-
+// 初始化数据
 const [tasksRes, membersRes, recruitsRes, signupsRes] = await Promise.all([
   supabase.from('tasks').select('*').order('task_time', { ascending: false }),
   supabase.from('members').select('*').eq('status', '在队').order('name'),
@@ -298,125 +242,97 @@ const [tasksRes, membersRes, recruitsRes, signupsRes] = await Promise.all([
   supabase.from('recruitment_signups').select('*')
 ]);
 
-document.getElementById('loading').style.display = 'none';
 globalAllTasks = tasksRes.data || [];
 globalAllMembers = membersRes.data || [];
+recruitsResData = recruitsRes.data || [];
+signupsResData = signupsRes.data || [];
 
-// 处理入队申请
-document.getElementById('applyForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById('applySubmitBtn');
-  btn.disabled = true; btn.textContent = '提交中...';
-  
-  const name = document.getElementById('applyName').value.trim().replace(/\s+/g, '');
-  const phone = document.getElementById('applyPhone').value.trim();
-  const emergency = document.getElementById('applyEmergency').value.trim();
-  
-  const { error } = await supabase.from('members').insert({
-    name, phone, emergency_contact: emergency, status: '待审核'
-  });
-  
-  btn.disabled = false; btn.textContent = '提交入队申请';
-  
-  if (error) {
-    alert('提交失败：' + error.message);
-  } else {
-    alert('提交成功！请等待后台管理员审核。');
-    document.getElementById('applyForm').reset();
-    document.getElementById('applyPanel').open = false;
+// 渲染招募
+renderRecruits();
+// 渲染历史
+renderTasks();
+// 处理统计数据
+processTasksData(globalAllTasks);
+
+// ---------------- 逻辑区 ----------------
+
+function renderRecruits() {
+  const container = document.getElementById('recruit-list');
+  if (!recruitsResData || recruitsResData.length === 0) {
+    document.getElementById('recruit-section').style.display = 'none';
+    return;
   }
-});
 
-if (recruitsRes.data && recruitsRes.data.length > 0) {
-  document.getElementById('recruitPanel').style.display = 'block';
-  document.getElementById('recruitList').innerHTML = recruitsRes.data.map(r => {
-    const signups = (signupsRes.data || []).filter(s => s.recruitment_id === r.id);
+  container.innerHTML = recruitsResData.map(r => {
+    const signups = (signupsResData || []).filter(s => s.recruitment_id === r.id);
     const signupNames = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
-    const mapUrl = r.location ? `https://uri.amap.com/search?keyword=${encodeURIComponent(r.location)}&src=mypage&callnative=1` : '#';
-    
-    let uniformHtml = '';
-    if (r.uniform_type) {
-      const uArr = r.uniform_type.split(',').map(u => u.trim());
-      uniformHtml = `
-        <div class="info-row">
-          <svg class="info-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-          着装：${uArr.map(u => esc(u)).join('、')}
-        </div>
-      `;
-    }
-    
     const isExpired = r.task_time ? new Date(r.task_time).getTime() < Date.now() : false;
+    
+    let uniformStr = r.uniform_type ? r.uniform_type.split(',').join('、') : '';
     
     let actionHtml = '';
     if (isExpired) {
-      actionHtml = `<div style="text-align:center; padding:10px; background:#f5f5f5; color:#9e9e9e; border-radius:6px; font-size:14px; border:1px dashed #e0e0e0;">该任务已过集合时间，接龙已结束</div>`;
+      actionHtml = `<div class="expired-box">该任务已过集合时间</div>`;
     } else {
-      // 三个按钮的排版
       actionHtml = `
-        <div style="display:flex; flex-direction:column; gap:10px;">
-          <input type="text" id="signupName_${r.id}" placeholder="输入真实姓名进行报名/退出" style="width:100%; padding:10px; border:1px solid #cfd8dc; border-radius:6px; font-size:14px;">
-          <div style="display:flex; gap:10px;">
-            <button onclick="handleSignup(${r.id})" style="flex:1; background:#e53935; color:#fff; border:none; padding:10px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:400;">接龙</button>
-            <button onclick="handleShare(${r.id})" style="flex:1; background:#1565c0; color:#fff; border:none; padding:10px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:400;">分享</button>
-            <button onclick="handleQuit(${r.id})" style="flex:1; background:#fff; color:#e53935; border:1px solid #e53935; padding:10px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:400;">退出</button>
-          </div>
+        <div class="recruit-actions">
+          <input type="text" id="signupName_${r.id}" placeholder="输入真实姓名报名">
+          <button class="btn-primary" onclick="handleSignup(${r.id})">接龙</button>
+          <button class="btn-outline" onclick="handleQuit(${r.id})">退出</button>
         </div>
       `;
     }
-    
+
     return `
-      <div class="recruit-card" style="${isExpired ? 'opacity: 0.8;' : ''}">
-        <h3 style="margin:0 0 8px; font-size:16px; color:${isExpired ? '#78909c' : '#e53935'}; font-weight:500;">
-          ${r.event_type ? `<span class="recruit-type-tag" style="${isExpired ? 'background:#eceff1;color:#78909c;' : ''}">${esc(r.event_type)}</span>` : ''}
-          ${esc(r.title)}
-        </h3>
-        <div class="info-row">
-          <svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          地点：
-          ${r.location ? `<a href="${mapUrl}" target="_blank" class="map-link" style="${isExpired ? 'color:#78909c;' : ''}">${esc(r.location)} <svg style="width:12px; height:12px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>` : '待定'}
+      <div class="recruit-card">
+        <div class="recruit-header">
+          <div class="recruit-avatar">云</div>
+          <div class="recruit-info">
+            <div class="recruit-name">云和蓝天救援队 <span class="tag-admin">管理员</span></div>
+            <div class="recruit-time">${formatTime(r.created_at)}</div>
+          </div>
         </div>
-        <div class="info-row">
-          <svg class="info-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-          时间：${formatTime(r.task_time)}
-        </div>
-        ${uniformHtml}
-        ${r.content ? `<p style="margin:10px 0; font-size:13px; color:#78909c; background:#f9fbfd; padding:8px; border-radius:4px;">${esc(r.content)}</p>` : ''}
+        <div class="recruit-title">${esc(r.title)}</div>
+        <div class="recruit-detail"><span>类型：</span>${esc(r.event_type) || '无'} ${uniformStr ? ` | <span>着装：</span>${esc(uniformStr)}` : ''}</div>
+        <div class="recruit-detail"><span>地点：</span>${esc(r.location) || '待定'}</div>
+        <div class="recruit-detail"><span>时间：</span>${formatTime(r.task_time)}</div>
+        ${r.content ? `<div class="recruit-detail" style="margin-top:5px; color:#999;">${esc(r.content)}</div>` : ''}
         
-        <div style="margin: 12px 0;">
-          <div style="font-size:12px; color:#78909c; margin-bottom:6px;">已报名 (${signups.length}人)：</div>
-          <div>${signupNames || '<span style="color:#b0bec5; font-size:12px;">暂无，快来抢沙发！</span>'}</div>
+        <div class="recruit-members">
+          <div style="margin-bottom:5px; font-weight:500;">已报名 (${signups.length}人)：</div>
+          <div>${signupNames || '<span style="color:#b0bec5;">暂无</span>'}</div>
         </div>
-        
         ${actionHtml}
       </div>
     `;
   }).join('');
 }
 
-// 构造分享文案
-function generateShareText(r, signups) {
-  let siteUrl = window.location.href.split('?')[0];
-  let text = `【云和·蓝天救援队 任务招募】\n\n`;
-  text += `[类型] ${r.event_type || '待定'}\n`;
-  text += `[着装] ${r.uniform_type || '无特殊要求'}\n`;
-  text += `[任务] ${r.title}\n`;
-  text += `[时间] ${formatTime(r.task_time)}\n`;
-  text += `[地点] ${r.location || '待定'}\n`;
-  if (r.content) text += `[详情] ${r.content}\n`;
-  
-  text += `\n[报名] 已有 ${signups.length} 人报名：\n`;
-  if (signups.length > 0) {
-    text += signups.map(s => s.member_name).join('、') + '\n';
-  } else {
-    text += `（暂无，快来抢沙发！）\n`;
+function renderTasks() {
+  const container = document.getElementById('task-list');
+  if (!globalAllTasks || globalAllTasks.length === 0) {
+    container.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">暂无历史记录</div>';
+    return;
   }
 
-  text += `\n请点击下方链接，打开网页输入真实姓名进行接龙报名：\n${siteUrl}\n\n`;
-  text += `（请大家积极报名，注意安全！）`;
-  return text;
+  container.innerHTML = globalAllTasks.map(t => {
+    let membersStr = (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) 
+      ? t.member_hours.map(m => `${esc(m.name)}(${m.hours}h)`).join('、') : (t.members || '-');
+
+    return `
+      <div class="task-card">
+        <div class="task-card-avatar">记</div>
+        <div class="task-content">
+          <div class="task-title">${esc(t.title)}</div>
+          <div class="task-meta">类型：${esc(t.event_type) || '无'} | 时间：${formatTime(t.task_time)}</div>
+          <div class="task-members"><strong>参与队员：</strong>${membersStr}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
-// 点击接龙
+// 报名
 window.handleSignup = async (id) => {
   const input = document.getElementById(`signupName_${id}`);
   const name = input.value.replace(/[\s\u3000]+/g, '');
@@ -425,85 +341,152 @@ window.handleSignup = async (id) => {
   const isMember = globalAllMembers.some(m => m.name === name);
   if (!isMember) { alert('报名失败：你不是本队队员（或入队申请暂未通过审核）。'); return; }
   
-  const r = recruitsRes.data.find(x => x.id === id);
-  let signups = (signupsRes.data || []).filter(s => s.recruitment_id === id);
-  
-  if (signups.some(s => s.member_name === name)) { alert('你已经报过名啦，无需重复报名！'); return; }
+  if (signupsResData.some(s => s.recruitment_id === id && s.member_name === name)) { alert('你已经报过名啦！'); return; }
 
   const { error } = await supabase.from('recruitment_signups').insert({ recruitment_id: id, member_name: name });
   
   if (error) {
     alert('报名失败：' + error.message);
   } else {
-    signups.push({ member_name: name }); 
-    const shareText = generateShareText(r, signups);
-    copyToClipboard(shareText);
-    
-    document.getElementById('shareTextArea').value = shareText;
-    document.getElementById('shareModal').style.display = 'flex';
+    alert('接龙成功！请准时参加。');
+    location.reload();
   }
 };
 
-// 退出接龙
+// 退出
 window.handleQuit = async (id) => {
   const input = document.getElementById(`signupName_${id}`);
   const name = input.value.replace(/[\s\u3000]+/g, '');
-  if (!name) { alert('请输入姓名以退出接龙'); return; }
+  if (!name) { alert('请输入姓名以退出'); return; }
   
   const { data: existing } = await supabase.from('recruitment_signups').select('*').eq('recruitment_id', id).eq('member_name', name);
-  if (!existing || existing.length === 0) { alert('未找到你的报名记录，请核对姓名。'); return; }
+  if (!existing || existing.length === 0) { alert('未找到你的报名记录'); return; }
 
-  if (!confirm(`确定要退出【${name}】的接龙报名吗？`)) return;
+  if (!confirm(`确定退出【${name}】的接龙吗？`)) return;
 
   const { error } = await supabase.from('recruitment_signups').delete().eq('recruitment_id', id).eq('member_name', name);
   if (error) alert('退出失败：' + error.message);
-  else { alert('已成功退出接龙。'); location.reload(); }
+  else { alert('已成功退出'); location.reload(); }
 };
 
-// 点击分享按钮
-window.handleShare = (id) => {
-  const r = recruitsRes.data.find(x => x.id === id);
-  const signups = (signupsRes.data || []).filter(s => s.recruitment_id === id);
-  const shareText = generateShareText(r, signups);
+// 个人查询弹窗
+window.doQuery = () => {
+  const name = document.getElementById('queryNameInput').value.trim();
+  const res = document.getElementById('queryResult');
+  if (!name) { alert('请输入姓名'); return; }
   
-  copyToClipboard(shareText);
-  alert('招募文案已复制！\n\n请打开微信群，直接粘贴发送即可。');
+  const data = globalMemberStats[name];
+  if (!data) {
+    res.innerHTML = `<span style="color:#e53935;">未找到“${esc(name)}”的记录</span>`;
+    return;
+  }
+  
+  const fmt = (num) => parseFloat(num.toFixed(1));
+  res.innerHTML = `
+    <div style="background:#f4f7fb; padding:15px; border-radius:8px;">
+      <p style="margin:0 0 10px; font-weight:bold;">${esc(name)} 的出勤报告</p>
+      <p style="margin:5px 0;">总时长：<strong style="color:#1565c0; font-size:18px;">${fmt(data.total)}</strong> 小时</p>
+      <p style="margin:5px 0; font-size:13px; color:#666;">公益救援：${fmt(data.rescue)}h | 技能培训：${fmt(data.training)}h | 森林消防：${fmt(data.fire)}h</p>
+    </div>
+  `;
 };
 
-// 复制辅助函数
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).catch(err => {
-    const textarea = document.createElement('textarea');
-    textarea.value = text; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea);
+// 通讯录解锁
+window.unlockContacts = () => {
+  const pwd = document.getElementById('contactPassword').value;
+  if (pwd === CONTACT_PASSWORD) {
+    document.getElementById('contact-lock-view').style.display = 'none';
+    const view = document.getElementById('contact-data-view');
+    view.style.display = 'block';
+    
+    let html = '<table style="width:100%; border-collapse:collapse; font-size:13px;">';
+    html += '<tr style="background:#f4f7fb; text-align:left;"><th style="padding:8px;">姓名</th><th>电话</th></tr>';
+    globalAllMembers.forEach(m => {
+      html += `<tr><td style="padding:8px; border-bottom:1px solid #eee;">${esc(m.name)}</td><td style="border-bottom:1px solid #eee;"><a href="tel:${esc(m.phone)}" style="color:#1565c0; text-decoration:none;">${esc(m.phone)}</a></td></tr>`;
+    });
+    html += '</table>';
+    view.innerHTML = html;
+  } else {
+    alert('口令错误！');
+  }
+};
+
+// 提交入队申请
+window.submitApply = async () => {
+  const btn = document.getElementById('applySubmitBtn');
+  const name = document.getElementById('applyName').value.trim();
+  if (!name) { alert('请输入姓名'); return; }
+  
+  btn.disabled = true; btn.textContent = '提交中...';
+  
+  const { error } = await supabase.from('members').insert({
+    name, 
+    phone: document.getElementById('applyPhone').value.trim(), 
+    emergency_contact: document.getElementById('applyEmergency').value.trim(), 
+    status: '待审核'
   });
-}
-
-// 弹窗内再次复制
-window.copyShareTextAgain = () => {
-  const text = document.getElementById('shareTextArea').value;
-  copyToClipboard(text);
-  alert('已重新复制！');
+  
+  btn.disabled = false; btn.textContent = '提交申请';
+  
+  if (error) {
+    alert('提交失败：' + error.message);
+  } else {
+    alert('提交成功！请等待管理员审核。');
+    closeModal('modal-apply');
+  }
 };
 
-// 关闭弹窗
-window.closeShareModal = () => {
-  location.reload();
+// 图表显示与收起
+window.toggleChart = () => {
+  const chartDiv = document.getElementById('chart-section');
+  if (chartDiv.style.display === 'block') {
+    chartDiv.style.display = 'none';
+    return;
+  }
+  
+  chartDiv.style.display = 'block';
+  
+  if (Object.keys(globalMemberStats).length > 0) {
+    const sorted = Object.entries(globalMemberStats).sort((a, b) => b[1].total - a[1].total);
+    const top10 = sorted.slice(0, 10);
+    
+    const barChart = echarts.init(document.getElementById('barChart'));
+    barChart.setOption({
+      title: { text: '出勤前十名', left: 'center', textStyle:{fontSize:14,color:'#666'} },
+      tooltip: { trigger: 'axis' },
+      grid: { left: '10%', right: '5%', bottom: '10%', top: '20%' },
+      xAxis: { type: 'category', data: top10.map(x => x[0]), axisLabel:{color:'#999', fontSize:10} },
+      yAxis: { type: 'value', splitLine:{lineStyle:{type:'dashed'}} },
+      series: [{ data: top10.map(x => x[1].total), type: 'bar', itemStyle: { color: '#42a5f5', borderRadius: [4,4,0,0] }, barMaxWidth: 20 }]
+    });
+
+    let tr=0, tt=0, tf=0;
+    Object.values(globalMemberStats).forEach(d => { tr+=d.rescue; tt+=d.training; tf+=d.fire; });
+    
+    const pieChart = echarts.init(document.getElementById('pieChart'));
+    pieChart.setOption({
+      title: { text: '任务类型占比', left: 'center', textStyle:{fontSize:14,color:'#666'} },
+      tooltip: { trigger: 'item' },
+      legend: { bottom: 0, icon: 'circle', textStyle:{fontSize:11} },
+      color: ['#42a5f5', '#66bb6a', '#ef5350'],
+      series: [{ type: 'pie', radius: ['40%', '65%'], label:{show:false}, data: [
+        {value: tr, name: '公益救援'}, {value: tt, name: '技能培训'}, {value: tf, name: '森林消防'}
+      ]}]
+    });
+    
+    window.addEventListener('resize', () => { barChart.resize(); pieChart.resize(); });
+  }
 };
 
-if (!tasksRes.error && globalAllTasks.length > 0) {
-  document.getElementById('statsPanel').style.display = 'block';
-  document.getElementById('personalPanel').style.display = 'block';
-  document.getElementById('tasksPanel').style.display = 'block';
-  processTasksData(globalAllTasks); 
-  renderTaskList(globalAllTasks);   
-  renderStatsTable();      
-  renderCharts();          
-} else {
-  document.getElementById('emptyState').style.display = 'block';
-}
+window.scrollToHistory = () => {
+  document.getElementById('history-section').scrollIntoView({ behavior: 'smooth' });
+};
 
-if (globalAllMembers.length > 0) document.getElementById('contactPanel').style.display = 'block';
+// 弹窗控制
+window.openModal = (id) => { document.getElementById(id).style.display = 'flex'; };
+window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
 
+// 统计数据
 function processTasksData(tasks) {
   globalMemberStats = {};
   tasks.forEach(t => {
@@ -525,157 +508,7 @@ function processTasksData(tasks) {
   });
 }
 
-function renderCharts() {
-  if (Object.keys(globalMemberStats).length === 0) return;
-  const sortedMembers = Object.entries(globalMemberStats).sort((a, b) => b[1].total - a[1].total);
-  const top10 = sortedMembers.slice(0, 10);
-  
-  const barChart = echarts.init(document.getElementById('barChart'));
-  barChart.setOption({
-    title: { text: '出勤前十名 (小时)', left: 'center', textStyle: { fontSize: 14, fontWeight: 400, color: '#546e7a' } },
-    tooltip: { trigger: 'axis' }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    xAxis: { type: 'category', data: top10.map(x => x[0]), axisLabel: { color: '#78909c' } },
-    yAxis: { type: 'value', axisLabel: { color: '#78909c' }, splitLine: { lineStyle: { type: 'dashed' } } },
-    series: [{ data: top10.map(x => x[1].total), type: 'bar', itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#64b5f6' }, { offset: 1, color: '#1565c0' }]), borderRadius: [4, 4, 0, 0] }, barMaxWidth: 30 }]
-  });
-
-  let totalRescue = 0, totalTraining = 0, totalFire = 0;
-  Object.values(globalMemberStats).forEach(d => { totalRescue += d.rescue; totalTraining += d.training; totalFire += d.fire; });
-  
-  const pieChart = echarts.init(document.getElementById('pieChart'));
-  pieChart.setOption({
-    title: { text: '任务类型时长占比', left: 'center', textStyle: { fontSize: 14, fontWeight: 400, color: '#546e7a' } },
-    tooltip: { trigger: 'item', formatter: '{b}: {c} 小时 ({d}%)' },
-    legend: { bottom: '0%', icon: 'circle', textStyle: { color: '#78909c' } },
-    color: ['#42a5f5', '#66bb6a', '#ef5350'],
-    series: [{ type: 'pie', radius: ['40%', '70%'], avoidLabelOverlap: false, itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 }, label: { show: false }, data: [{ value: parseFloat(totalRescue.toFixed(1)), name: '公益救援' }, { value: parseFloat(totalTraining.toFixed(1)), name: '技能培训' }, { value: parseFloat(totalFire.toFixed(1)), name: '森林消防' }] }]
-  });
-  window.addEventListener('resize', () => { barChart.resize(); pieChart.resize(); });
-}
-
-function renderStatsTable() {
-  const statsBox = document.getElementById('statsBox');
-  const sortedMembers = Object.entries(globalMemberStats).sort((a, b) => b[1].total - a[1].total);
-  
-  if (sortedMembers.length === 0) { statsBox.innerHTML = '<div class="empty">暂无记录</div>'; return; }
-  
-  const top10 = sortedMembers.slice(0, 10);
-  const fmt = (num) => parseFloat(num.toFixed(1));
-
-  statsBox.innerHTML = `
-    <table class="stats-table">
-      <thead><tr><th class="rank">排名</th><th>队员姓名</th><th>总时长</th></tr></thead>
-      <tbody>
-        ${top10.map((item, index) => {
-          const name = item[0], data = item[1];
-          let rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
-          let detailsHtml = '';
-          if (data.rescue > 0) detailsHtml += `<span class="detail-badge rescue">公益救援：${fmt(data.rescue)}h</span>`;
-          if (data.training > 0) detailsHtml += `<span class="detail-badge training">技能培训：${fmt(data.training)}h</span>`;
-          if (data.fire > 0) detailsHtml += `<span class="detail-badge fire">森林消防：${fmt(data.fire)}h</span>`;
-          if (detailsHtml === '') detailsHtml = '<span class="detail-badge">暂无分类明细</span>';
-
-          return `
-            <tr>
-              <td class="rank ${rankClass}">${index + 1}</td>
-              <td><span class="clickable-name" onclick="toggleDetail('detail-${index}', this)">${esc(name)} <span class="arrow">▼</span></span></td>
-              <td class="total-col">${fmt(data.total)} 小时</td>
-            </tr>
-            <tr id="detail-${index}" class="details-row" style="display: none;"><td colspan="3"><div class="details-flex">${detailsHtml}</div></td></tr>
-          `;
-        }).join('')}
-      </tbody>
-    </table>
-  `;
-}
-
-document.getElementById('queryBtn').addEventListener('click', () => {
-  const name = document.getElementById('queryNameInput').value.trim();
-  const resultBox = document.getElementById('personalResult');
-  if (!name) { alert('请输入姓名'); return; }
-  
-  const data = globalMemberStats[name];
-  if (!data) {
-    resultBox.innerHTML = `<h3 style="color:#e53935;">未找到“${esc(name)}”的记录</h3><p>请检查输入是否正确，或联系管理员录入。</p>`;
-    resultBox.style.display = 'block'; return;
-  }
-
-  const fmt = (num) => parseFloat(num.toFixed(1));
-  resultBox.innerHTML = `
-    <h3>
-      <svg class="svg-big" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-      ${esc(name)}，你的出勤报告：
-    </h3>
-    <p>累计总时长：<strong style="color:#1565c0; font-size:18px;">${fmt(data.total)}</strong> 小时</p>
-    <p style="margin-top:10px;">
-      公益救援：<span class="detail-badge rescue">${fmt(data.rescue)}h</span> &nbsp;
-      技能培训：<span class="detail-badge training">${fmt(data.training)}h</span> &nbsp;
-      森林消防：<span class="detail-badge fire">${fmt(data.fire)}h</span>
-    </p>
-  `;
-  resultBox.style.display = 'block';
-});
-
-window.unlockContacts = async () => {
-  const pwd = document.getElementById('contactPassword').value;
-  if (pwd === CONTACT_PASSWORD) {
-    document.getElementById('lockView').style.display = 'none';
-    document.getElementById('contactDataView').style.display = 'block';
-    document.getElementById('contactDataView').innerHTML = `
-      <table class="contact-table">
-        <thead><tr><th>姓名</th><th>联系电话</th><th>紧急联系人</th></tr></thead>
-        <tbody>
-          ${globalAllMembers.map(m => `
-            <tr>
-              <td>${esc(m.name)}</td>
-              <td>${m.phone ? `<a href="tel:${esc(m.phone)}" style="color:#1565c0;text-decoration:none;">${esc(m.phone)}</a>` : '-'}</td>
-              <td>${esc(m.emergency_contact) || '-'}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-  } else {
-    alert('口令错误，请重试！');
-    document.getElementById('contactPassword').value = '';
-  }
-};
-
-function renderTaskList(tasks) {
-  document.getElementById('taskList').innerHTML = tasks.map(t => {
-    let membersHtml = (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) 
-      ? t.member_hours.map(m => `${esc(m.name)}(${m.hours}h)`).join('、') : esc(t.members).replace(/\n/g, '、');
-
-    let displayDuration = t.duration;
-    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
-      const arr = t.member_hours.map(m => parseFloat(m.hours) || 0);
-      if (arr.length > 0) displayDuration = Math.max(...arr);
-    }
-
-    return `
-      <article class="card" style="box-shadow:none; border:1px solid #f0f4f8; margin-bottom:12px; background: #fafbfc; border-radius: 8px;">
-        <div style="margin-bottom:6px;">
-          ${t.event_type ? `<span class="type-tag">${esc(t.event_type)}</span>` : ''}
-          <span style="font-weight: 400; font-size: 15px; color: #1f2d3d;">${esc(t.title)}</span>
-        </div>
-        <div class="meta" style="color: #78909c; font-size: 13px;">
-          活动时间：${formatTime(t.task_time)} 
-          ${displayDuration ? ` · 任务时长：${esc(displayDuration)} 小时` : ''}
-        </div>
-        ${t.content ? `<div class="content" style="color: #546e7a; margin-top: 8px;">${esc(t.content)}</div>` : ''}
-        ${membersHtml ? `<div class="members" style="margin-top: 8px; font-size: 13px;"><strong>参与成员：</strong>${membersHtml}</div>` : ''}
-      </article>
-    `;
-  }).join('');
-}
-
-window.toggleDetail = (detailId, nameElement) => {
-  const detailRow = document.getElementById(detailId);
-  const arrow = nameElement.querySelector('.arrow');
-  if (detailRow.style.display === 'none') { detailRow.style.display = 'table-row'; arrow.classList.add('open'); }
-  else { detailRow.style.display = 'none'; arrow.classList.remove('open'); }
-};
-
+// 辅助工具
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function formatTime(t) { if (!t) return '待定'; const d = new Date(t); if (isNaN(d)) return t; const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
 </script>

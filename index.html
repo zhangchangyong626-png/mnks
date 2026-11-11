@@ -13,17 +13,52 @@
   }
   body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 400; background: var(--bg-color); color: #333; margin: 0; padding-bottom: 60px; max-width: 600px; margin: 0 auto; position: relative;}
 
-  /* 1. 顶部 Header */
-  header { background: var(--primary); color: #fff; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-  .header-title { font-size: 18px; font-weight: 500; letter-spacing: 1px; }
-  .header-icons { display: flex; gap: 15px; font-size: 20px; }
-  .header-icons a { color: #fff; text-decoration: none; }
+  /* ================= 1. 全新顶部结构 ================= */
+  .app-header {
+    background: #0d47a1;
+    padding: 35px 20px 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
 
-  /* 2. Banner */
-  .banner { width: 100%; height: 180px; position: relative; background: #cfd8dc; overflow: hidden; }
-  .banner img { width: 100%; height: 100%; object-fit: cover; }
-  .banner-tag { position: absolute; bottom: 10px; right: 10px; background: rgba(255,255,255,0.9); color: #1565c0; font-size: 12px; padding: 4px 10px; border-radius: 12px; font-weight: 500; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  .banner-tag-left { position: absolute; bottom: 10px; left: 10px; background: rgba(255,255,255,0.9); color: #1565c0; font-size: 12px; padding: 4px 10px; border-radius: 12px; font-weight: 500; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .settings-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: #fff;
+    font-size: 22px;
+    text-decoration: none;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .settings-btn:hover { opacity: 1; }
+
+  .app-logo {
+    height: 75px;
+    object-fit: contain;
+    margin-bottom: 15px;
+  }
+
+  .app-title {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0 0 8px 0;
+    letter-spacing: 2px;
+  }
+
+  .app-slogan {
+    color: rgba(255, 255, 255, 0.75); /* 半透明 */
+    font-size: 12px; /* 字体稍小 */
+    margin: 0;
+    letter-spacing: 1px;
+  }
+  /* ================================================= */
 
   /* 3. 金刚区 (宫格) */
   .grid-nav { background: #fff; display: grid; grid-template-columns: repeat(5, 1fr); padding: 15px 10px; gap: 15px 5px; margin-bottom: 10px; }
@@ -98,20 +133,13 @@
 </head>
 <body>
 
-<!-- 1. 顶部 -->
-<header>
-  <div class="header-title">云和·蓝天救援队</div>
-  <div class="header-icons">
-    <a href="login.html">⚙</a>
-  </div>
+<!-- 1. 全新顶部结构 -->
+<header class="app-header">
+  <a href="login.html" class="settings-btn">⚙</a>
+  <img src="https://img.alicdn.com/imgextra/i3/706125935/O1CN01KcQnpNaiagF49oPo_!!706125935.png" alt="云和蓝天救援队" class="app-logo">
+  <h1 class="app-title">云和·蓝天救援队</h1>
+  <p class="app-slogan">同在蓝天下 携手为公益 400-600-9958</p>
 </header>
-
-<!-- 2. Banner -->
-<div class="banner">
-  <img src="https://img.alicdn.com/imgextra/i3/706125935/O1CN01KcQnpNaiagF49oPo_!!706125935.png" alt="云和蓝天" style="object-fit: contain; background: #0d47a1;">
-  <div class="banner-tag-left">同在蓝天下</div>
-  <div class="banner-tag">携手为公益</div>
-</div>
 
 <!-- 3. 金刚区 (宫格) -->
 <div class="grid-nav">
@@ -234,7 +262,6 @@ const CONTACT_PASSWORD = "9958";
 
 const { data: { session } } = await supabase.auth.getSession();
 
-// 初始化数据
 const [tasksRes, membersRes, recruitsRes, signupsRes] = await Promise.all([
   supabase.from('tasks').select('*').order('task_time', { ascending: false }),
   supabase.from('members').select('*').eq('status', '在队').order('name'),
@@ -247,14 +274,9 @@ globalAllMembers = membersRes.data || [];
 recruitsResData = recruitsRes.data || [];
 signupsResData = signupsRes.data || [];
 
-// 渲染招募
 renderRecruits();
-// 渲染历史
 renderTasks();
-// 处理统计数据
 processTasksData(globalAllTasks);
-
-// ---------------- 逻辑区 ----------------
 
 function renderRecruits() {
   const container = document.getElementById('recruit-list');
@@ -332,7 +354,6 @@ function renderTasks() {
   }).join('');
 }
 
-// 报名
 window.handleSignup = async (id) => {
   const input = document.getElementById(`signupName_${id}`);
   const name = input.value.replace(/[\s\u3000]+/g, '');
@@ -345,15 +366,10 @@ window.handleSignup = async (id) => {
 
   const { error } = await supabase.from('recruitment_signups').insert({ recruitment_id: id, member_name: name });
   
-  if (error) {
-    alert('报名失败：' + error.message);
-  } else {
-    alert('接龙成功！请准时参加。');
-    location.reload();
-  }
+  if (error) alert('报名失败：' + error.message);
+  else { alert('接龙成功！请准时参加。'); location.reload(); }
 };
 
-// 退出
 window.handleQuit = async (id) => {
   const input = document.getElementById(`signupName_${id}`);
   const name = input.value.replace(/[\s\u3000]+/g, '');
@@ -369,7 +385,6 @@ window.handleQuit = async (id) => {
   else { alert('已成功退出'); location.reload(); }
 };
 
-// 个人查询弹窗
 window.doQuery = () => {
   const name = document.getElementById('queryNameInput').value.trim();
   const res = document.getElementById('queryResult');
@@ -391,7 +406,6 @@ window.doQuery = () => {
   `;
 };
 
-// 通讯录解锁
 window.unlockContacts = () => {
   const pwd = document.getElementById('contactPassword').value;
   if (pwd === CONTACT_PASSWORD) {
@@ -411,7 +425,6 @@ window.unlockContacts = () => {
   }
 };
 
-// 提交入队申请
 window.submitApply = async () => {
   const btn = document.getElementById('applySubmitBtn');
   const name = document.getElementById('applyName').value.trim();
@@ -428,15 +441,13 @@ window.submitApply = async () => {
   
   btn.disabled = false; btn.textContent = '提交申请';
   
-  if (error) {
-    alert('提交失败：' + error.message);
-  } else {
+  if (error) alert('提交失败：' + error.message);
+  else {
     alert('提交成功！请等待管理员审核。');
     closeModal('modal-apply');
   }
 };
 
-// 图表显示与收起
 window.toggleChart = () => {
   const chartDiv = document.getElementById('chart-section');
   if (chartDiv.style.display === 'block') {
@@ -482,11 +493,9 @@ window.scrollToHistory = () => {
   document.getElementById('history-section').scrollIntoView({ behavior: 'smooth' });
 };
 
-// 弹窗控制
 window.openModal = (id) => { document.getElementById(id).style.display = 'flex'; };
 window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
 
-// 统计数据
 function processTasksData(tasks) {
   globalMemberStats = {};
   tasks.forEach(t => {
@@ -508,7 +517,6 @@ function processTasksData(tasks) {
   });
 }
 
-// 辅助工具
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function formatTime(t) { if (!t) return '待定'; const d = new Date(t); if (isNaN(d)) return t; const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
 </script>

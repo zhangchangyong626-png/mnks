@@ -553,7 +553,7 @@ window.shareToWeChat = (id) => {
   });
 };
 
-// 核心需求1&2：转出勤后隐藏未报名的人，并且弹窗提示带入的时间
+// 转出勤逻辑
 window.convertToTask = async (id) => {
   const r = allRecruits.find(x => x.id === id);
   const signups = allSignups.filter(s => s.recruitment_id === id);
@@ -569,7 +569,6 @@ window.convertToTask = async (id) => {
     });
   }
 
-  // 清空搜索框
   document.getElementById('memberSearchInput').value = '';
   
   document.querySelectorAll('input[name="task_members"]').forEach(cb => {
@@ -577,14 +576,12 @@ window.convertToTask = async (id) => {
     cb.checked = false; toggleHoursInput(cb);
     
     if (signups.some(s => s.member_name === cb.value)) {
-      // 报名了：显示、勾选、默认给4小时
       cb.checked = true;
       toggleHoursInput(cb);
       cb.parentElement.querySelector('.member-hours-input').value = '4';
       label.style.display = 'inline-flex';
       label.dataset.hiddenBySignup = 'false';
     } else {
-      // 没报名：默认隐藏，打上标记
       label.style.display = 'none';
       label.dataset.hiddenBySignup = 'true';
     }
@@ -597,7 +594,7 @@ window.convertToTask = async (id) => {
   alert(`已带入任务信息！\n活动时间：${formatTime(r.task_time)}\n\n已为您自动勾选报名人员并隐藏未报名人员（如需添加未报名成员，请在搜索框输入其姓名）。`);
 };
 
-// 核心需求3：搜索时可以搜到所有人（包括被隐藏的未报名人员）
+// 搜索功能
 window.filterMemberCheckboxes = (keyword) => {
   const kw = keyword.trim().toLowerCase();
   document.querySelectorAll('#memberCheckboxes .checkbox-item').forEach(label => {
@@ -605,10 +602,8 @@ window.filterMemberCheckboxes = (keyword) => {
     const isMatch = name.includes(kw);
     
     if (kw) {
-      // 如果有关键词，只要匹配就显示
       label.style.display = isMatch ? 'inline-flex' : 'none';
     } else {
-      // 如果清空了搜索，恢复默认状态（没报名的继续隐藏）
       if (label.dataset.hiddenBySignup === 'true') {
         label.style.display = 'none';
       } else {
@@ -618,7 +613,7 @@ window.filterMemberCheckboxes = (keyword) => {
   });
 };
 
-// 重置状态：当取消编辑或保存成功后，让所有人员恢复正常显示
+// 重置状态
 function resetMemberVisibility() {
   document.getElementById('memberSearchInput').value = '';
   document.querySelectorAll('#memberCheckboxes .checkbox-item').forEach(label => {
@@ -685,7 +680,7 @@ function renderTasks(filterText = '') {
     }));
   tbody.querySelectorAll('[data-export]').forEach(btn => btn.addEventListener('click', () => {
       const task = allTasks.find(x => String(x.id) === btn.dataset.export);
-      if (task) exportTasksToCSV([task], `出勤记录_${task.title}`);
+      if (task) exportSingleTaskToCSV(task);
     }));
 }
 
@@ -726,7 +721,7 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
   else { 
     document.getElementById('taskForm').reset(); 
     document.getElementById('taskId').value = ''; 
-    resetMemberVisibility(); // 保存后恢复所有成员显示
+    resetMemberVisibility();
     loadTasks().then(() => renderTasks(document.getElementById('taskSearchInput').value)); 
     alert('保存成功'); 
   }
@@ -746,7 +741,7 @@ function startEdit(t) {
   document.getElementById('task_time').value = toLocalInput(t.task_time);
   document.querySelectorAll('input[name="event_type"]').forEach(r => r.checked = (r.value === t.event_type));
   
-  resetMemberVisibility(); // 编辑历史记录时，先让所有人显示出来
+  resetMemberVisibility();
 
   const taskMembers = t.members ? t.members.split(',').map(s => s.trim()) : [];
   const memberHoursData = t.member_hours || [];
@@ -774,7 +769,7 @@ document.getElementById('cancelEdit').addEventListener('click', (e) => {
   document.getElementById('taskId').value = '';
   document.getElementById('submitBtn').textContent = '保存记录'; 
   e.target.style.display = 'none';
-  resetMemberVisibility(); // 取消编辑恢复状态
+  resetMemberVisibility();
 });
 
 function toLocalInput(t) {
@@ -789,17 +784,110 @@ function formatTime(t) {
 }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-// 导出事件的简单占位（复用第一阶段的复杂逻辑或直接调用 CSV 函数）
-function exportTasksToCSV(data, name) {
-  if (!data || data.length === 0) return alert("无数据");
-  const headers = ['类型', '名称', '时间', '总时长', '详情'];
-  const rows = data.map(t => [t.event_type||'', t.title||'', formatTime(t.task_time), t.duration||'', t.content||'']);
-  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement("a"); link.href = URL.createObjectURL(blob);
-  link.download = `${name}.csv`; link.click();
+// --- 🚀 核心导出逻辑大升级 ---
+
+// 1. 导出单条记录（模仿你的 Excel 表格样式）
+function exportSingleTaskToCSV(t) {
+  let rows = [];
+  
+  // 表头标题
+  rows.push(["云和县蓝天救援队救援记录表"]);
+  // 事件名称与代码 (用任务ID的后四位模拟代码)
+  const codeStr = String(t.id).padStart(4, '0').slice(-4);
+  rows.push(["事件名称：", t.title, "", "", "代码：", codeStr]);
+  // 基本信息
+  rows.push(["信息登记", "事件时间：", formatTime(t.task_time), "", "事件任务：", t.event_type || ""]);
+  rows.push(["", "事件地点：", t.location || "", "", "", ""]);
+  rows.push(["", "出发时间：", "", "", "结束时间：", ""]);
+  rows.push(["", "现场指挥：", "", "", "现场协调人员：", ""]);
+  rows.push(["", "现场拍照：", "", "", "设备调配：", ""]);
+  rows.push(["", "救助人姓名：", "", "", "家属电话：", ""]);
+  
+  // 事件经过
+  rows.push(["事件", "经过", "", "", "", ""]);
+  rows.push(["", (t.content || "").replace(/\n/g, ' ')]);
+  
+  // 出勤记录分组标题
+  rows.push(["", "救援人员出勤记录", "", "", "", ""]);
+  
+  // 核心：按时长分组
+  const grouped = {};
+  let maxNamesPerRow = 7; // 模仿截图，每行大概放 7-8 个名字
+  
+  if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
+    t.member_hours.forEach(m => {
+      const h = parseFloat(m.hours) || 0;
+      if (!grouped[h]) grouped[h] = [];
+      grouped[h].push(m.name);
+    });
+  } else if (t.members && t.duration) {
+    // 兼容老数据
+    const h = parseFloat(t.duration) || 0;
+    grouped[h] = t.members.split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  // 遍历分组，输出名字和总结
+  for (const [hours, names] of Object.entries(grouped)) {
+    // 名字可能需要分多行
+    for (let i = 0; i < names.length; i += maxNamesPerRow) {
+      const chunk = names.slice(i, i + maxNamesPerRow);
+      rows.push(["参与队员", ...chunk]); // 填充名字
+    }
+    // 紧接着说明时长
+    rows.push(["", `以上人员记 ${hours} 个小时`]);
+    // 组与组之间加个空行
+    rows.push([""]);
+  }
+
+  // 把二维数组转成 CSV 格式并下载
+  const csvContent = rows.map(row => 
+    row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+  ).join('\n');
+
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", `记录表_${t.title}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
-document.getElementById('exportAllBtn').addEventListener('click', () => exportTasksToCSV(allTasks, '全部记录'));
+
+// 2. 导出所有记录（列表格式）
+function exportTasksToCSV(tasksData, name) {
+  if (!tasksData || tasksData.length === 0) return alert("无数据可导出");
+  
+  const headers = ['类型', '名称', '时间', '总时长', '参与成员(个人时长)', '详情'];
+  const rows = tasksData.map(t => {
+    let membersStr = '';
+    if (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) {
+      membersStr = t.member_hours.map(m => `${m.name}(${m.hours}h)`).join('、');
+    } else {
+      membersStr = t.members || '';
+    }
+    return [
+      t.event_type || '', t.title || '', formatTime(t.task_time),
+      t.duration || '', membersStr, (t.content || '').replace(/\n/g, ' ')
+    ];
+  });
+
+  const csvContent = [headers, ...rows].map(row => 
+    row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+  ).join('\n');
+
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", `${name}_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+document.getElementById('exportAllBtn').addEventListener('click', () => exportTasksToCSV(allTasks, '云和蓝天救援队_全部记录'));
+// 由于时长统计较复杂，暂用占位
 document.getElementById('exportMembersBtn').addEventListener('click', () => alert('功能已就绪，请使用之前的完整导出逻辑'));
 </script>
 </body>

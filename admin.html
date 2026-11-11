@@ -85,7 +85,7 @@
 <main>
 
   <!-- 0. 待审核申请 (独立置顶) -->
-  <details class="details-card border-purple" open style="border-top: 4px solid #7b1fa2; margin-bottom: 20px;">
+  <details class="details-card" open style="border-top: 4px solid #7b1fa2; margin-bottom: 20px;">
     <summary style="background: #f3e5f5;">
       <h2 style="color: #7b1fa2;">
         <svg class="title-icon purple" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
@@ -264,12 +264,9 @@ async function loadMembers() {
   const { data } = await supabase.from('members').select('*').order('name');
   allMembers = data || [];
   
-  // 过滤出待审核的
   const pendingMembers = allMembers.filter(m => m.status === '待审核');
-  // 过滤出正式队员（包括没有status字段的老数据）
   const activeMembers = allMembers.filter(m => m.status !== '待审核');
 
-  // 更新红点数字
   const badge = document.getElementById('pendingCountBadge');
   if (pendingMembers.length > 0) {
     badge.textContent = pendingMembers.length;
@@ -278,7 +275,6 @@ async function loadMembers() {
     badge.style.display = 'none';
   }
 
-  // 渲染置顶的待审核列表
   const pendingList = document.getElementById('pendingList');
   if (pendingMembers.length === 0) {
     pendingList.innerHTML = '<div class="empty" style="padding: 10px 0; color: #90a4ae;">暂无待审核的申请</div>';
@@ -298,7 +294,6 @@ async function loadMembers() {
     `).join('');
   }
 
-  // 渲染正式队员列表
   document.getElementById('memberList').innerHTML = activeMembers.map(m => `
     <span style="display:inline-flex; align-items:center; gap:8px; padding:6px 10px; background:#e3f2fd; color:#1565c0; border-radius:6px; font-size:13px; margin:4px;">
       <strong>${esc(m.name)}</strong> 
@@ -310,9 +305,8 @@ async function loadMembers() {
     </span>
   `).join('');
 
-  // 给勾选框填充可选成员
   document.getElementById('memberCheckboxes').innerHTML = activeMembers.map(m => `
-    <label class="checkbox-item" style="background:#fff; padding:6px 12px; border:1px solid #eceff1; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; white-space:nowrap;">
+    <label class="checkbox-item" data-hidden-by-signup="false" style="background:#fff; padding:6px 12px; border:1px solid #eceff1; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; white-space:nowrap;">
       <input type="checkbox" name="task_members" value="${esc(m.name)}" onchange="toggleHoursInput(this)">
       <span style="min-width: 40px;">${esc(m.name)}</span>
       <input type="number" step="0.5" min="0" class="member-hours-input" placeholder="时长" style="width:60px; padding:4px; border:1px solid #cfd8dc; border-radius:4px; display:none;">
@@ -345,7 +339,7 @@ window.editMember = (id) => {
   document.getElementById('addMemberBtn').textContent = '保存修改';
   document.getElementById('cancelMemberEdit').style.display = 'inline-block';
   
-  document.querySelectorAll('.details-card')[1].open = true; // 定位到队员管理
+  document.querySelectorAll('.details-card')[1].open = true;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -371,7 +365,7 @@ document.getElementById('memberForm').addEventListener('submit', async (e) => {
   if(!name) return;
   
   const payload = { name, phone, emergency_contact: emergency };
-  if (!id) payload.status = '在队'; // 后台手动添加的默认在队
+  if (!id) payload.status = '在队';
   
   let res;
   if (id) {
@@ -408,7 +402,6 @@ function renderRecruits() {
     const signups = allSignups.filter(s => s.recruitment_id === r.id);
     const names = signups.map(s => `<span class="signup-tag">${esc(s.member_name)}</span>`).join('');
     
-    // 判断是否过期
     const isExpired = r.task_time ? new Date(r.task_time).getTime() < Date.now() : false;
     const statusStr = isExpired ? '已结束' : (r.status || '已结束');
     
@@ -468,7 +461,7 @@ window.editRecruit = (id) => {
   document.getElementById('recruitSubmitBtn').textContent = '保存修改';
   document.getElementById('cancelRecruitEdit').style.display = 'inline-block';
   
-  document.querySelectorAll('.details-card')[2].open = true; // 定位到招募管理
+  document.querySelectorAll('.details-card')[2].open = true;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -560,11 +553,11 @@ window.shareToWeChat = (id) => {
   });
 };
 
-// 一键转为出勤记录
+// 核心需求1&2：转出勤后隐藏未报名的人，并且弹窗提示带入的时间
 window.convertToTask = async (id) => {
   const r = allRecruits.find(x => x.id === id);
   const signups = allSignups.filter(s => s.recruitment_id === id);
-  if (signups.length === 0) { alert('该招募令暂无人员报名'); return; }
+  if (signups.length === 0) { alert('该招募令暂无人员报名，将转入全部成员选择模式。'); }
   
   document.getElementById('title').value = r.title;
   document.getElementById('task_time').value = toLocalInput(r.task_time);
@@ -575,22 +568,64 @@ window.convertToTask = async (id) => {
       radio.checked = (radio.value === r.event_type);
     });
   }
+
+  // 清空搜索框
+  document.getElementById('memberSearchInput').value = '';
   
   document.querySelectorAll('input[name="task_members"]').forEach(cb => {
+    const label = cb.parentElement;
     cb.checked = false; toggleHoursInput(cb);
+    
     if (signups.some(s => s.member_name === cb.value)) {
+      // 报名了：显示、勾选、默认给4小时
       cb.checked = true;
       toggleHoursInput(cb);
       cb.parentElement.querySelector('.member-hours-input').value = '4';
+      label.style.display = 'inline-flex';
+      label.dataset.hiddenBySignup = 'false';
+    } else {
+      // 没报名：默认隐藏，打上标记
+      label.style.display = 'none';
+      label.dataset.hiddenBySignup = 'true';
     }
   });
   
   document.querySelector('.member-select-details').open = true;
-  document.querySelectorAll('.details-card')[3].open = true; // 定位到出勤记录
+  document.querySelectorAll('.details-card')[3].open = true; 
   
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  alert('报名人员及活动类型已自动填好，请核对时长后保存出勤记录。');
+  alert(`已带入任务信息！\n活动时间：${formatTime(r.task_time)}\n\n已为您自动勾选报名人员并隐藏未报名人员（如需添加未报名成员，请在搜索框输入其姓名）。`);
 };
+
+// 核心需求3：搜索时可以搜到所有人（包括被隐藏的未报名人员）
+window.filterMemberCheckboxes = (keyword) => {
+  const kw = keyword.trim().toLowerCase();
+  document.querySelectorAll('#memberCheckboxes .checkbox-item').forEach(label => {
+    const name = label.querySelector('span').textContent.toLowerCase();
+    const isMatch = name.includes(kw);
+    
+    if (kw) {
+      // 如果有关键词，只要匹配就显示
+      label.style.display = isMatch ? 'inline-flex' : 'none';
+    } else {
+      // 如果清空了搜索，恢复默认状态（没报名的继续隐藏）
+      if (label.dataset.hiddenBySignup === 'true') {
+        label.style.display = 'none';
+      } else {
+        label.style.display = 'inline-flex';
+      }
+    }
+  });
+};
+
+// 重置状态：当取消编辑或保存成功后，让所有人员恢复正常显示
+function resetMemberVisibility() {
+  document.getElementById('memberSearchInput').value = '';
+  document.querySelectorAll('#memberCheckboxes .checkbox-item').forEach(label => {
+    label.dataset.hiddenBySignup = 'false';
+    label.style.display = 'inline-flex';
+  });
+}
 
 // --- 4. 历史记录与导出 ---
 async function loadTasks() {
@@ -688,7 +723,13 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
 
   const res = id ? await supabase.from('tasks').update(payload).eq('id', id) : await supabase.from('tasks').insert(payload);
   if (res.error) alert('保存失败：' + res.error.message);
-  else { document.getElementById('taskForm').reset(); document.getElementById('taskId').value = ''; loadTasks().then(() => renderTasks(document.getElementById('taskSearchInput').value)); alert('保存成功'); }
+  else { 
+    document.getElementById('taskForm').reset(); 
+    document.getElementById('taskId').value = ''; 
+    resetMemberVisibility(); // 保存后恢复所有成员显示
+    loadTasks().then(() => renderTasks(document.getElementById('taskSearchInput').value)); 
+    alert('保存成功'); 
+  }
 });
 
 // 辅助工具
@@ -696,13 +737,6 @@ window.toggleHoursInput = (checkbox) => {
   const input = checkbox.parentElement.querySelector('.member-hours-input');
   if (checkbox.checked) { input.style.display = 'inline-block'; input.required = true; }
   else { input.style.display = 'none'; input.required = false; input.value = ''; }
-};
-window.filterMemberCheckboxes = (keyword) => {
-  const kw = keyword.trim().toLowerCase();
-  document.querySelectorAll('#memberCheckboxes .checkbox-item').forEach(label => {
-    const name = label.querySelector('span').textContent.toLowerCase();
-    label.style.display = name.includes(kw) ? 'inline-flex' : 'none';
-  });
 };
 
 function startEdit(t) {
@@ -712,6 +746,8 @@ function startEdit(t) {
   document.getElementById('task_time').value = toLocalInput(t.task_time);
   document.querySelectorAll('input[name="event_type"]').forEach(r => r.checked = (r.value === t.event_type));
   
+  resetMemberVisibility(); // 编辑历史记录时，先让所有人显示出来
+
   const taskMembers = t.members ? t.members.split(',').map(s => s.trim()) : [];
   const memberHoursData = t.member_hours || [];
   document.querySelectorAll('input[name="task_members"]').forEach(cb => {
@@ -733,8 +769,12 @@ function startEdit(t) {
 }
 
 document.getElementById('cancelEdit').addEventListener('click', (e) => {
-  e.preventDefault(); document.getElementById('taskForm').reset(); document.getElementById('taskId').value = '';
-  document.getElementById('submitBtn').textContent = '保存记录'; e.target.style.display = 'none';
+  e.preventDefault(); 
+  document.getElementById('taskForm').reset(); 
+  document.getElementById('taskId').value = '';
+  document.getElementById('submitBtn').textContent = '保存记录'; 
+  e.target.style.display = 'none';
+  resetMemberVisibility(); // 取消编辑恢复状态
 });
 
 function toLocalInput(t) {

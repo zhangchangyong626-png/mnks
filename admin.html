@@ -190,10 +190,19 @@
         <label>参与成员及个人时长</label>
         <details class="details-box member-select-details">
           <summary><div class="summary-title"><svg class="summary-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>点击展开选择参与成员</div></summary>
+          
           <div class="search-input-wrapper">
             <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
             <input type="text" id="memberSearchInput" class="search-input" placeholder="输入姓名搜索..." oninput="filterMemberCheckboxes(this.value)">
           </div>
+
+          <!-- 新增：批量设置时长工具栏 -->
+          <div style="display:flex; gap:10px; align-items:center; padding:10px 12px; background:#f4f7fb; border-bottom:1px solid #eceff1;">
+            <span style="font-size:13px; color:#607d8b;">批量设置时长：</span>
+            <input type="number" step="0.5" min="0" id="batchHoursInput" placeholder="例如 4" style="width:80px; padding:6px; border:1px solid #cfd8dc; border-radius:4px; font-size:13px;">
+            <button type="button" class="btn sm" style="background:#2e7d32; padding:6px 12px;" onclick="applyBatchHours()">应用到已勾选</button>
+          </div>
+
           <div id="memberCheckboxes" class="scroll-area" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
         </details>
         <div id="error" class="msg err" style="display:none"></div>
@@ -458,7 +467,7 @@ window.editRecruit = (id) => {
     radio.checked = (radio.value === r.event_type);
   });
   
-  // 多选着装回显：先将数据库里的逗号分隔字符串转为数组
+  // 多选着装回显
   const uniforms = r.uniform_type ? r.uniform_type.split(',').map(s => s.trim()) : [];
   document.querySelectorAll('input[name="r_uniform_type"]').forEach(cb => {
     cb.checked = uniforms.includes(cb.value);
@@ -483,7 +492,6 @@ document.getElementById('recruitForm').addEventListener('submit', async (e) => {
   const id = document.getElementById('recruitEditId').value;
   const typeEl = document.querySelector('input[name="r_event_type"]:checked');
   
-  // 提取所有勾选的着装，拼接成逗号分隔的字符串
   const uniformEls = document.querySelectorAll('input[name="r_uniform_type"]:checked');
   const uniformStr = Array.from(uniformEls).map(el => el.value).join(', ');
   
@@ -579,6 +587,7 @@ window.convertToTask = async (id) => {
   }
 
   document.getElementById('memberSearchInput').value = '';
+  document.getElementById('batchHoursInput').value = ''; // 清空批量时长
   
   document.querySelectorAll('input[name="task_members"]').forEach(cb => {
     const label = cb.parentElement;
@@ -603,7 +612,28 @@ window.convertToTask = async (id) => {
   alert(`已带入任务信息！\n活动时间：${formatTime(r.task_time)}\n\n已为您自动勾选报名人员并隐藏未报名人员（如需添加未报名成员，请在搜索框输入其姓名）。`);
 };
 
-// 搜索功能（核心优化：被勾选的人清空搜索后不会被隐藏）
+// 批量设置时长功能
+window.applyBatchHours = () => {
+  const hours = document.getElementById('batchHoursInput').value;
+  if (hours === '') { alert('请先输入要设置的时长'); return; }
+  
+  let count = 0;
+  document.querySelectorAll('input[name="task_members"]:checked').forEach(cb => {
+    const input = cb.parentElement.querySelector('.member-hours-input');
+    if (input) {
+      input.value = hours;
+      count++;
+    }
+  });
+  
+  if (count === 0) {
+    alert('请先在下方勾选需要设置时长的成员');
+  } else {
+    // alert(`已成功为 ${count} 名成员设置时长`);
+  }
+};
+
+// 搜索功能
 window.filterMemberCheckboxes = (keyword) => {
   const kw = keyword.trim().toLowerCase();
   document.querySelectorAll('#memberCheckboxes .checkbox-item').forEach(label => {
@@ -612,12 +642,8 @@ window.filterMemberCheckboxes = (keyword) => {
     const isChecked = label.querySelector('input[type="checkbox"]').checked;
     
     if (kw) {
-      // 如果有关键词，只要匹配就显示
       label.style.display = isMatch ? 'inline-flex' : 'none';
     } else {
-      // 如果清空了搜索：
-      // 如果原本是没报名(hiddenBySignup=true) 且 现在也没勾选，才隐藏
-      // 如果已经勾选了，就强制显示出来，方便管理员核对
       if (label.dataset.hiddenBySignup === 'true' && !isChecked) {
         label.style.display = 'none';
       } else {
@@ -630,6 +656,7 @@ window.filterMemberCheckboxes = (keyword) => {
 // 重置状态
 function resetMemberVisibility() {
   document.getElementById('memberSearchInput').value = '';
+  document.getElementById('batchHoursInput').value = '';
   document.querySelectorAll('#memberCheckboxes .checkbox-item').forEach(label => {
     label.dataset.hiddenBySignup = 'false';
     label.style.display = 'inline-flex';

@@ -7,24 +7,11 @@
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <style>
-  :root {
-    --primary: #1565c0;
-    --bg-color: #f4f5f7;
-  }
+  :root { --primary: #1565c0; --bg-color: #f4f5f7; }
   body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 400; background: var(--bg-color); color: #333; margin: 0; padding-bottom: 60px; max-width: 600px; margin: 0 auto; position: relative;}
 
   /* 1. 顶部结构 */
-  .app-header {
-    background: #0d47a1;
-    padding: 30px 20px 20px; 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    text-align: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
+  .app-header { background: #0d47a1; padding: 30px 20px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
   .settings-btn { position: absolute; top: 15px; right: 15px; color: #fff; font-size: 22px; text-decoration: none; opacity: 0.8; }
   .app-logo { height: 70px; object-fit: contain; margin-bottom: 10px; }
   .app-title { color: #ffffff; font-size: 24px; font-weight: 500; margin: 0 0 4px 0; letter-spacing: 1px; line-height: 1.2; }
@@ -37,7 +24,6 @@
   .grid-icon svg { width: 24px; height: 24px; fill: #fff; }
   .grid-text { font-size: 11px; color: #546e7a; }
   
-  /* 图标背景色 */
   .bg-blue { background: linear-gradient(135deg, #64b5f6, #2196f3); }
   .bg-orange { background: linear-gradient(135deg, #ffb74d, #f57c00); }
   .bg-purple { background: linear-gradient(135deg, #ba68c8, #8e24aa); }
@@ -53,7 +39,6 @@
   #chart-section { display: none; background: #fff; margin: 0 10px 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
   .charts-container { display: flex; flex-wrap: wrap; gap: 15px; padding: 15px; background: #f9fbfd; border-bottom: 1px solid #eee; }
   .chart-box { flex: 1; min-width: 280px; height: 240px; }
-  
   .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
   .stats-table th, .stats-table td { padding: 14px 8px; border-bottom: 1px solid #eceff1; font-weight: 300; }
   .stats-table th { color: #78909c; font-weight: 400; background: #fafbfc; }
@@ -94,8 +79,6 @@
   .recruit-detail span { color: #999; }
   .recruit-members { background: #f9fbfd; padding: 8px; border-radius: 6px; font-size: 13px; color: #546e7a; margin: 10px 0; border: 1px solid #eee; }
   .signup-tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin: 2px; }
-  
-  /* 招募按钮排版：强制一排显示 */
   .recruit-actions { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
   .recruit-actions input { flex: 1; min-width: 0; padding: 6px 8px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; outline: none; }
   .btn-primary { background: #e53935; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap; }
@@ -128,11 +111,7 @@
   .btn-block { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; }
   
   /* 强制分享弹窗 */
-  #shareModal {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6); z-index: 1000;
-    flex-direction: column; align-items: center; justify-content: center;
-  }
+  #shareModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
   .share-modal-content { background: #fff; width: 90%; max-width: 350px; border-radius: 12px; overflow: hidden; text-align: center; }
   .share-modal-header { background: #e53935; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; }
   .share-modal-body { padding: 20px; }
@@ -144,7 +123,7 @@
   .btn-close-modal { background: #eceff1; color: #546e7a; }
 
   /* 新增模块内部通用样式 */
-  .intro-text { font-size: 14px; color: #555; line-height: 1.8; text-indent: 2em; }
+  .intro-text { font-size: 14px; color: #555; line-height: 1.8; text-indent: 2em; white-space: pre-wrap;}
   .honor-item { display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px dashed #eee; }
   .honor-icon { width: 40px; height: 40px; background: #fff8e1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
   .honor-info p { margin: 0; font-size: 14px; font-weight: 500; color: #333; }
@@ -152,11 +131,11 @@
   .style-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .style-card { background: #f4f5f7; border-radius: 8px; overflow: hidden; text-align: center; padding-bottom: 8px;}
   .style-card img { width: 100%; height: 120px; object-fit: cover; margin-bottom: 5px; background: #ddd;}
-  .style-card p { margin: 0; font-size: 13px; color: #333; }
+  .style-card p { margin: 0; font-size: 13px; color: #333; padding: 0 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
   .skill-list { list-style: none; padding: 0; margin: 0; }
   .skill-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
   .skill-item span:first-child { color: #333; font-weight: 500; }
-  .skill-item span:last-child { color: #1565c0; background: #e3f2fd; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+  .skill-item span:last-child { color: #1565c0; background: #e3f2fd; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-align:right; max-width:60%;}
   .donate-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px; }
   .donate-item .name { color: #333; font-weight: 500; }
   .donate-item .amount { color: #e53935; font-weight: bold; }
@@ -164,7 +143,6 @@
 </head>
 <body>
 
-<!-- 1. 顶部结构 -->
 <header class="app-header">
   <a href="login.html" class="settings-btn">⚙</a>
   <img src="https://img.alicdn.com/imgextra/i3/706125935/O1CN01KcQnpNaiagF49oPo_!!706125935.png" alt="云和蓝天救援队" class="app-logo">
@@ -172,9 +150,7 @@
   <p class="app-slogan">同在蓝天下 携手为公益 400-600-9958</p>
 </header>
 
-<!-- 3. 金刚区 (两排10宫格) -->
 <div class="grid-nav">
-  <!-- 第一排 -->
   <div class="grid-item" onclick="openModal('modal-intro')">
     <div class="grid-icon bg-blue"><svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></div>
     <div class="grid-text">队伍介绍</div>
@@ -196,7 +172,6 @@
     <div class="grid-text">捐赠记录</div>
   </div>
 
-  <!-- 第二排 -->
   <div class="grid-item" onclick="openModal('modal-query')">
     <div class="grid-icon bg-teal"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></div>
     <div class="grid-text">个人查询</div>
@@ -219,7 +194,6 @@
   </div>
 </div>
 
-<!-- 出勤榜单 -->
 <div id="chart-section">
   <div class="charts-container">
     <div id="barChart" class="chart-box"></div>
@@ -229,7 +203,6 @@
   <div style="text-align:center; font-size:12px; color:#999; padding:10px;">点击上方“出勤榜单”可收起</div>
 </div>
 
-<!-- 4. 任务招募接龙 (置顶) -->
 <div id="recruit-section">
   <div class="section-title">
     <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#e53935;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
@@ -238,7 +211,6 @@
   <div id="recruit-list" class="recruit-container"></div>
 </div>
 
-<!-- 5. 历史活动列表 -->
 <div id="history-section" class="section-title" style="margin-top: 10px;">
   <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#1565c0;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
   历史活动记录
@@ -250,7 +222,6 @@
 </div>
 <div id="task-list" class="task-list" style="padding-top: 10px;"></div>
 
-<!-- 底部 TabBar -->
 <div class="bottom-tab">
   <div class="tab-btn active">
     <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -266,9 +237,7 @@
   </div>
 </div>
 
-<!-- ================= 模态框区 ================= -->
-
-<!-- 个人查询 -->
+<!-- 弹窗区 -->
 <div id="modal-query" class="modal">
   <div class="modal-content">
     <div class="close-btn" onclick="closeModal('modal-query')">×</div>
@@ -279,7 +248,6 @@
   </div>
 </div>
 
-<!-- 队员通讯录 -->
 <div id="modal-contact" class="modal">
   <div class="modal-content">
     <div class="close-btn" onclick="closeModal('modal-contact')">×</div>
@@ -293,7 +261,6 @@
   </div>
 </div>
 
-<!-- 申请入队 -->
 <div id="modal-apply" class="modal">
   <div class="modal-content">
     <div class="close-btn" onclick="closeModal('modal-apply')">×</div>
@@ -305,149 +272,49 @@
   </div>
 </div>
 
-<!-- 新增：队伍介绍 -->
 <div id="modal-intro" class="modal">
   <div class="modal-content">
     <div class="close-btn" onclick="closeModal('modal-intro')">×</div>
     <div class="modal-title">队伍介绍</div>
-    <p class="intro-text">
-      云和县蓝天救援队是一支扎根于本地的纯公益救援力量。我们秉承“同在蓝天下，携手为公益”的宗旨，由一群热心公益、具备专业技能的志愿者组成。
-    </p>
-    <p class="intro-text">
-      队伍主要开展山野救援、水域救援、城市搜救、防灾减灾宣讲以及大型群众性活动的安全保障等志愿服务。无论严寒酷暑，只要群众有需要，我们就会披上蓝色战袍，逆行而上。
-    </p>
-    <p class="intro-text" style="color:#1565c0; font-weight:bold; text-align:center; margin-top:15px;">
+    <div id="content-intro" class="intro-text"></div>
+    <p style="color:#1565c0; font-weight:bold; text-align:center; margin-top:15px;">
       24小时公益救援电话：400-600-9958
     </p>
   </div>
 </div>
 
-<!-- 新增：荣誉墙 -->
 <div id="modal-honor" class="modal">
   <div class="modal-content">
     <div class="close-btn" onclick="closeModal('modal-honor')">×</div>
     <div class="modal-title">队伍荣誉墙</div>
-    
-    <div class="honor-item">
-      <div class="honor-icon">🏆</div>
-      <div class="honor-info">
-        <p>2025年度优秀志愿服务组织</p>
-        <span>颁发单位：县精神文明建设委员会</span>
-      </div>
-    </div>
-    <div class="honor-item">
-      <div class="honor-icon">🎖️</div>
-      <div class="honor-info">
-        <p>抗洪抢险先进集体</p>
-        <span>颁发单位：县应急管理局</span>
-      </div>
-    </div>
-    <div class="honor-item">
-      <div class="honor-icon">🤝</div>
-      <div class="honor-info">
-        <p>“爱心单位”荣誉称号</p>
-        <span>颁发单位：县红十字会</span>
-      </div>
-    </div>
-    <div class="honor-item">
-      <div class="honor-icon">🚩</div>
-      <div class="honor-info">
-        <p>群众致谢锦旗 50+ 面</p>
-        <span>“蓝天救援，无私奉献”</span>
-      </div>
-    </div>
+    <div id="content-honors"></div>
   </div>
 </div>
 
-<!-- 新增：队员风采 -->
 <div id="modal-style" class="modal">
   <div class="modal-content">
     <div class="close-btn" onclick="closeModal('modal-style')">×</div>
     <div class="modal-title">队员风采</div>
-    <div class="style-grid">
-      <div class="style-card">
-        <img src="https://images.unsplash.com/photo-1533230243019-612cbc84c310?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="救援">
-        <p>水域救援演练</p>
-      </div>
-      <div class="style-card">
-        <img src="https://images.unsplash.com/photo-1611095973763-414019e72400?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="训练">
-        <p>绳索技能培训</p>
-      </div>
-      <div class="style-card">
-        <img src="https://images.unsplash.com/photo-1517409378124-6831eb180f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="演练">
-        <p>森林消防拉练</p>
-      </div>
-      <div class="style-card">
-        <img src="https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="保障">
-        <p>马拉松安全保障</p>
-      </div>
-    </div>
+    <div id="content-styles" class="style-grid"></div>
   </div>
 </div>
 
-<!-- 新增：技能榜 -->
 <div id="modal-skill" class="modal">
   <div class="modal-content">
     <div class="close-btn" onclick="closeModal('modal-skill')">×</div>
     <div class="modal-title">队员技能资质榜</div>
-    <p style="font-size:12px; color:#999; margin-bottom:15px; text-align:center;">数据基于后台录入资质统计</p>
-    
-    <ul class="skill-list">
-      <li class="skill-item">
-        <span>张昌勇</span>
-        <span>红十字急救员、无线电操作证</span>
-      </li>
-      <li class="skill-item">
-        <span>雷少敏</span>
-        <span>冲锋舟驾驶证、潜水员证</span>
-      </li>
-      <li class="skill-item">
-        <span>孙雨</span>
-        <span>无人机驾驶证、绳索救援</span>
-      </li>
-      <li class="skill-item">
-        <span>苏薇</span>
-        <span>红十字急救员、心理救援证</span>
-      </li>
-      <li class="skill-item">
-        <span>邱小闽</span>
-        <span>水域救援教练、急救员</span>
-      </li>
-    </ul>
+    <ul id="content-skills" class="skill-list"></ul>
   </div>
 </div>
 
-<!-- 新增：捐赠记录 -->
 <div id="modal-donate" class="modal">
   <div class="modal-content">
     <div class="close-btn" onclick="closeModal('modal-donate')">×</div>
     <div class="modal-title">爱心捐赠记录</div>
-    <p style="font-size:12px; color:#999; margin-bottom:15px; text-align:center;">财务公开透明，感谢所有爱心人士</p>
-    
-    <div class="donate-item">
-      <span class="name">某爱心企业</span>
-      <span class="amount">￥10,000</span>
-    </div>
-    <div class="donate-item">
-      <span class="name">匿名爱心人士 (张先生)</span>
-      <span class="amount">￥2,000</span>
-    </div>
-    <div class="donate-item">
-      <span class="name">某某建材商行</span>
-      <span class="amount">物资：救生衣 50 件</span>
-    </div>
-    <div class="donate-item">
-      <span class="name">李女士</span>
-      <span class="amount">物资：急救包 20 个</span>
-    </div>
-    <div class="donate-item">
-      <span class="name">某车友会</span>
-      <span class="amount">￥5,000</span>
-    </div>
+    <div id="content-donations"></div>
   </div>
 </div>
 
-<!-- 强制分享弹窗 -->
 <div id="shareModal">
   <div class="share-modal-content">
     <div class="share-modal-header">✅ 接龙成功</div>
@@ -474,21 +341,87 @@ const CONTACT_PASSWORD = "9958";
 
 const { data: { session } } = await supabase.auth.getSession();
 
-const [tasksRes, membersRes, recruitsRes, signupsRes] = await Promise.all([
+const [tasksRes, membersRes, recruitsRes, signupsRes, settingsRes] = await Promise.all([
   supabase.from('tasks').select('*').order('task_time', { ascending: false }),
   supabase.from('members').select('*').eq('status', '在队').order('name'),
   supabase.from('recruitments').select('*').eq('status', '招募中').order('created_at', { ascending: false }),
-  supabase.from('recruitment_signups').select('*')
+  supabase.from('recruitment_signups').select('*'),
+  supabase.from('site_settings').select('*')
 ]);
 
 globalAllTasks = tasksRes.data || [];
 globalAllMembers = membersRes.data || [];
 recruitsResData = recruitsRes.data || [];
 signupsResData = signupsRes.data || [];
+const allSettings = settingsRes.data || [];
 
+// 渲染静态内容
+renderSettingsContent(allSettings);
 renderRecruits();
 renderTasks();
 processTasksData(globalAllTasks);
+
+function renderSettingsContent(settings) {
+  const getContent = (key, defaultVal) => {
+    const s = settings.find(x => x.key === key);
+    return s && s.content ? s.content : defaultVal;
+  };
+
+  // 1. 队伍介绍
+  document.getElementById('content-intro').textContent = getContent('intro', '暂无介绍。');
+
+  // 2. 荣誉墙
+  const honors = getContent('honors', '').split('\n').filter(Boolean);
+  document.getElementById('content-honors').innerHTML = honors.map(line => {
+    const parts = line.split('|');
+    return `
+      <div class="honor-item">
+        <div class="honor-icon">🏆</div>
+        <div class="honor-info">
+          <p>${esc(parts[0]) || '荣誉'}</p>
+          <span>${esc(parts[1]) || ''}</span>
+        </div>
+      </div>
+    `;
+  }).join('') || '<div class="empty">暂无记录</div>';
+
+  // 3. 队员风采
+  const styles = getContent('styles', '').split('\n').filter(Boolean);
+  document.getElementById('content-styles').innerHTML = styles.map(line => {
+    const parts = line.split('|');
+    return `
+      <div class="style-card">
+        <img src="${esc(parts[0]) || 'https://via.placeholder.com/150'}" alt="${esc(parts[1])}">
+        <p>${esc(parts[1]) || '风采展示'}</p>
+      </div>
+    `;
+  }).join('') || '<div class="empty" style="grid-column: span 2;">暂无记录</div>';
+
+  // 4. 技能榜
+  const skills = getContent('skills', '').split('\n').filter(Boolean);
+  document.getElementById('content-skills').innerHTML = skills.map(line => {
+    const parts = line.split('|');
+    return `
+      <li class="skill-item">
+        <span>${esc(parts[0]) || '姓名'}</span>
+        <span>${esc(parts[1]) || '技能'}</span>
+      </li>
+    `;
+  }).join('') || '<li class="empty" style="text-align:center; padding:20px; color:#999;">暂无记录</li>';
+
+  // 5. 捐赠记录
+  const donations = getContent('donations', '').split('\n').filter(Boolean);
+  document.getElementById('content-donations').innerHTML = donations.map(line => {
+    const parts = line.split('|');
+    return `
+      <div class="donate-item">
+        <span class="name">${esc(parts[0]) || '爱心人士'}</span>
+        <span class="amount">${esc(parts[1]) || '捐赠'}</span>
+      </div>
+    `;
+  }).join('') || '<div class="empty">暂无记录</div>';
+}
+
 
 function renderRecruits() {
   const container = document.getElementById('recruit-list');

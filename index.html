@@ -8,21 +8,26 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <style>
   :root { --primary: #1565c0; --bg-color: #f4f5f7; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 400; background: var(--bg-color); color: #333; margin: 0; padding-bottom: 60px; max-width: 600px; margin: 0 auto; position: relative;}
+  /* 全局纤细字体 */
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 300; background: var(--bg-color); color: #333; margin: 0; padding-bottom: 60px; max-width: 600px; margin: 0 auto; position: relative;}
+  
+  /* 统一加粗级别为 400 */
+  h1, h2, h3, h4, th, strong, b, .app-title, .modal-title { font-weight: 400 !important; }
 
   /* 1. 顶部结构 */
   .app-header { background: #0d47a1; padding: 30px 20px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
   .settings-btn { position: absolute; top: 15px; right: 15px; color: #fff; font-size: 22px; text-decoration: none; opacity: 0.8; }
   .app-logo { height: 70px; object-fit: contain; margin-bottom: 10px; }
-  .app-title { color: #ffffff; font-size: 24px; font-weight: 500; margin: 0 0 4px 0; letter-spacing: 1px; line-height: 1.2; }
-  .app-slogan { color: rgba(255, 255, 255, 0.75); font-size: 12px; margin: 0; letter-spacing: 1px; line-height: 1.2; }
+  .app-title { color: #ffffff; font-size: 24px; margin: 0 0 4px 0; letter-spacing: 1px; line-height: 1.2; }
+  .app-slogan { color: rgba(255, 255, 255, 0.75); font-size: 12px; font-weight: 300; margin: 0; letter-spacing: 1px; line-height: 1.2; }
 
   /* 3. 金刚区 (两排10宫格) */
   .grid-nav { background: #fff; display: grid; grid-template-columns: repeat(5, 1fr); padding: 15px 10px; gap: 15px 5px; margin-bottom: 10px; }
   .grid-item { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
   .grid-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
   .grid-icon svg { width: 24px; height: 24px; fill: #fff; }
-  .grid-text { font-size: 11px; color: #546e7a; }
+  .grid-text { font-size: 11px; font-weight: 300; color: #546e7a; }
   
   .bg-blue { background: linear-gradient(135deg, #64b5f6, #2196f3); }
   .bg-orange { background: linear-gradient(135deg, #ffb74d, #f57c00); }
@@ -41,104 +46,107 @@
   .chart-box { flex: 1; min-width: 280px; height: 240px; }
   .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
   .stats-table th, .stats-table td { padding: 14px 8px; border-bottom: 1px solid #eceff1; font-weight: 300; }
-  .stats-table th { color: #78909c; font-weight: 400; background: #fafbfc; }
+  .stats-table th { color: #78909c; background: #fafbfc; }
   .stats-table td:nth-child(2) { text-align: left; }
-  .clickable-name { cursor: pointer; color: #1565c0; font-weight: 400; display: inline-flex; align-items: center; gap: 6px; }
+  .clickable-name { cursor: pointer; color: #1565c0; display: inline-flex; align-items: center; gap: 6px; }
   .arrow { font-size: 10px; color: #b0bec5; transition: transform 0.3s ease; }
   .arrow.open { transform: rotate(180deg); }
-  .rank { font-weight: 400; color: #90a4ae; width: 50px; }
-  .rank-1 { color: #f57f17; font-size: 18px; font-weight: 500; }
-  .rank-2 { color: #78909c; font-size: 18px; font-weight: 500; }
-  .rank-3 { color: #8d6e63; font-size: 18px; font-weight: 500; }
-  .total-col { font-weight: 500; color: #1565c0; }
+  .rank { color: #90a4ae; width: 50px; }
+  .rank-1 { color: #f57f17; font-size: 18px; font-weight: 400; }
+  .rank-2 { color: #78909c; font-size: 18px; font-weight: 400; }
+  .rank-3 { color: #8d6e63; font-size: 18px; font-weight: 400; }
+  .total-col { color: #1565c0; font-weight: 400; }
   .details-row td { background: #f9fbfd; padding: 12px 15px; border-bottom: 1px solid #eceff1; }
   .details-flex { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-  .detail-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 300; background: #fff; border: 1px solid #cfd8dc; color: #546e7a; }
+  .detail-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; background: #fff; border: 1px solid #cfd8dc; color: #546e7a; }
   .detail-badge.rescue { border-color: #90caf9; color: #1565c0; background: #e3f2fd; }
   .detail-badge.training { border-color: #a5d6a7; color: #2e7d32; background: #e8f5e9; }
   .detail-badge.fire { border-color: #ef9a9a; color: #c62828; background: #ffebee; }
 
   /* 4. 列表 Tab */
   .tabs { background: #fff; display: flex; padding: 10px 15px; gap: 20px; border-bottom: 1px solid #eee; align-items: center;}
-  .tab-item { font-size: 15px; color: #666; cursor: pointer; position: relative; padding-bottom: 5px; }
-  .tab-item.active { color: #333; font-weight: bold; }
+  .tab-item { font-size: 15px; font-weight: 300; color: #666; cursor: pointer; position: relative; padding-bottom: 5px; }
+  .tab-item.active { color: #333; font-weight: 400; }
   .tab-item.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 20px; height: 3px; background: var(--primary); border-radius: 2px; }
 
   /* 5. 招募接龙区 */
-  .section-title { padding: 15px 15px 5px; font-size: 16px; font-weight: bold; color: #333; display: flex; align-items: center; gap: 8px;}
+  .section-title { padding: 15px 15px 5px; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;}
   .recruit-container { padding: 0 10px; }
   .recruit-card { background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
   .recruit-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .recruit-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: bold; }
+  .recruit-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 400; }
   .recruit-info { flex: 1; }
-  .recruit-name { font-size: 15px; font-weight: 500; color: #333; display: flex; align-items: center; gap: 5px;}
-  .tag-admin { background: #ffb74d; color: #fff; font-size: 10px; padding: 1px 4px; border-radius: 4px; }
+  .recruit-name { font-size: 15px; color: #333; display: flex; align-items: center; gap: 5px;}
+  .tag-admin { background: #ffb74d; color: #fff; font-size: 10px; padding: 1px 4px; border-radius: 4px; font-weight: 300;}
   .recruit-time { font-size: 12px; color: #999; }
-  .recruit-title { font-size: 15px; font-weight: 500; color: #333; margin-bottom: 8px; line-height: 1.4; }
+  .recruit-title { font-size: 15px; color: #333; margin-bottom: 8px; line-height: 1.4; }
   .recruit-detail { font-size: 13px; color: #666; margin-bottom: 5px; }
   .recruit-detail span { color: #999; }
   .recruit-members { background: #f9fbfd; padding: 8px; border-radius: 6px; font-size: 13px; color: #546e7a; margin: 10px 0; border: 1px solid #eee; }
   .signup-tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin: 2px; }
   .recruit-actions { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
-  .recruit-actions input { flex: 1; min-width: 0; padding: 6px 8px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; outline: none; }
-  .btn-primary { background: #e53935; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap; }
-  .btn-share { background: #1565c0; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap; }
-  .btn-outline { background: #fff; color: #e53935; border: 1px solid #e53935; padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap; }
-  .expired-box { background: #f5f5f5; color: #999; text-align: center; padding: 10px; border-radius: 6px; font-size: 13px; }
+  .recruit-actions input { flex: 1; min-width: 0; padding: 6px 8px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; outline: none; font-weight: 300; }
+  
+  /* 按钮统一纤细感 */
+  .btn-primary, .btn-share, .btn-outline { padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap; font-weight: 300; }
+  .btn-primary { background: #e53935; color: #fff; border: none; }
+  .btn-share { background: #1565c0; color: #fff; border: none; }
+  .btn-outline { background: #fff; color: #e53935; border: 1px solid #e53935; }
+  .expired-box { background: #f5f5f5; color: #999; text-align: center; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: 300;}
 
   /* 6. 历史活动列表 */
   .task-list { padding: 0 10px; }
   .task-card { background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; gap: 10px; }
-  .task-card-avatar { width: 40px; height: 40px; border-radius: 50%; background: #e3f2fd; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #1565c0; font-weight: bold; }
+  .task-card-avatar { width: 40px; height: 40px; border-radius: 50%; background: #e3f2fd; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #1565c0; font-size: 16px; font-weight: 400;}
   .task-content { flex: 1; }
-  .task-title { font-size: 15px; font-weight: bold; margin-bottom: 5px; color: #333; }
+  .task-title { font-size: 15px; margin-bottom: 5px; color: #333; }
   .task-meta { font-size: 12px; color: #999; margin-bottom: 5px; }
   .task-members { font-size: 13px; color: #666; background: #f9fbfd; padding: 6px; border-radius: 4px; }
 
   /* 7. 底部 TabBar */
   .bottom-tab { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background: #fff; display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid #eee; z-index: 100; }
-  .tab-btn { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 11px; cursor: pointer; }
+  .tab-btn { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 11px; font-weight: 300; cursor: pointer; }
   .tab-btn.active { color: var(--primary); }
   .tab-btn svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
 
   /* 8. 弹窗样式 */
   .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
   .modal-content { background: #fff; width: 85%; max-width: 400px; border-radius: 12px; padding: 20px; position: relative; max-height: 80vh; overflow-y: auto;}
-  .close-btn { position: absolute; top: 15px; right: 15px; font-size: 20px; color: #999; cursor: pointer; z-index: 10;}
-  .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #333; text-align: center;}
+  .close-btn { position: absolute; top: 15px; right: 15px; font-size: 20px; color: #999; cursor: pointer; z-index: 10; font-weight: 300;}
+  .modal-title { font-size: 18px; margin-bottom: 15px; color: #333; text-align: center; }
   .input-group { margin-bottom: 15px; }
-  .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
-  .btn-block { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; }
+  .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; font-weight: 300;}
+  .btn-block { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; font-weight: 300;}
   
   /* 强制分享弹窗 */
   #shareModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
   .share-modal-content { background: #fff; width: 90%; max-width: 350px; border-radius: 12px; overflow: hidden; text-align: center; }
-  .share-modal-header { background: #e53935; color: #fff; padding: 15px; font-size: 18px; font-weight: bold; }
+  .share-modal-header { background: #e53935; color: #fff; padding: 15px; font-size: 18px; font-weight: 400; }
   .share-modal-body { padding: 20px; }
-  .share-modal-body p { margin: 0 0 15px; font-size: 14px; color: #333; line-height: 1.5; }
-  .share-modal-body textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 12px; resize: none; background: #f9fbfd; color: #666; outline: none;}
+  .share-modal-body p { margin: 0 0 15px; font-size: 14px; color: #333; line-height: 1.5; font-weight: 300;}
+  .share-modal-body textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 12px; resize: none; background: #f9fbfd; color: #666; outline: none; font-weight: 300;}
   .share-modal-footer { padding: 15px; background: #f4f7fb; display: flex; gap: 10px; }
-  .share-modal-footer button { flex: 1; padding: 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 500; }
+  .share-modal-footer button { flex: 1; padding: 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 300; }
   .btn-copy-again { background: #1565c0; color: #fff; }
   .btn-close-modal { background: #eceff1; color: #546e7a; }
 
   /* 新增模块内部通用样式 */
-  .intro-text { font-size: 14px; color: #555; line-height: 1.8; text-indent: 2em; white-space: pre-wrap;}
+  .intro-text { font-size: 14px; color: #555; line-height: 1.8; text-indent: 2em; white-space: pre-wrap; font-weight: 300;}
   .honor-item { display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px dashed #eee; }
   .honor-icon { width: 40px; height: 40px; background: #fff8e1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-  .honor-info p { margin: 0; font-size: 14px; font-weight: 500; color: #333; }
-  .honor-info span { font-size: 12px; color: #999; }
+  .honor-info p { margin: 0; font-size: 14px; color: #333; font-weight: 400;}
+  .honor-info span { font-size: 12px; color: #999; font-weight: 300;}
   .style-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .style-card { background: #f4f5f7; border-radius: 8px; overflow: hidden; text-align: center; padding-bottom: 8px;}
   .style-card img { width: 100%; height: 120px; object-fit: cover; margin-bottom: 5px; background: #ddd;}
-  .style-card p { margin: 0; font-size: 13px; color: #333; padding: 0 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+  .style-card p { margin: 0; font-size: 13px; color: #333; padding: 0 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 300;}
   .skill-list { list-style: none; padding: 0; margin: 0; }
   .skill-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
-  .skill-item span:first-child { color: #333; font-weight: 500; }
-  .skill-item span:last-child { color: #1565c0; background: #e3f2fd; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-align:right; max-width:60%;}
+  .skill-item span:first-child { color: #333; font-weight: 400; }
+  .skill-item span:last-child { color: #1565c0; background: #e3f2fd; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-align:right; max-width:60%; font-weight: 300;}
   .donate-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px; }
-  .donate-item .name { color: #333; font-weight: 500; }
-  .donate-item .amount { color: #e53935; font-weight: bold; }
+  .donate-item .name { color: #333; font-weight: 400; }
+  .donate-item .amount { color: #e53935; font-weight: 400; }
 </style>
 </head>
 <body>
@@ -200,7 +208,7 @@
     <div id="pieChart" class="chart-box"></div>
   </div>
   <div id="statsTableBox"></div>
-  <div style="text-align:center; font-size:12px; color:#999; padding:10px;">点击上方“出勤榜单”可收起</div>
+  <div style="text-align:center; font-size:12px; color:#999; padding:10px; font-weight:300;">点击上方“出勤榜单”可收起</div>
 </div>
 
 <div id="recruit-section">
@@ -244,7 +252,7 @@
     <div class="modal-title">查询出勤时长</div>
     <div class="input-group"><input type="text" id="queryNameInput" placeholder="请输入真实姓名"></div>
     <button class="btn-block" onclick="doQuery()">立即查询</button>
-    <div id="queryResult" style="margin-top:15px; font-size:14px; color:#333;"></div>
+    <div id="queryResult" style="margin-top:15px; font-size:14px; color:#333; font-weight: 300;"></div>
   </div>
 </div>
 
@@ -253,11 +261,11 @@
     <div class="close-btn" onclick="closeModal('modal-contact')">×</div>
     <div class="modal-title">队员通讯录</div>
     <div id="contact-lock-view">
-      <p style="font-size:13px; color:#666; margin-bottom:10px;">为保护隐私，请输入口令：</p>
+      <p style="font-size:13px; color:#666; margin-bottom:10px; font-weight: 300;">为保护隐私，请输入口令：</p>
       <div class="input-group"><input type="password" id="contactPassword" placeholder="输入队内口令"></div>
       <button class="btn-block" onclick="unlockContacts()">解锁</button>
     </div>
-    <div id="contact-data-view" style="display:none;"></div>
+    <div id="contact-data-view" style="display:none; font-weight: 300;"></div>
   </div>
 </div>
 
@@ -277,7 +285,7 @@
     <div class="close-btn" onclick="closeModal('modal-intro')">×</div>
     <div class="modal-title">队伍介绍</div>
     <div id="content-intro" class="intro-text"></div>
-    <p style="color:#1565c0; font-weight:bold; text-align:center; margin-top:15px;">
+    <p style="color:#1565c0; text-align:center; margin-top:15px; font-weight: 400;">
       24小时公益救援电话：400-600-9958
     </p>
   </div>
@@ -355,7 +363,6 @@ recruitsResData = recruitsRes.data || [];
 signupsResData = signupsRes.data || [];
 const allSettings = settingsRes.data || [];
 
-// 渲染静态内容
 renderSettingsContent(allSettings);
 renderRecruits();
 renderTasks();
@@ -367,10 +374,8 @@ function renderSettingsContent(settings) {
     return s && s.content ? s.content : defaultVal;
   };
 
-  // 1. 队伍介绍
   document.getElementById('content-intro').textContent = getContent('intro', '暂无介绍。');
 
-  // 2. 荣誉墙
   const honors = getContent('honors', '').split('\n').filter(Boolean);
   document.getElementById('content-honors').innerHTML = honors.map(line => {
     const parts = line.split('|');
@@ -383,9 +388,8 @@ function renderSettingsContent(settings) {
         </div>
       </div>
     `;
-  }).join('') || '<div class="empty">暂无记录</div>';
+  }).join('') || '<div class="empty" style="text-align:center; padding:20px; color:#999; font-weight:300;">暂无记录</div>';
 
-  // 3. 队员风采
   const styles = getContent('styles', '').split('\n').filter(Boolean);
   document.getElementById('content-styles').innerHTML = styles.map(line => {
     const parts = line.split('|');
@@ -395,9 +399,8 @@ function renderSettingsContent(settings) {
         <p>${esc(parts[1]) || '风采展示'}</p>
       </div>
     `;
-  }).join('') || '<div class="empty" style="grid-column: span 2;">暂无记录</div>';
+  }).join('') || '<div class="empty" style="grid-column: span 2; text-align:center; padding:20px; color:#999; font-weight:300;">暂无记录</div>';
 
-  // 4. 技能榜
   const skills = getContent('skills', '').split('\n').filter(Boolean);
   document.getElementById('content-skills').innerHTML = skills.map(line => {
     const parts = line.split('|');
@@ -407,9 +410,8 @@ function renderSettingsContent(settings) {
         <span>${esc(parts[1]) || '技能'}</span>
       </li>
     `;
-  }).join('') || '<li class="empty" style="text-align:center; padding:20px; color:#999;">暂无记录</li>';
+  }).join('') || '<li class="empty" style="text-align:center; padding:20px; color:#999; font-weight:300;">暂无记录</li>';
 
-  // 5. 捐赠记录
   const donations = getContent('donations', '').split('\n').filter(Boolean);
   document.getElementById('content-donations').innerHTML = donations.map(line => {
     const parts = line.split('|');
@@ -419,9 +421,8 @@ function renderSettingsContent(settings) {
         <span class="amount">${esc(parts[1]) || '捐赠'}</span>
       </div>
     `;
-  }).join('') || '<div class="empty">暂无记录</div>';
+  }).join('') || '<div class="empty" style="text-align:center; padding:20px; color:#999; font-weight:300;">暂无记录</div>';
 }
-
 
 function renderRecruits() {
   const container = document.getElementById('recruit-list');
@@ -467,7 +468,7 @@ function renderRecruits() {
         ${r.content ? `<div class="recruit-detail" style="margin-top:5px; color:#999;">${esc(r.content)}</div>` : ''}
         
         <div class="recruit-members">
-          <div style="margin-bottom:5px; font-weight:500;">已报名 (${signups.length}人)：</div>
+          <div style="margin-bottom:5px; font-weight:400;">已报名 (${signups.length}人)：</div>
           <div>${signupNames || '<span style="color:#b0bec5;">暂无</span>'}</div>
         </div>
         ${actionHtml}
@@ -479,7 +480,7 @@ function renderRecruits() {
 function renderTasks() {
   const container = document.getElementById('task-list');
   if (!globalAllTasks || globalAllTasks.length === 0) {
-    container.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">暂无历史记录</div>';
+    container.innerHTML = '<div style="text-align:center; color:#999; padding:20px; font-weight:300;">暂无历史记录</div>';
     return;
   }
 
@@ -604,9 +605,9 @@ window.doQuery = () => {
   const fmt = (num) => parseFloat(num.toFixed(1));
   res.innerHTML = `
     <div style="background:#f4f7fb; padding:15px; border-radius:8px;">
-      <p style="margin:0 0 10px; font-weight:bold;">${esc(name)} 的出勤报告</p>
-      <p style="margin:5px 0;">总时长：<strong style="color:#1565c0; font-size:18px;">${fmt(data.total)}</strong> 小时</p>
-      <p style="margin:5px 0; font-size:13px; color:#666;">公益救援：${fmt(data.rescue)}h | 技能培训：${fmt(data.training)}h | 森林消防：${fmt(data.fire)}h</p>
+      <p style="margin:0 0 10px; font-weight:400;">${esc(name)} 的出勤报告</p>
+      <p style="margin:5px 0;">总时长：<strong style="color:#1565c0; font-size:18px; font-weight:400;">${fmt(data.total)}</strong> 小时</p>
+      <p style="margin:5px 0; font-size:13px; color:#666; font-weight:300;">公益救援：${fmt(data.rescue)}h | 技能培训：${fmt(data.training)}h | 森林消防：${fmt(data.fire)}h</p>
     </div>
   `;
 };
@@ -618,8 +619,8 @@ window.unlockContacts = () => {
     const view = document.getElementById('contact-data-view');
     view.style.display = 'block';
     
-    let html = '<table style="width:100%; border-collapse:collapse; font-size:13px;">';
-    html += '<tr style="background:#f4f7fb; text-align:left;"><th style="padding:8px;">姓名</th><th>电话</th></tr>';
+    let html = '<table style="width:100%; border-collapse:collapse; font-size:13px; font-weight:300;">';
+    html += '<tr style="background:#f4f7fb; text-align:left; font-weight:400;"><th style="padding:8px;">姓名</th><th>电话</th></tr>';
     globalAllMembers.forEach(m => {
       html += `<tr><td style="padding:8px; border-bottom:1px solid #eee;">${esc(m.name)}</td><td style="border-bottom:1px solid #eee;"><a href="tel:${esc(m.phone)}" style="color:#1565c0; text-decoration:none;">${esc(m.phone)}</a></td></tr>`;
     });
@@ -668,11 +669,11 @@ window.toggleChart = () => {
     
     const barChart = echarts.init(document.getElementById('barChart'));
     barChart.setOption({
-      title: { text: '出勤前十名', left: 'center', textStyle:{fontSize:14,color:'#666'} },
+      title: { text: '出勤前十名', left: 'center', textStyle:{fontSize:14,color:'#666',fontWeight:300} },
       tooltip: { trigger: 'axis' },
       grid: { left: '10%', right: '5%', bottom: '10%', top: '20%' },
-      xAxis: { type: 'category', data: top10.map(x => x[0]), axisLabel:{color:'#999', fontSize:10} },
-      yAxis: { type: 'value', splitLine:{lineStyle:{type:'dashed'}} },
+      xAxis: { type: 'category', data: top10.map(x => x[0]), axisLabel:{color:'#999', fontSize:10, fontWeight:300} },
+      yAxis: { type: 'value', splitLine:{lineStyle:{type:'dashed'}}, axisLabel:{fontWeight:300} },
       series: [{ data: top10.map(x => x[1].total), type: 'bar', itemStyle: { color: '#42a5f5', borderRadius: [4,4,0,0] }, barMaxWidth: 20 }]
     });
 
@@ -681,9 +682,9 @@ window.toggleChart = () => {
     
     const pieChart = echarts.init(document.getElementById('pieChart'));
     pieChart.setOption({
-      title: { text: '任务类型占比', left: 'center', textStyle:{fontSize:14,color:'#666'} },
+      title: { text: '任务类型占比', left: 'center', textStyle:{fontSize:14,color:'#666',fontWeight:300} },
       tooltip: { trigger: 'item' },
-      legend: { bottom: 0, icon: 'circle', textStyle:{fontSize:11} },
+      legend: { bottom: 0, icon: 'circle', textStyle:{fontSize:11, fontWeight:300} },
       color: ['#42a5f5', '#66bb6a', '#ef5350'],
       series: [{ type: 'pie', radius: ['40%', '65%'], label:{show:false}, data: [
         {value: tr, name: '公益救援'}, {value: tt, name: '技能培训'}, {value: tf, name: '森林消防'}

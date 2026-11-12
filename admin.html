@@ -7,10 +7,16 @@
 <link rel="stylesheet" href="style.css">
 <style>
   :root { --primary: #1565c0; --bg: #f4f5f7; }
+  * { box-sizing: border-box; }
+  /* 全局纤细字体 */
   body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 300; background: var(--bg); color: #333; margin: 0; padding-bottom: 20px;}
+  
+  /* 统一加粗级别为 400 */
+  h1, h2, h3, h4, th, strong, b { font-weight: 400 !important; }
+
   header { background: var(--primary); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-  .header-title { font-size: 18px; font-weight: 500; }
-  .header-actions a { color: #fff; text-decoration: none; margin-left: 15px; font-size: 14px;}
+  .header-title { font-size: 18px; font-weight: 400; }
+  .header-actions a { color: #fff; text-decoration: none; margin-left: 15px; font-size: 14px; font-weight: 300;}
 
   /* 宫格导航 */
   .admin-nav { background: #fff; display: grid; grid-template-columns: repeat(5, 1fr); padding: 15px 10px; gap: 15px 5px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
@@ -18,18 +24,13 @@
   .nav-item:active { transform: scale(0.95); }
   .nav-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
   .nav-icon svg { width: 24px; height: 24px; fill: #fff; }
-  .nav-text { font-size: 11px; color: #546e7a; text-align: center; }
+  .nav-text { font-size: 11px; color: #546e7a; font-weight: 300; text-align: center; }
   
   .bg-blue { background: linear-gradient(135deg, #64b5f6, #2196f3); }
   .bg-orange { background: linear-gradient(135deg, #ffb74d, #f57c00); }
   .bg-purple { background: linear-gradient(135deg, #ba68c8, #8e24aa); }
   .bg-pink { background: linear-gradient(135deg, #f06292, #d81b60); }
   .bg-green { background: linear-gradient(135deg, #81c784, #388e3c); }
-  .bg-teal { background: linear-gradient(135deg, #4db6ac, #00796b); }
-  .bg-red { background: linear-gradient(135deg, #e57373, #d32f2f); }
-  .bg-indigo { background: linear-gradient(135deg, #7986cb, #303f9f); }
-  .bg-cyan { background: linear-gradient(135deg, #4dd0e1, #0097a7); }
-  .bg-brown { background: linear-gradient(135deg, #a1887f, #5d4037); }
 
   /* 面板容器 */
   .panel-container { padding: 0 15px; max-width: 900px; margin: 0 auto; }
@@ -37,15 +38,15 @@
   .panel.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
   
-  h2 { font-weight: 400; color: #1f2d3d; font-size: 18px; margin: 0 0 15px 0; border-bottom: 2px solid #eceff1; padding-bottom: 10px;}
-  h3 { font-weight: 400; font-size: 15px; color: #546e7a; margin: 15px 0 10px 0;}
+  h2 { color: #1f2d3d; font-size: 18px; margin: 0 0 15px 0; border-bottom: 1px solid #eceff1; padding-bottom: 10px;}
+  h3 { font-size: 15px; color: #546e7a; margin: 15px 0 10px 0;}
 
   .form-group { margin-bottom: 12px; }
-  .form-group label { display: block; font-size: 13px; color: #607d8b; margin-bottom: 5px; }
-  .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px 10px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+  .form-group label { display: block; font-size: 13px; color: #607d8b; margin-bottom: 5px; font-weight: 300;}
+  .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px 10px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 14px; font-family: inherit; font-weight: 300; outline: none;}
   .form-group textarea { resize: vertical; }
   
-  .btn { background: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px;}
+  .btn { background: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-weight: 300;}
   .btn:hover { background: #0d47a1; }
   .btn-sm { padding: 4px 8px; font-size: 12px; }
   .btn-gray { background: #78909c; }
@@ -58,12 +59,12 @@
 
   /* 表格 */
   .table-wrapper { overflow-x: auto; border: 1px solid #eceff1; border-radius: 8px; margin-top: 15px;}
-  table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; min-width: 700px;}
-  th, td { padding: 10px 12px; border-bottom: 1px solid #eceff1; }
-  th { background: #fafbfc; font-weight: 400; color: #78909c; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; min-width: 700px; font-weight: 300;}
+  th, td { padding: 10px 12px; border-bottom: 1px solid #eceff1; font-weight: 300;}
+  th { background: #fafbfc; color: #78909c; font-weight: 400;}
   
   /* 标签 */
-  .tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-right: 5px;}
+  .tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-right: 5px; font-weight: 300;}
   .tag-blue { background: #e3f2fd; color: #1565c0; }
   .tag-orange { background: #fff3e0; color: #e65100; }
   .tag-green { background: #e8f5e9; color: #2e7d32; }
@@ -73,7 +74,7 @@
   ::-webkit-scrollbar-thumb { background: #cfd8dc; border-radius: 3px; }
 
   /* 搜索框 */
-  .search-input { width: 100%; padding: 8px 12px; border: 1px solid #cfd8dc; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box;}
+  .search-input { width: 100%; padding: 8px 12px; border: 1px solid #cfd8dc; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box; font-weight: 300;}
 </style>
 </head>
 <body>
@@ -117,7 +118,7 @@
     <h2>队员名单与审核</h2>
     
     <div id="pending-box" style="display:none; background:#fff3e0; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ffe0b2;">
-      <h3 style="color:#e65100; margin:0 0 10px 0;">待审核申请 <span id="pendingCount" style="background:#e53935; color:#fff; padding:2px 8px; border-radius:10px; font-size:12px;">0</span></h3>
+      <h3 style="color:#e65100; margin:0 0 10px 0; font-weight:400;">待审核申请 <span id="pendingCount" style="background:#e53935; color:#fff; padding:2px 8px; border-radius:10px; font-size:12px; font-weight:400;">0</span></h3>
       <div id="pendingList"></div>
     </div>
 
@@ -152,18 +153,18 @@
         <div>
           <label>任务类型 *</label>
           <div style="display:flex; gap:15px; margin-bottom:10px;">
-            <label style="font-weight:400; display:flex; align-items:center; gap:5px;"><input type="radio" name="r_event_type" value="公益救援" required> 公益救援</label>
-            <label style="font-weight:400; display:flex; align-items:center; gap:5px;"><input type="radio" name="r_event_type" value="技能培训"> 技能培训</label>
-            <label style="font-weight:400; display:flex; align-items:center; gap:5px;"><input type="radio" name="r_event_type" value="森林消防"> 森林消防</label>
+            <label style="font-weight:300; display:flex; align-items:center; gap:5px; font-size:13px;"><input type="radio" name="r_event_type" value="公益救援" required> 公益救援</label>
+            <label style="font-weight:300; display:flex; align-items:center; gap:5px; font-size:13px;"><input type="radio" name="r_event_type" value="技能培训"> 技能培训</label>
+            <label style="font-weight:300; display:flex; align-items:center; gap:5px; font-size:13px;"><input type="radio" name="r_event_type" value="森林消防"> 森林消防</label>
           </div>
         </div>
         <div>
           <label>着装要求 (可多选)</label>
           <div style="display:flex; gap:15px; margin-bottom:10px;">
-            <label style="font-weight:400; display:flex; align-items:center; gap:5px;"><input type="checkbox" name="r_uniform_type" value="蓝天队服"> 蓝天队服</label>
-            <label style="font-weight:400; display:flex; align-items:center; gap:5px;"><input type="checkbox" name="r_uniform_type" value="体能服"> 体能服</label>
-            <label style="font-weight:400; display:flex; align-items:center; gap:5px;"><input type="checkbox" name="r_uniform_type" value="消防服"> 消防服</label>
-            <label style="font-weight:400; display:flex; align-items:center; gap:5px;"><input type="checkbox" name="r_uniform_type" value="便装"> 便装</label>
+            <label style="font-weight:300; display:flex; align-items:center; gap:5px; font-size:13px;"><input type="checkbox" name="r_uniform_type" value="蓝天队服"> 蓝天队服</label>
+            <label style="font-weight:300; display:flex; align-items:center; gap:5px; font-size:13px;"><input type="checkbox" name="r_uniform_type" value="体能服"> 体能服</label>
+            <label style="font-weight:300; display:flex; align-items:center; gap:5px; font-size:13px;"><input type="checkbox" name="r_uniform_type" value="消防服"> 消防服</label>
+            <label style="font-weight:300; display:flex; align-items:center; gap:5px; font-size:13px;"><input type="checkbox" name="r_uniform_type" value="便装"> 便装</label>
           </div>
         </div>
       </div>
@@ -195,9 +196,9 @@
       <div class="form-group">
         <label>事件类型 *</label>
         <div style="display:flex; gap:15px;">
-          <label style="font-weight:400; display:flex; align-items:center; gap:5px;"><input type="radio" name="event_type" value="公益救援" required> 公益救援</label>
-          <label style="font-weight:400; display:flex; align-items:center; gap:5px;"><input type="radio" name="event_type" value="技能培训"> 技能培训</label>
-          <label style="font-weight:400; display:flex; align-items:center; gap:5px;"><input type="radio" name="event_type" value="森林消防"> 森林消防</label>
+          <label style="font-weight:300; display:flex; align-items:center; gap:5px; font-size:13px;"><input type="radio" name="event_type" value="公益救援" required> 公益救援</label>
+          <label style="font-weight:300; display:flex; align-items:center; gap:5px; font-size:13px;"><input type="radio" name="event_type" value="技能培训"> 技能培训</label>
+          <label style="font-weight:300; display:flex; align-items:center; gap:5px; font-size:13px;"><input type="radio" name="event_type" value="森林消防"> 森林消防</label>
         </div>
       </div>
 
@@ -205,21 +206,21 @@
       <div class="form-group"><label>事件详情</label><textarea id="content"></textarea></div>
       
       <div style="background:#f9fbfd; border:1px solid #cfd8dc; border-radius:6px; margin-bottom:15px;">
-        <div style="padding:10px 15px; background:#fff; border-bottom:1px solid #eceff1; font-size:14px; color:#1565c0; font-weight:500;">参与成员及个人时长</div>
+        <div style="padding:10px 15px; background:#fff; border-bottom:1px solid #eceff1; font-size:14px; color:#1565c0; font-weight:400;">参与成员及个人时长</div>
         <div class="search-input-wrapper" style="position:relative; background:#fff;">
           <input type="text" id="memberSearchInput" class="search-input" placeholder="搜索队员姓名..." oninput="filterMemberCheckboxes(this.value)" style="border:none; border-bottom:1px solid #eee; border-radius:0; padding-left:10px;">
         </div>
         
         <div style="display:flex; gap:10px; align-items:center; padding:10px; background:#f4f7fb; border-bottom:1px solid #eceff1;">
-          <span style="font-size:13px; color:#607d8b; white-space:nowrap;">批量设置时长：</span>
-          <input type="number" step="0.5" min="0" id="batchHoursInput" placeholder="如 4" style="width:70px; padding:6px; border:1px solid #cfd8dc; border-radius:4px; font-size:13px;">
-          <button type="button" class="btn btn-sm btn-green" onclick="applyBatchHours()">应用到已勾选</button>
+          <span style="font-size:13px; color:#607d8b; white-space:nowrap; font-weight:300;">批量设置时长：</span>
+          <input type="number" step="0.5" min="0" id="batchHoursInput" placeholder="如 4" style="width:70px; padding:6px; border:1px solid #cfd8dc; border-radius:4px; font-size:13px; font-weight:300;">
+          <button type="button" class="btn btn-sm btn-green" onclick="applyBatchHours()" style="font-weight:300;">应用到已勾选</button>
         </div>
 
         <div id="memberCheckboxes" style="max-height: 250px; overflow-y: auto; padding: 10px; display:flex; flex-wrap:wrap; gap:8px;"></div>
       </div>
 
-      <div id="error" style="color:#e53935; font-size:14px; display:none; margin-bottom:10px;"></div>
+      <div id="error" style="color:#e53935; font-size:14px; display:none; margin-bottom:10px; font-weight:300;"></div>
       <div style="display:flex; gap:10px;">
         <button type="submit" class="btn" id="submitBtn">保存记录</button>
         <a href="#" class="btn btn-gray" id="cancelEdit" style="display:none;">取消编辑</a>
@@ -231,12 +232,12 @@
   <div id="panel-history" class="panel">
     <h2>历史记录管理</h2>
     <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; background:#f4f7fb; padding:10px; border-radius:8px; margin-bottom:15px;">
-      <input type="text" id="taskSearchInput" placeholder="搜索事件、成员或类型..." oninput="filterTasks(this.value)" style="flex:1; min-width:150px; padding:8px; border:1px solid #cfd8dc; border-radius:4px;">
+      <input type="text" id="taskSearchInput" placeholder="搜索事件、成员或类型..." oninput="filterTasks(this.value)" style="flex:1; min-width:150px; padding:8px; border:1px solid #cfd8dc; border-radius:4px; font-weight:300; outline:none;">
       
       <div style="display:flex; align-items:center; gap:5px;">
-        <input type="date" id="exportStart" style="padding:6px; border:1px solid #cfd8dc; border-radius:4px;">
-        <span>-</span>
-        <input type="date" id="exportEnd" style="padding:6px; border:1px solid #cfd8dc; border-radius:4px;">
+        <input type="date" id="exportStart" style="padding:6px; border:1px solid #cfd8dc; border-radius:4px; font-weight:300;">
+        <span style="font-weight:300;">-</span>
+        <input type="date" id="exportEnd" style="padding:6px; border:1px solid #cfd8dc; border-radius:4px; font-weight:300;">
       </div>
       
       <button class="btn btn-sm" id="exportMembersBtn">导出时长</button>
@@ -254,7 +255,7 @@
   <!-- 5. 内容编辑 -->
   <div id="panel-content" class="panel">
     <h2>网站内容编辑</h2>
-    <p style="font-size:13px; color:#e53935; margin-bottom:15px;">⚠️ 提示：请严格按照格式要求填写，每行一条，用竖线 `|` 分隔，否则前台显示会错乱。</p>
+    <p style="font-size:13px; color:#e53935; margin-bottom:15px; font-weight:300;">⚠️ 提示：请严格按照格式要求填写，每行一条，用竖线 `|` 分隔。</p>
     
     <form id="contentForm">
       <div class="form-group">
@@ -301,7 +302,6 @@ let allRecruits = [];
 let allSignups = [];
 let allSettings = [];
 
-// 初始化加载
 async function init() {
   await Promise.all([loadMembers(), loadTasks(), loadRecruits(), loadSettings()]);
   renderRecruits();
@@ -310,13 +310,11 @@ async function init() {
 }
 init();
 
-// =============== 面板切换 ===============
 window.switchPanel = (id) => {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 };
 
-// =============== 1. 队员管理 ===============
 async function loadMembers() {
   const { data } = await supabase.from('members').select('*').order('name');
   allMembers = data || [];
@@ -329,7 +327,7 @@ async function loadMembers() {
     document.getElementById('pendingCount').textContent = pendingMembers.length;
     document.getElementById('pendingList').innerHTML = pendingMembers.map(m => `
       <div style="background:#fff; padding:10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <div><strong>${esc(m.name)}</strong> (${esc(m.phone) || '无电话'})</div>
+        <div style="font-weight:300;"><strong>${esc(m.name)}</strong> (${esc(m.phone) || '无电话'})</div>
         <div>
           <button class="btn btn-sm btn-green" onclick="approveMember(${m.id})">通过</button>
           <button class="btn btn-sm btn-red" onclick="rejectMember(${m.id})">拒绝</button>
@@ -341,19 +339,19 @@ async function loadMembers() {
   }
 
   document.getElementById('memberList').innerHTML = activeMembers.map(m => `
-    <span style="display:inline-flex; align-items:center; gap:8px; padding:6px 10px; background:#e3f2fd; color:#1565c0; border-radius:6px; font-size:13px;">
+    <span style="display:inline-flex; align-items:center; gap:8px; padding:6px 10px; background:#e3f2fd; color:#1565c0; border-radius:6px; font-size:13px; font-weight:300;">
       <strong>${esc(m.name)}</strong> 
       ${m.phone ? `<span style="color:#546e7a;">${esc(m.phone)}</span>` : ''} 
       <a style="color:#1565c0; cursor:pointer; font-size:12px;" onclick="editMember('${m.id}')">编辑</a>
-      <a style="color:#e53935; cursor:pointer; font-size:14px; font-weight:bold;" onclick="deleteMember('${m.id}')">×</a>
+      <a style="color:#e53935; cursor:pointer; font-size:14px;" onclick="deleteMember('${m.id}')">×</a>
     </span>
   `).join('');
 
   document.getElementById('memberCheckboxes').innerHTML = activeMembers.map(m => `
-    <label class="checkbox-item" data-hidden-by-signup="false" style="background:#fff; padding:6px 10px; border:1px solid #eceff1; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:13px;">
+    <label class="checkbox-item" data-hidden-by-signup="false" style="background:#fff; padding:6px 10px; border:1px solid #eceff1; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:300;">
       <input type="checkbox" name="task_members" value="${esc(m.name)}" onchange="toggleHoursInput(this)">
       <span style="min-width: 40px;">${esc(m.name)}</span>
-      <input type="number" step="0.5" min="0" class="member-hours-input" placeholder="时长" style="width:50px; padding:4px; border:1px solid #cfd8dc; border-radius:4px; display:none;">
+      <input type="number" step="0.5" min="0" class="member-hours-input" placeholder="时长" style="width:50px; padding:4px; border:1px solid #cfd8dc; border-radius:4px; display:none; font-weight:300;">
     </label>
   `).join('');
 }
@@ -409,7 +407,6 @@ window.deleteMember = async (id) => {
   loadMembers();
 };
 
-// =============== 2. 招募管理 ===============
 async function loadRecruits() {
   const [rRes, sRes] = await Promise.all([
     supabase.from('recruitments').select('*').order('created_at', { ascending: false }),
@@ -420,7 +417,7 @@ async function loadRecruits() {
 }
 function renderRecruits() {
   const tbody = document.getElementById('recruitTableBody');
-  if (allRecruits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#90a4ae;">暂无招募令</td></tr>'; return; }
+  if (allRecruits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#90a4ae; font-weight:300;">暂无招募令</td></tr>'; return; }
   tbody.innerHTML = allRecruits.map(r => {
     const signups = allSignups.filter(s => s.recruitment_id === r.id);
     const names = signups.map(s => `<span class="tag tag-blue">${esc(s.member_name)}</span>`).join('');
@@ -430,12 +427,12 @@ function renderRecruits() {
     let uniformTags = r.uniform_type ? r.uniform_type.split(',').map(u => `<span class="tag tag-orange">${esc(u.trim())}</span>`).join('') : '';
     return `
       <tr>
-        <td>${statusTag}</td>
-        <td>
-          <div style="font-weight:500;">${uniformTags} ${esc(r.title)}</div>
+        <td style="font-weight:300;">${statusTag}</td>
+        <td style="font-weight:300;">
+          <div>${uniformTags} ${esc(r.title)}</div>
           <div style="font-size:12px; color:#78909c; margin-top:4px;">${formatTime(r.task_time)}</div>
         </td>
-        <td style="max-width: 200px;">${names || '无'}</td>
+        <td style="max-width: 200px; font-weight:300;">${names || '无'}</td>
         <td>
           <div style="display:flex; gap:5px; flex-wrap:wrap;">
             <button class="btn btn-sm btn-gray" onclick="editRecruit(${r.id})">编辑</button>
@@ -538,21 +535,20 @@ window.convertToTask = async (id) => {
   alert(`已带入信息并自动隐藏未报名队员。如需添加未报名者，请在搜索框输入其姓名。`);
 };
 
-// =============== 3. 录入出勤 ===============
 async function loadTasks() {
   const { data } = await supabase.from('tasks').select('*').order('task_time', { ascending: false });
   allTasks = data || [];
 }
 function renderTasks(filterText = '') {
   const tbody = document.getElementById('taskTableBody');
-  if (!allTasks || allTasks.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#90a4ae;">暂无记录</td></tr>'; return; }
+  if (!allTasks || allTasks.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#90a4ae; font-weight:300;">暂无记录</td></tr>'; return; }
 
   const filteredTasks = allTasks.filter(t => {
     if (!filterText) return true;
     const kw = filterText.toLowerCase();
     return (t.title && t.title.toLowerCase().includes(kw)) || (t.event_type && t.event_type.toLowerCase().includes(kw)) || (t.members && t.members.toLowerCase().includes(kw));
   });
-  if (filteredTasks.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#90a4ae;">未找到</td></tr>'; return; }
+  if (filteredTasks.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#90a4ae; font-weight:300;">未找到</td></tr>'; return; }
 
   tbody.innerHTML = filteredTasks.map(t => {
     let displayDuration = t.duration;
@@ -563,9 +559,9 @@ function renderTasks(filterText = '') {
     let membersStr = (t.member_hours && Array.isArray(t.member_hours) && t.member_hours.length > 0) ? t.member_hours.map(m => `${m.name}(${m.hours}h)`).join('、') : (t.members || '-');
     let typeTag = t.event_type ? `<span class="tag tag-blue">${esc(t.event_type)}</span>` : '-';
     return `
-    <tr>
+    <tr style="font-weight:300;">
       <td>${typeTag}</td>
-      <td style="font-weight: 400;">${esc(t.title)}</td>
+      <td>${esc(t.title)}</td>
       <td style="color: #78909c;">${formatTime(t.task_time)}</td>
       <td>${displayDuration ? displayDuration + 'h' : '-'}</td>
       <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${esc(membersStr)}">${esc(membersStr)}</td>
@@ -681,7 +677,6 @@ document.getElementById('cancelEdit').addEventListener('click', (e) => {
   document.getElementById('submitBtn').textContent = '保存记录'; e.target.style.display = 'none'; resetMemberVisibility();
 });
 
-// =============== 4. 历史记录导出 ===============
 window.exportSingleTaskToCSV = (id) => {
   const t = allTasks.find(x => String(x.id) === String(id));
   if(!t) return;
@@ -735,7 +730,6 @@ function downloadCSVFile(csvContent, filename) {
   link.download = filename; link.click();
 }
 
-// =============== 5. 内容设置 ===============
 async function loadSettings() {
   const { data } = await supabase.from('site_settings').select('*');
   allSettings = data || [];
@@ -774,7 +768,6 @@ document.getElementById('contentForm').addEventListener('submit', async (e) => {
   loadSettings();
 });
 
-// =============== 辅助工具 ===============
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).catch(() => {
     const textarea = document.createElement('textarea');
